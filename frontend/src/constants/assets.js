@@ -6,7 +6,7 @@ export const ASSETS = {
   mandalaBg:
     "https://customer-assets.emergentagent.com/job_bua-luang-spa/artifacts/69uhszsz_Pozadina%201.jpg",
   heroBg:
-    "https://customer-assets.emergentagent.com/job_01f0a81a-a7b4-4a80-858e-bdfcd0b3ed2c/artifacts/txo7d5tz_pozadinska%20slika%20tamnija.jpg",
+    "https://customer-assets.emergentagent.com/job_bua-luang-spa/artifacts/xmochu39_pozadinska%20slika%20tamnija%20levo.jpg",
   buddhaBg:
     "https://customer-assets.emergentagent.com/job_bua-luang-spa/artifacts/s5win1v0_promenjena%20rezolucija.jpg",
   spaScene:
