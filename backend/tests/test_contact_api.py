@@ -1,9 +1,15 @@
-"""Backend tests for Bua Luang Thai Spa contact API."""
+"""Backend tests for Bua Luang Thai Spa contact API (iteration 5).
+
+Schema changed:
+  - removed: email_sent
+  - added:   client_email_sent (bool), owner_email_sent (bool), email_error (str|null)
+"""
 import os
+import time
 import pytest
 import requests
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://bua-luang-spa.preview.emergentagent.com").rstrip("/")
+BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/")
 API = f"{BASE_URL}/api"
 
 
@@ -39,10 +45,14 @@ class TestContactCreate:
         assert data["name"] == "TEST_Sr User"
         assert data["email"] == "test_sr@example.com"
         assert data["language"] == "sr"
-        assert isinstance(data["email_sent"], bool)
-        # Email is sent via BackgroundTasks, so on the immediate response email_sent
-        # will typically be False and email_error None. SMTP outcome is written
-        # to the DB record by the background task. Accept either state here.
+        # New schema fields
+        assert "client_email_sent" in data
+        assert "owner_email_sent" in data
+        assert "email_error" in data
+        assert isinstance(data["client_email_sent"], bool)
+        assert isinstance(data["owner_email_sent"], bool)
+        # email_sent (old field) must no longer be returned
+        assert "email_sent" not in data
         assert isinstance(data.get("id"), str) and len(data["id"]) > 0
         assert data.get("created_at")
 
@@ -59,8 +69,32 @@ class TestContactCreate:
         data = r.json()
         assert data["language"] == lang
         assert data["name"] == f"TEST_{lang.upper()}"
-        # API should not crash on SMTP failures
-        assert "email_sent" in data
+        assert "client_email_sent" in data
+        assert "owner_email_sent" in data
+
+    def test_background_task_persists_email_outcome(self, api_client):
+        """Even when SMTP fails (Gmail 535 in sandbox), background task must
+        update the DB record with client_email_sent=False, owner_email_sent=False,
+        email_error non-null. We verify via GET after a short wait."""
+        payload = {
+            "name": "TEST_BGOutcome",
+            "email": "test_bgoutcome@example.com",
+            "message": "TEST background outcome",
+            "language": "sr",
+        }
+        created = api_client.post(f"{API}/contact", json=payload).json()
+        created_id = created["id"]
+        # Wait for background task to attempt SMTP and persist outcome
+        time.sleep(8)
+        items = api_client.get(f"{API}/contact").json()
+        match = next((it for it in items if it["id"] == created_id), None)
+        assert match is not None, "Created record not found in GET list"
+        assert "client_email_sent" in match
+        assert "owner_email_sent" in match
+        assert "email_error" in match
+        # Outcome assertion: either both succeeded OR both failed with error string.
+        if not match["client_email_sent"] or not match["owner_email_sent"]:
+            assert match["email_error"], "email_error must be set when SMTP fails"
 
     def test_missing_required_fields_returns_422(self, api_client):
         r = api_client.post(f"{API}/contact", json={"email": "x@y.com"})
@@ -82,7 +116,6 @@ class TestContactCreate:
 # ---- GET /api/contact ----
 class TestContactList:
     def test_list_returns_persisted_records(self, api_client):
-        # Create one record first
         payload = {
             "name": "TEST_ListCheck",
             "email": "test_listcheck@example.com",
@@ -98,16 +131,18 @@ class TestContactList:
         assert isinstance(items, list)
         assert len(items) > 0
 
-        # No mongo _id leakage
         for it in items:
             assert "_id" not in it
             assert "id" in it
             assert "name" in it
             assert "email" in it
             assert "language" in it
+            assert "client_email_sent" in it
+            assert "owner_email_sent" in it
+            # old field must not leak
+            assert "email_sent" not in it
 
-        # Most recent first - verify our just-created record is in the list
         ids = [it["id"] for it in items]
         assert created_id in ids
-        # Recent first ordering: our created record should be near the top
+        # Most recent first
         assert ids.index(created_id) < 5

@@ -1,0 +1,36 @@
+{
+  "summary": "Iteration 5 polish verified. Backend: 10/10 pytest cases pass — POST /api/contact returns 200 with new schema (client_email_sent, owner_email_sent, email_error; old email_sent removed), persists all 4 languages (sr/en/ru/zh), validates missing fields and bad email format with 422, GET /api/contact returns most-recent-first with no _id leakage, and the background task correctly writes outcome to the DB record (verified: when SMTP fails in sandbox both booleans = false and email_error is non-null). Frontend: hero-title has computed CSS filter 'drop-shadow(rgba(0,0,0,0.95) 0px 6px 24px) drop-shadow(rgba(0,0,0,0.9) 0px 2px 6px)'. Form (data-testid=contact-form) and map (data-testid=contact-map) have equal bounding heights — 504.5px each (0px diff, well within 10px tolerance). New POZOVITE NAS <a data-testid=contact-call href='tel:+38162625500'> sits on the same row as contact-submit, innerText reads 'POZOVITE NAS' (uppercased via CSS text-transform). Language switcher updates the call button correctly: en→CALL US, ru→ПОЗВОНИТЕ НАМ, zh→致电我们, sr→POZOVITE NAS. End-to-end form submission triggers the sonner success toast 'Hvala! Poslali smo vam potvrdu na email.'",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/contact (background SMTP task)", "issue": "Gmail SMTP still rejects credentials with 535 BadCredentials from this sandbox — expected per agent-to-agent context note. API correctly persists client_email_sent=false, owner_email_sent=false, email_error populated."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_contact_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "email_templates.py owner row builder has a subtle quirk: when phone is empty the 'safe_phone' variable is set to '—' but the conditional 'safe_phone if not phone else <a tel link>' still uses safe_phone correctly — fine, just dense. Consider simplifying.",
+    "server.py owner_inbox defaults to SMTP_USER which is the same Gmail address (bualuangthailandspa@gmail.com) — correct per spec, but if SMTP_USER is ever swapped to a relay-only sender the admin notifications will go to that relay. Consider a dedicated OWNER_EMAIL env var for clarity.",
+    "Background task has no retry/backoff for transient SMTP failures. Acceptable for MVP — flag for production.",
+    "GET /api/contact has no pagination/auth — fine for MVP, flag for production hardening.",
+    "Hero h1 uses bg-clip-text:transparent so accessible text-rendering relies on the inner <span>; filter:drop-shadow correctly applies because it walks the painted alpha. Good fix."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_contact_api.py (renamed-in-place: replaced old email_sent assertions with client_email_sent/owner_email_sent/email_error and added test_background_task_persists_email_outcome that verifies DB persistence after the background task runs)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "none required",
+  "seed_data_creation": "TEST_-prefixed records added to contact_messages collection: TEST_Sr User, TEST_EN, TEST_RU, TEST_ZH, TEST_BGOutcome, TEST_ListCheck, TEST_FE Iter5.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Contact API schema: client_email_sent (bool), owner_email_sent (bool), email_error (str|null). Field 'email_sent' is REMOVED — do not assert it. Background task fires 2 emails via FastAPI BackgroundTasks; in this sandbox both will fail with Gmail 535 and the DB record gets email_error populated. Verify outcome via GET /api/contact after a ~6-10s wait, not via the immediate POST response. data-testids stable: hero-title, contact-form, contact-map, contact-submit, contact-call (href tel:+38162625500), language-switcher, lang-option-{sr,en,ru,zh}, contact-input-{name,email,phone,message}. Call button labels per locale: POZOVITE NAS / CALL US / ПОЗВОНИТЕ НАМ / 致电我们.",
+  "rca_of_issue": "No bugs found. Previous test file referenced old field 'email_sent' which no longer exists in the response — updated assertions to use client_email_sent/owner_email_sent/email_error and added a wait-and-verify test for the background task outcome."
+}

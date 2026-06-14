@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, BackgroundTasks, HTTPException
+from fastapi import FastAPI, APIRouter, BackgroundTasks
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -13,6 +13,8 @@ import uuid
 from datetime import datetime, timezone
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+from email_templates import render_client_email, render_owner_email
 
 
 ROOT_DIR = Path(__file__).parent
@@ -30,42 +32,6 @@ db = client[os.environ['DB_NAME']]
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
-
-
-# ---- Translation messages for confirmation emails ----
-CONFIRMATION_SUBJECTS = {
-    "sr": "Hvala što ste nas kontaktirali — Bua Luang Thai Spa",
-    "en": "Thank you for contacting us — Bua Luang Thai Spa",
-    "ru": "Спасибо, что связались с нами — Bua Luang Thai Spa",
-    "zh": "感谢您与我们联系 — Bua Luang Thai Spa",
-}
-
-CONFIRMATION_BODIES = {
-    "sr": (
-        "Poštovani/a {name},\n\n"
-        "Hvala što ste nam se obratili. Vaša poruka je primljena i naš tim će Vam odgovoriti u najkraćem mogućem roku.\n\n"
-        "Vaša poruka:\n\"{message}\"\n\n"
-        "Sa poštovanjem,\nBua Luang Thai Spa\nTel: +381 62 625 500"
-    ),
-    "en": (
-        "Dear {name},\n\n"
-        "Thank you for reaching out. We have received your message and our team will respond as soon as possible.\n\n"
-        "Your message:\n\"{message}\"\n\n"
-        "Warm regards,\nBua Luang Thai Spa\nPhone: +381 62 625 500"
-    ),
-    "ru": (
-        "Уважаемый(ая) {name},\n\n"
-        "Спасибо, что обратились к нам. Мы получили ваше сообщение, и наша команда ответит вам в кратчайшие сроки.\n\n"
-        "Ваше сообщение:\n\"{message}\"\n\n"
-        "С уважением,\nBua Luang Thai Spa\nТел: +381 62 625 500"
-    ),
-    "zh": (
-        "尊敬的 {name}，\n\n"
-        "感谢您与我们联系。我们已收到您的留言，团队将尽快回复您。\n\n"
-        "您的留言：\n\"{message}\"\n\n"
-        "诚挚问候，\nBua Luang Thai Spa\n电话：+381 62 625 500"
-    ),
-}
 
 
 # ---- Models ----
@@ -86,13 +52,14 @@ class ContactMessage(BaseModel):
     phone: Optional[str] = None
     message: str
     language: str = "sr"
-    email_sent: bool = False
+    client_email_sent: bool = False
+    owner_email_sent: bool = False
     email_error: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 # ---- Email helper ----
-def _send_email_sync(to_email: str, subject: str, body: str) -> None:
+def _send_email_sync(to_email: str, subject: str, html_body: str, text_body: str) -> None:
     host = os.environ['SMTP_HOST']
     port = int(os.environ.get('SMTP_PORT', '587'))
     user = os.environ['SMTP_USER']
@@ -103,7 +70,8 @@ def _send_email_sync(to_email: str, subject: str, body: str) -> None:
     msg['Subject'] = subject
     msg['From'] = f"{from_name} <{user}>"
     msg['To'] = to_email
-    msg.attach(MIMEText(body, 'plain', 'utf-8'))
+    msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
+    msg.attach(MIMEText(html_body, 'html', 'utf-8'))
 
     with smtplib.SMTP(host, port, timeout=20) as server:
         server.starttls()
@@ -111,25 +79,52 @@ def _send_email_sync(to_email: str, subject: str, body: str) -> None:
         server.sendmail(user, [to_email], msg.as_string())
 
 
-async def send_confirmation_email(to_email: str, name: str, message: str, language: str) -> tuple[bool, Optional[str]]:
-    lang = language if language in CONFIRMATION_SUBJECTS else "sr"
-    subject = CONFIRMATION_SUBJECTS[lang]
-    body = CONFIRMATION_BODIES[lang].format(name=name, message=message)
+async def _send_async(to_email: str, subject: str, html_body: str, text_body: str) -> tuple[bool, Optional[str]]:
     try:
         await asyncio.get_event_loop().run_in_executor(
-            None, _send_email_sync, to_email, subject, body
+            None, _send_email_sync, to_email, subject, html_body, text_body
         )
         return True, None
     except Exception as exc:  # noqa: BLE001
-        logger.exception("SMTP send failed")
+        logger.exception("SMTP send failed for %s", to_email)
         return False, str(exc)
 
 
-async def _send_and_update(record_id: str, to_email: str, name: str, message: str, language: str) -> None:
-    sent, err = await send_confirmation_email(to_email, name, message, language)
+async def _send_and_update(record_id: str, payload: dict) -> None:
+    """Send both client confirmation + owner notification, update DB record."""
+    name = payload["name"]
+    to_client = payload["email"]
+    phone = payload["phone"] or ""
+    message = payload["message"]
+    language = payload["language"]
+    submitted_at = payload["created_at"]
+
+    # 1. Client confirmation (in submitter's selected language)
+    c_subject, c_html, c_text = render_client_email(language, name, phone, message)
+    client_sent, client_err = await _send_async(to_client, c_subject, c_html, c_text)
+
+    # 2. Owner notification — always in Serbian, always to the spa inbox
+    owner_inbox = os.environ.get("SMTP_USER", "")
+    o_subject, o_html, o_text = render_owner_email(
+        name=name,
+        email=to_client,
+        phone=phone,
+        message=message,
+        language=language,
+        submitted_at_iso=submitted_at,
+    )
+    owner_sent, owner_err = await _send_async(owner_inbox, o_subject, o_html, o_text)
+
+    err = client_err or owner_err
     await db.contact_messages.update_one(
         {"id": record_id},
-        {"$set": {"email_sent": sent, "email_error": err}},
+        {
+            "$set": {
+                "client_email_sent": client_sent,
+                "owner_email_sent": owner_sent,
+                "email_error": err,
+            }
+        },
     )
 
 
@@ -153,11 +148,7 @@ async def create_contact_message(payload: ContactCreate, background_tasks: Backg
     doc['created_at'] = doc['created_at'].isoformat()
     await db.contact_messages.insert_one(doc)
 
-    # Send confirmation email in the background so the request returns fast,
-    # then update the DB record with the SMTP outcome.
-    background_tasks.add_task(
-        _send_and_update, record.id, record.email, record.name, record.message, record.language
-    )
+    background_tasks.add_task(_send_and_update, record.id, doc)
 
     return record
 
