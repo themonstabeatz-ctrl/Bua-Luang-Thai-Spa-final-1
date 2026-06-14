@@ -1,7 +1,7 @@
 import React from "react";
 import { useLang } from "@/i18n/LanguageContext";
 import { ASSETS } from "@/constants/assets";
-import { Instagram, Mail, Phone } from "lucide-react";
+import { Instagram, Mail, Phone, Clock } from "lucide-react";
 
 export const Footer = () => {
   const { t } = useLang();
@@ -76,6 +76,18 @@ export const Footer = () => {
               <Instagram className="h-4 w-4 text-[#a17a35]" />
               @bualuang_thai_spa
             </a>
+            <div
+              className="flex items-center gap-3 text-[#3a312a]"
+              data-testid="footer-hours"
+            >
+              <Clock className="h-4 w-4 text-[#a17a35]" />
+              <span>
+                <span className="block text-[10px] uppercase tracking-[0.28em] text-[#a17a35]">
+                  {t.contact.info.hoursLabel}
+                </span>
+                {t.contact.info.hoursValue}
+              </span>
+            </div>
           </div>
         </div>
       </div>

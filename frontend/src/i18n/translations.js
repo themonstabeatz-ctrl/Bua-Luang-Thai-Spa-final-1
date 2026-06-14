@@ -2,10 +2,10 @@
 // Languages: sr (default), en, ru, zh
 
 export const LANGUAGES = [
-  { code: "sr", label: "SR", name: "Srpski", flag: "🇷🇸" },
-  { code: "en", label: "EN", name: "English", flag: "🇬🇧" },
-  { code: "ru", label: "RU", name: "Русский", flag: "🇷🇺" },
-  { code: "zh", label: "ZH", name: "中文", flag: "🇨🇳" },
+  { code: "sr", label: "SR", name: "Srpski", flag: "🇷🇸", iso: "rs" },
+  { code: "en", label: "EN", name: "English", flag: "🇬🇧", iso: "gb" },
+  { code: "ru", label: "RU", name: "Русский", flag: "🇷🇺", iso: "ru" },
+  { code: "zh", label: "ZH", name: "中文", flag: "🇨🇳", iso: "cn" },
 ];
 
 const SR_PRICING = {

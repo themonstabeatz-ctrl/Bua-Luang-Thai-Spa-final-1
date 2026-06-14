@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLang } from "@/i18n/LanguageContext";
+import { Reveal } from "@/components/Reveal";
 import { ChevronDown } from "lucide-react";
 
 const formatPrice = (n) => n.toLocaleString("sr-RS");
@@ -7,12 +8,11 @@ const formatPrice = (n) => n.toLocaleString("sr-RS");
 const PricingRow = ({ row, idx, t }) => {
   const [open, setOpen] = useState(false);
   return (
-    <li
+    <div
       data-testid={`pricing-row-${idx}`}
-      className="border-b border-[rgba(161,122,53,0.18)] last:border-b-0 py-6"
+      className="border-b border-[rgba(161,122,53,0.18)] last:border-b-0 py-5"
     >
       <div className="flex items-start gap-3 sm:gap-5">
-        {/* Left: name + subname + toggle */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <h3
@@ -42,7 +42,6 @@ const PricingRow = ({ row, idx, t }) => {
           </button>
         </div>
 
-        {/* Right: durations + prices stacked */}
         <div className="flex flex-col items-end gap-1.5 text-right shrink-0 pt-1">
           {row.options.map((opt, i) => (
             <div key={i} className="flex items-baseline gap-3 whitespace-nowrap">
@@ -63,7 +62,6 @@ const PricingRow = ({ row, idx, t }) => {
         </div>
       </div>
 
-      {/* Description toggle */}
       <div
         data-testid={`pricing-description-${idx}`}
         className="grid transition-all duration-300 ease-out"
@@ -77,7 +75,7 @@ const PricingRow = ({ row, idx, t }) => {
           </div>
         </div>
       </div>
-    </li>
+    </div>
   );
 };
 
@@ -87,39 +85,40 @@ export const PricingSection = () => {
     <section
       id="pricing"
       data-testid="pricing-section"
-      className="relative w-full bg-gradient-to-b from-[#fbf6ec] via-[#fdfaf3] to-[#fbf6ec] py-28 sm:py-36"
+      className="relative w-full bg-gradient-to-b from-[#fbf6ec] via-[#fdfaf3] to-[#fbf6ec] py-16 sm:py-20 overflow-hidden"
     >
       <div className="max-w-4xl mx-auto px-6 sm:px-10">
-        <div className="text-center mb-12">
-          <div className="text-[11px] tracking-[0.42em] uppercase text-[#a17a35] mb-6 inline-flex items-center gap-3">
-            <span className="h-px w-10 bg-[#a17a35]" />
-            {t.pricing.eyebrow}
-            <span className="h-px w-10 bg-[#a17a35]" />
-          </div>
-          <h2
-            data-testid="pricing-title"
-            className="font-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.05] bg-gradient-to-br from-[#c9a45a] via-[#a17a35] to-[#7a5a22] bg-clip-text text-transparent"
-            style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', serif" }}
-          >
-            {t.pricing.title}
-          </h2>
-          <p className="mt-5 text-[#5a4f44] max-w-xl mx-auto font-light">
-            {t.pricing.subtitle}
-          </p>
+        <div className="text-center mb-10">
+          <Reveal direction="top" duration={700}>
+            <div className="text-[11px] tracking-[0.42em] uppercase text-[#a17a35] mb-5 inline-flex items-center gap-3">
+              <span className="h-px w-10 bg-[#a17a35]" />
+              {t.pricing.eyebrow}
+              <span className="h-px w-10 bg-[#a17a35]" />
+            </div>
+          </Reveal>
+          <Reveal direction="top" duration={900} delay={120}>
+            <h2
+              data-testid="pricing-title"
+              className="font-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.05] bg-gradient-to-br from-[#c9a45a] via-[#a17a35] to-[#7a5a22] bg-clip-text text-transparent"
+              style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', serif" }}
+            >
+              {t.pricing.title}
+            </h2>
+          </Reveal>
         </div>
 
-        <ul data-testid="pricing-list">
+        <div data-testid="pricing-list">
           {t.pricing.rows.map((row, idx) => (
-            <PricingRow key={idx} row={row} idx={idx} t={t} />
+            <Reveal
+              key={idx}
+              direction={idx % 2 === 0 ? "left" : "right"}
+              duration={850}
+              delay={idx * 70}
+            >
+              <PricingRow row={row} idx={idx} t={t} />
+            </Reveal>
           ))}
-        </ul>
-
-        <p
-          data-testid="pricing-note"
-          className="mt-8 text-center text-xs text-[#7a6e5e] italic"
-        >
-          {t.pricing.note}
-        </p>
+        </div>
       </div>
     </section>
   );

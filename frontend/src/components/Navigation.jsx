@@ -16,20 +16,40 @@ const navItems = [
   { id: "contact", href: "#contact" },
 ];
 
+// Tiny flag image — flagcdn.com is a free public flag CDN with stable urls.
+const Flag = ({ iso, className = "" }) => (
+  <img
+    src={`https://flagcdn.com/w40/${iso}.png`}
+    srcSet={`https://flagcdn.com/w80/${iso}.png 2x`}
+    alt=""
+    width={20}
+    height={14}
+    className={`inline-block rounded-[2px] object-cover shadow-[0_1px_3px_rgba(0,0,0,0.25)] ${className}`}
+  />
+);
+
 export const Navigation = () => {
   const { t, lang, setLang, languages } = useLang();
   const [scrolled, setScrolled] = useState(false);
+  const [logoOpacity, setLogoOpacity] = useState(1);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 30);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 30);
+      // Fade out the nav logo as the user scrolls. Fully visible at top,
+      // fully hidden after ~480px of scroll (smooth easing).
+      const t = Math.min(1, Math.max(0, y / 480));
+      const eased = 1 - t * t;
+      setLogoOpacity(eased);
+    };
     onScroll();
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const current = languages.find((l) => l.code === lang) || languages[0];
-  const linkColor = scrolled ? "text-[#3a312a]" : "text-white";
 
   return (
     <header
@@ -45,6 +65,7 @@ export const Navigation = () => {
           href="#home"
           data-testid="nav-logo"
           className="flex items-center gap-3 group"
+          style={{ opacity: logoOpacity, transition: "opacity 200ms linear" }}
         >
           <img
             src={ASSETS.logo}
@@ -63,9 +84,7 @@ export const Navigation = () => {
               key={item.id}
               href={item.href}
               data-testid={`nav-link-${item.id}`}
-              className={`relative text-sm tracking-[0.18em] uppercase font-medium transition-colors duration-300 hover:text-[#e8c98a] after:absolute after:left-0 after:-bottom-2 after:h-px after:w-0 after:bg-gradient-to-r after:from-[#a17a35] after:to-[#e8c98a] after:transition-all after:duration-500 hover:after:w-full ${
-                scrolled ? "text-white" : "text-white"
-              }`}
+              className="relative text-sm tracking-[0.18em] uppercase font-medium transition-colors duration-300 text-white hover:text-[#e8c98a] after:absolute after:left-0 after:-bottom-2 after:h-px after:w-0 after:bg-gradient-to-r after:from-[#a17a35] after:to-[#e8c98a] after:transition-all after:duration-500 hover:after:w-full"
             >
               {t.nav[item.id]}
             </a>
@@ -77,12 +96,10 @@ export const Navigation = () => {
             <DropdownMenuTrigger asChild>
               <button
                 data-testid="language-switcher"
+                aria-label={current.name}
                 className="flex items-center gap-2 px-3 py-2 rounded-full border border-white/40 bg-white/10 backdrop-blur-md text-white hover:bg-white/20 hover:border-white/70 transition-all duration-300"
               >
-                <span className="text-lg leading-none">{current.flag}</span>
-                <span className="text-sm font-medium tracking-wider">
-                  {current.label}
-                </span>
+                <Flag iso={current.iso} />
                 <ChevronDown className="h-3.5 w-3.5 opacity-80" />
               </button>
             </DropdownMenuTrigger>
@@ -100,9 +117,8 @@ export const Navigation = () => {
                     l.code === lang ? "text-[#e8c98a]" : "text-white"
                   }`}
                 >
-                  <span className="text-lg leading-none">{l.flag}</span>
-                  <span className="text-sm tracking-wider font-medium">{l.label}</span>
-                  <span className="text-xs opacity-65 ml-auto">{l.name}</span>
+                  <Flag iso={l.iso} />
+                  <span className="text-sm font-medium">{l.name}</span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -127,7 +143,6 @@ export const Navigation = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       <div
         className={`lg:hidden overflow-hidden transition-[max-height] duration-500 ease-out ${
           mobileOpen ? "max-h-[480px]" : "max-h-0"
