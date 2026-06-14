@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, BackgroundTasks, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -17,6 +17,12 @@ from email.mime.multipart import MIMEMultipart
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
@@ -119,6 +125,14 @@ async def send_confirmation_email(to_email: str, name: str, message: str, langua
         return False, str(exc)
 
 
+async def _send_and_update(record_id: str, to_email: str, name: str, message: str, language: str) -> None:
+    sent, err = await send_confirmation_email(to_email, name, message, language)
+    await db.contact_messages.update_one(
+        {"id": record_id},
+        {"$set": {"email_sent": sent, "email_error": err}},
+    )
+
+
 # ---- Routes ----
 @api_router.get("/")
 async def root():
@@ -126,7 +140,7 @@ async def root():
 
 
 @api_router.post("/contact", response_model=ContactMessage)
-async def create_contact_message(payload: ContactCreate):
+async def create_contact_message(payload: ContactCreate, background_tasks: BackgroundTasks):
     record = ContactMessage(
         name=payload.name.strip(),
         email=payload.email,
@@ -135,15 +149,15 @@ async def create_contact_message(payload: ContactCreate):
         language=payload.language,
     )
 
-    sent, err = await send_confirmation_email(
-        record.email, record.name, record.message, record.language
-    )
-    record.email_sent = sent
-    record.email_error = err
-
     doc = record.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.contact_messages.insert_one(doc)
+
+    # Send confirmation email in the background so the request returns fast,
+    # then update the DB record with the SMTP outcome.
+    background_tasks.add_task(
+        _send_and_update, record.id, record.email, record.name, record.message, record.language
+    )
 
     return record
 
@@ -166,12 +180,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 
 @app.on_event("shutdown")
