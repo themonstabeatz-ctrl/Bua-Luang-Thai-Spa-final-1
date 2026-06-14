@@ -24,11 +24,17 @@ const getGreeting = () => {
 
 const buildMessage = (selection) => {
   const greeting = getGreeting();
-  const base = `${greeting} Pišem Vam preko sajta Bua Luang Thai Spa — zainteresovan/a sam za rezervaciju tretmana. Možete li mi pomoći oko termina i dodatnih informacija? Hvala unapred.`;
-  if (selection?.messageSerbian) {
-    return `${base}\n\nTretman koji me interesuje: ${selection.messageSerbian}`;
-  }
-  return base;
+  const treatmentLine = selection?.messageSerbian
+    ? `Tretman: ${selection.messageSerbian}`
+    : "Tretman: ";
+  return (
+    `${greeting}\n\n` +
+    `Želim da rezervišem termin za masažu u Bua Luang Thai Spa.\n\n` +
+    `Moje ime: \n` +
+    `${treatmentLine}\n` +
+    `Željeni datum i vreme: \n\n` +
+    `Hvala unapred!`
+  );
 };
 
 export const ChatFloater = () => {
@@ -53,7 +59,9 @@ export const ChatFloater = () => {
   // Recompute links on every open so the greeting and selection stay fresh.
   const message = buildMessage(selection);
   const waUrl = `https://wa.me/${PHONE_RAW}?text=${encodeURIComponent(message)}`;
-  const viberUrl = `viber://chat?number=%2B${PHONE_RAW}&text=${encodeURIComponent(message)}`;
+  // Viber's `viber://chat?number=...` protocol does NOT support a `text=`
+  // parameter, so we only pass the phone number to guarantee the chat opens.
+  const viberUrl = `viber://chat?number=%2B${PHONE_RAW}`;
 
   return (
     <div
