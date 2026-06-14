@@ -41,6 +41,13 @@ api_router = APIRouter(prefix="/api")
 
 
 # ---- Models ----
+class SelectedTreatment(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    duration: int = Field(ge=1, le=600)
+    price: int = Field(ge=0)
+    description: Optional[str] = Field(default=None, max_length=2000)
+
+
 class ContactCreate(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     email: EmailStr
@@ -48,6 +55,7 @@ class ContactCreate(BaseModel):
     message: str = Field(min_length=1, max_length=4000)
     language: str = Field(default="sr")
     message_serbian: Optional[str] = Field(default=None, max_length=4000)
+    selected_treatment: Optional[SelectedTreatment] = None
 
 
 class ContactMessage(BaseModel):
@@ -95,7 +103,10 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
     submitted_at = payload["created_at"]
 
     # 1) Client confirmation (translated to client's selected language)
-    c_subject, c_html, c_text = render_client_email(language, name, phone, message)
+    treatment = payload.get("selected_treatment")
+    c_subject, c_html, c_text = render_client_email(
+        language, name, phone, message, treatment=treatment
+    )
     client_sent, client_err = await _resend_send(to_client, c_subject, c_html, c_text)
 
     # 2) Owner notification — ALWAYS Serbian, ALWAYS Serbian massage details
@@ -135,6 +146,8 @@ async def create_contact_message(payload: ContactCreate, background_tasks: Backg
 
     doc = record.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
+    if payload.selected_treatment:
+        doc['selected_treatment'] = payload.selected_treatment.model_dump()
     await db.contact_messages.insert_one(doc)
 
     background_tasks.add_task(_send_and_update, record.id, doc)

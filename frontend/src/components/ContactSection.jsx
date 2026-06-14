@@ -19,11 +19,22 @@ export const ContactSection = () => {
 
   // Auto-populate message when a treatment is selected in the Pricing section,
   // and update the Serbian copy used in the owner notification email.
+  // Auto-populate message when a treatment is selected in the Pricing section,
+  // and update the Serbian copy used in the owner notification email.
   useEffect(() => {
     if (!selection) return;
     setForm((prev) => ({ ...prev, message: selection.message }));
     setMessageSerbian(selection.messageSerbian);
   }, [selection]);
+
+  const selectedTreatmentPayload = selection
+    ? {
+        name: selection.name,
+        duration: selection.duration,
+        price: selection.price,
+        description: selection.description,
+      }
+    : null;
 
   // If user manually edits the message, drop the cached Serbian translation so
   // we don't ship a stale "Odabrano: …" line to the owner.
@@ -44,6 +55,7 @@ export const ContactSection = () => {
         ...form,
         language: lang,
         message_serbian: messageSerbian || undefined,
+        selected_treatment: selectedTreatmentPayload || undefined,
       });
       toast.success(t.contact.form.success);
       setForm(initial);

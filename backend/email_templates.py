@@ -5,7 +5,94 @@ LOGO_URL = (
     "5esihdex_Bua%20luang%20logo%20crna%20senka.png"
 )
 BRAND_PHONE = "+381 62 625 500"
+BRAND_PHONE_TEL = "+38162625500"
 BRAND_EMAIL = "bualuangthailandspa@gmail.com"
+INSTAGRAM_URL = "https://www.instagram.com/bualuang_thai_spa/"
+
+
+# Localised labels for the rich "selected treatment" block + CTAs in client email.
+CLIENT_TREATMENT_COPY = {
+    "sr": {
+        "block_heading": "Vaš odabrani tretman", "name_label": "Naziv masaže",
+        "duration_label": "Trajanje", "duration_unit": "MIN",
+        "description_label": "Opis", "price_label": "Cena", "currency": "RSD",
+        "call_us_heading": "Pozovite nas", "call_us_cta": "Pozovi sada",
+        "instagram_cta": "Pratite nas na Instagramu",
+    },
+    "en": {
+        "block_heading": "Your selected treatment", "name_label": "Massage name",
+        "duration_label": "Duration", "duration_unit": "MIN",
+        "description_label": "Description", "price_label": "Price", "currency": "RSD",
+        "call_us_heading": "Call us", "call_us_cta": "Call now",
+        "instagram_cta": "Follow us on Instagram",
+    },
+    "ru": {
+        "block_heading": "Выбранная процедура", "name_label": "Название массажа",
+        "duration_label": "Длительность", "duration_unit": "мин",
+        "description_label": "Описание", "price_label": "Цена", "currency": "RSD",
+        "call_us_heading": "Позвоните нам", "call_us_cta": "Позвонить",
+        "instagram_cta": "Подпишитесь на нас в Instagram",
+    },
+    "zh": {
+        "block_heading": "您选择的疗程", "name_label": "按摩名称",
+        "duration_label": "时长", "duration_unit": "分钟",
+        "description_label": "说明", "price_label": "价格", "currency": "RSD",
+        "call_us_heading": "致电我们", "call_us_cta": "立即致电",
+        "instagram_cta": "在 Instagram 关注我们",
+    },
+    "th": {
+        "block_heading": "ทรีตเมนต์ที่คุณเลือก", "name_label": "ชื่อนวด",
+        "duration_label": "ระยะเวลา", "duration_unit": "นาที",
+        "description_label": "รายละเอียด", "price_label": "ราคา", "currency": "RSD",
+        "call_us_heading": "โทรหาเรา", "call_us_cta": "โทรเลย",
+        "instagram_cta": "ติดตามเราที่ Instagram",
+    },
+}
+
+
+def _format_price(n):
+    return f"{int(n):,}".replace(",", ".")
+
+
+def _treatment_block_html(language, treatment):
+    c = CLIENT_TREATMENT_COPY.get(language, CLIENT_TREATMENT_COPY["sr"])
+    name = _html_escape(str(treatment.get("name", "")))
+    duration = treatment.get("duration", "")
+    price = treatment.get("price", 0)
+    description = _html_escape(str(treatment.get("description") or ""))
+    desc_block = (
+        f"""<tr><td colspan="2" style="padding:10px 16px 0 16px;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#a17a35;">{c['description_label']}</td></tr>
+            <tr><td colspan="2" style="padding:6px 16px 14px 16px;font-size:14px;line-height:1.7;color:#3a312a;font-style:italic;">{description}</td></tr>"""
+        if description else ""
+    )
+    return f"""<div style="margin:28px 0 6px 0;padding:22px 4px 4px 4px;border:1px solid rgba(161,122,53,0.30);border-radius:14px;background:#fbf6ec;">
+      <div style="text-align:center;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#a17a35;padding:0 16px 18px 16px;">{c['block_heading']}</div>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:separate;">
+        <tr><td style="padding:10px 16px;width:42%;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#a17a35;vertical-align:top;border-top:1px solid rgba(161,122,53,0.18);">{c['name_label']}</td>
+            <td style="padding:10px 16px;font-family:Georgia,'Cormorant Garamond',serif;font-size:18px;color:#3a312a;border-top:1px solid rgba(161,122,53,0.18);">{name}</td></tr>
+        <tr><td style="padding:10px 16px;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#a17a35;vertical-align:top;border-top:1px solid rgba(161,122,53,0.18);">{c['duration_label']}</td>
+            <td style="padding:10px 16px;font-size:15px;color:#3a312a;border-top:1px solid rgba(161,122,53,0.18);">{duration} {c['duration_unit']}</td></tr>
+        {desc_block}
+        <tr><td style="padding:14px 16px 18px 16px;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#a17a35;vertical-align:top;border-top:1px solid rgba(161,122,53,0.30);">{c['price_label']}</td>
+            <td style="padding:14px 16px 18px 16px;font-family:Georgia,serif;font-size:22px;font-weight:600;color:#7a5a22;border-top:1px solid rgba(161,122,53,0.30);">{_format_price(price)} <span style="font-size:13px;color:#a17a35;letter-spacing:0.14em;">{c['currency']}</span></td></tr>
+      </table>
+    </div>"""
+
+
+def _call_us_block_html(language):
+    c = CLIENT_TREATMENT_COPY.get(language, CLIENT_TREATMENT_COPY["sr"])
+    return f"""<div style="margin:28px 0 8px 0;padding:24px 18px;border-radius:14px;background:linear-gradient(135deg,#fff7e3 0%,#f7e7bb 100%);border:1px solid rgba(161,122,53,0.30);text-align:center;">
+      <div style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.32em;text-transform:uppercase;color:#a17a35;margin-bottom:8px;">{c['call_us_heading']}</div>
+      <a href="tel:{BRAND_PHONE_TEL}" style="display:inline-block;font-family:Georgia,serif;font-size:28px;font-weight:600;color:#7a5a22;text-decoration:none;letter-spacing:0.04em;line-height:1.1;">{BRAND_PHONE}</a>
+      <div style="margin-top:14px;"><a href="tel:{BRAND_PHONE_TEL}" style="display:inline-block;padding:13px 28px;border-radius:999px;background:linear-gradient(90deg,#a17a35,#d4ad5e,#a17a35);color:#ffffff;font-family:Arial,sans-serif;font-size:13px;letter-spacing:0.22em;text-transform:uppercase;text-decoration:none;font-weight:600;">{c['call_us_cta']}</a></div>
+    </div>"""
+
+
+def _instagram_block_html(language):
+    c = CLIENT_TREATMENT_COPY.get(language, CLIENT_TREATMENT_COPY["sr"])
+    return f"""<div style="margin:16px 0 4px 0;text-align:center;">
+      <a href="{INSTAGRAM_URL}" target="_blank" rel="noopener" style="display:inline-block;padding:12px 22px;border-radius:999px;border:1px solid rgba(161,122,53,0.40);background:#ffffff;color:#7a5a22;font-family:Arial,sans-serif;font-size:13px;letter-spacing:0.16em;text-transform:uppercase;text-decoration:none;font-weight:600;">{c['instagram_cta']} →</a>
+    </div>"""
 
 
 # ------------------------- Client confirmation (per language) -------------------------
@@ -156,7 +243,7 @@ def _shell(inner_html: str) -> str:
 </html>"""
 
 
-def render_client_email(language: str, name: str, phone: str, message: str) -> tuple[str, str, str]:
+def render_client_email(language: str, name: str, phone: str, message: str, treatment=None) -> tuple[str, str, str]:
     """Return (subject, html, plain_text) for the client confirmation email."""
     lang = language if language in CLIENT_COPY else "sr"
     c = CLIENT_COPY[lang]
@@ -166,50 +253,70 @@ def render_client_email(language: str, name: str, phone: str, message: str) -> t
     safe_phone = _html_escape(phone) if phone else c["phone_empty"]
     safe_message = _html_escape(message).replace("\n", "<br/>")
 
-    inner = f"""
-      <h1 style="margin:0 0 18px 0;font-size:24px;line-height:1.2;color:#a17a35;font-weight:400;letter-spacing:0.02em;">
-        {c['greeting'].format(name=safe_name)}
-      </h1>
-      <p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;color:#3a312a;">
-        {c['intro']}
-      </p>
-      <p style="margin:0 0 22px 0;font-size:15px;line-height:1.7;color:#3a312a;">
-        {c['review']}
-      </p>
+    treatment_block = _treatment_block_html(lang, treatment) if treatment else ""
+    call_us_block = _call_us_block_html(lang)
+    instagram_block = _instagram_block_html(lang)
+
+    # When a treatment is selected we already render its details beautifully —
+    # avoid duplicating the same line inside the generic "data" box.
+    submission_block = "" if treatment else f"""
       <div style="margin:24px 0;padding:18px 22px;background:#fbf6ec;border:1px solid rgba(161,122,53,0.25);border-radius:12px;">
-        <div style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#a17a35;margin-bottom:10px;">
-          {c['data_heading']}
-        </div>
+        <div style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#a17a35;margin-bottom:10px;">{c['data_heading']}</div>
         <table cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:14px;color:#3a312a;">
-          <tr>
-            <td style="padding:4px 0;width:130px;color:#7a6e5e;font-family:Arial,sans-serif;">{c['phone_label']}:</td>
-            <td style="padding:4px 0;">{safe_phone}</td>
-          </tr>
-          <tr>
-            <td valign="top" style="padding:4px 0;color:#7a6e5e;font-family:Arial,sans-serif;">{c['message_label']}:</td>
-            <td style="padding:4px 0;line-height:1.6;">{safe_message}</td>
-          </tr>
+          <tr><td style="padding:4px 0;width:130px;color:#7a6e5e;font-family:Arial,sans-serif;">{c['phone_label']}:</td><td style="padding:4px 0;">{safe_phone}</td></tr>
+          <tr><td valign="top" style="padding:4px 0;color:#7a6e5e;font-family:Arial,sans-serif;">{c['message_label']}:</td><td style="padding:4px 0;line-height:1.6;">{safe_message}</td></tr>
         </table>
       </div>
-      <p style="margin:18px 0 26px 0;font-size:15px;line-height:1.7;color:#3a312a;font-style:italic;">
-        {c['closing']}
+    """
+
+    # If a treatment is selected we still want phone visible somewhere clean.
+    phone_inline = "" if not treatment else f"""
+      <p style="margin:12px 0 0 0;font-size:13px;color:#7a6e5e;text-align:center;">
+        <span style="font-family:Arial,sans-serif;text-transform:uppercase;letter-spacing:0.18em;font-size:10px;color:#a17a35;">{c['phone_label']}:</span>
+        &nbsp;{safe_phone}
       </p>
-      <p style="margin:0;font-size:14px;line-height:1.6;color:#3a312a;">
+    """
+
+    inner = f"""
+      <h1 style="margin:0 0 18px 0;font-size:24px;line-height:1.2;color:#a17a35;font-weight:400;letter-spacing:0.02em;">{c['greeting'].format(name=safe_name)}</h1>
+      <p style="margin:0 0 14px 0;font-size:15px;line-height:1.7;color:#3a312a;">{c['intro']}</p>
+      <p style="margin:0 0 6px 0;font-size:15px;line-height:1.7;color:#3a312a;">{c['review']}</p>
+      {treatment_block}
+      {phone_inline}
+      {submission_block}
+      {call_us_block}
+      <p style="margin:22px 0 26px 0;font-size:15px;line-height:1.7;color:#3a312a;font-style:italic;text-align:center;">{c['closing']}</p>
+      <p style="margin:0 0 10px 0;font-size:14px;line-height:1.6;color:#3a312a;text-align:center;">
         {c['signoff']}<br/>
         <span style="color:#a17a35;font-weight:600;letter-spacing:0.02em;">{c['team']}</span>
       </p>
+      {instagram_block}
     """
+
+    plain_treatment = ""
+    if treatment:
+        plain_treatment = (
+            f"\n{CLIENT_TREATMENT_COPY[lang]['block_heading']}:\n"
+            f"  {CLIENT_TREATMENT_COPY[lang]['name_label']}: {treatment.get('name','')}\n"
+            f"  {CLIENT_TREATMENT_COPY[lang]['duration_label']}: {treatment.get('duration','')} "
+            f"{CLIENT_TREATMENT_COPY[lang]['duration_unit']}\n"
+        )
+        if treatment.get("description"):
+            plain_treatment += f"  {CLIENT_TREATMENT_COPY[lang]['description_label']}: {treatment['description']}\n"
+        plain_treatment += (
+            f"  {CLIENT_TREATMENT_COPY[lang]['price_label']}: "
+            f"{_format_price(treatment.get('price',0))} {CLIENT_TREATMENT_COPY[lang]['currency']}\n"
+        )
 
     plain = (
         f"{c['greeting'].format(name=name)}\n\n"
         f"{c['intro']}\n\n"
-        f"{c['review']}\n\n"
-        f"{c['data_heading']}:\n"
-        f"  {c['phone_label']}: {phone or c['phone_empty']}\n"
-        f"  {c['message_label']}: {message}\n\n"
+        f"{c['review']}\n"
+        f"{plain_treatment}\n"
         f"{c['closing']}\n\n"
-        f"{c['signoff']}\n{c['team']}\n"
-        f"{BRAND_EMAIL} · {BRAND_PHONE}\n"
+        f"{c['signoff']}\n{c['team']}\n\n"
+        f"{CLIENT_TREATMENT_COPY[lang]['call_us_heading']}: {BRAND_PHONE}\n"
+        f"{CLIENT_TREATMENT_COPY[lang]['instagram_cta']}: {INSTAGRAM_URL}\n"
     )
 
     return subject, _shell(inner), plain
