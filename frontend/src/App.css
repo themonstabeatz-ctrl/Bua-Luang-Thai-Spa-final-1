@@ -1,0 +1,50 @@
+.App {
+  min-height: 100vh;
+  background: #0a0705;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #0a0705;
+  color: #ffffff;
+  font-family: "Manrope", "Inter", system-ui, -apple-system, sans-serif;
+}
+
+::selection {
+  background: rgba(196, 154, 76, 0.35);
+  color: #f4e4bf;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0705;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #a17a35, #c49a4c);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #c49a4c, #e8c98a);
+}
+
+@keyframes bounce-slow {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, 8px); }
+}
+.animate-bounce-slow {
+  animation: bounce-slow 2.4s ease-in-out infinite;
+}
+
+/* Disable fixed parallax on iOS where it is broken */
+@supports (-webkit-touch-callout: none) {
+  #home {
+    background-attachment: scroll !important;
+  }
+}
