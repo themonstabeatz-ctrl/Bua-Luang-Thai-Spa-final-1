@@ -90,7 +90,7 @@ export const ContactSection = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-[1.4fr_1fr] gap-12 items-start">
           {/* LEFT: form + info */}
           <div>
             <form
@@ -204,21 +204,19 @@ export const ContactSection = () => {
             </div>
           </div>
 
-          {/* RIGHT: map */}
+          {/* RIGHT: map (Google Maps, compact) */}
           <div
             data-testid="contact-map"
-            className="rounded-2xl overflow-hidden border border-[rgba(161,122,53,0.25)] bg-white min-h-[480px] lg:min-h-full relative shadow-[0_18px_60px_rgba(80,55,18,0.08)]"
+            className="rounded-2xl overflow-hidden border border-[rgba(161,122,53,0.25)] bg-white relative shadow-[0_18px_60px_rgba(80,55,18,0.10)]"
           >
             <iframe
               title="Belgrade map"
-              src="https://www.openstreetmap.org/export/embed.html?bbox=20.36%2C44.78%2C20.55%2C44.84&layer=mapnik&marker=44.8125%2C20.4612"
-              className="w-full h-full min-h-[480px]"
-              style={{
-                border: 0,
-                filter: "saturate(0.78) sepia(0.10) hue-rotate(-10deg) brightness(1.02)",
-              }}
+              src="https://www.google.com/maps?q=Beograd%2C+Srbija&t=&z=12&ie=UTF8&iwloc=&output=embed"
+              className="w-full h-[360px] sm:h-[400px]"
+              style={{ border: 0 }}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
+              allowFullScreen
             />
             <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-[rgba(161,122,53,0.18)] rounded-2xl" />
           </div>

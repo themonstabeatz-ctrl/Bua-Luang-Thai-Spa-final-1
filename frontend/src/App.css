@@ -43,9 +43,17 @@ body {
   animation: bounce-slow 2.4s ease-in-out infinite;
 }
 
+/* Parallax stacks — each carries its own fixed background. Content sections
+   contained inside should be transparent so the bg is visible. */
+.parallax-stack {
+  position: relative;
+  background-repeat: no-repeat;
+}
+
 /* Disable fixed parallax on iOS where it is broken */
 @supports (-webkit-touch-callout: none) {
-  #home {
+  #home,
+  .parallax-stack {
     background-attachment: scroll !important;
   }
 }
