@@ -49,9 +49,8 @@ export const Hero = () => {
           <span className="block text-5xl sm:text-6xl lg:text-7xl xl:text-[88px] leading-[1.02] tracking-tight uppercase bg-gradient-to-br from-[#fff4d6] via-[#e8c98a] to-[#a17a35] bg-clip-text text-transparent">
             Bua Luang Thai Spa
           </span>
-          <span className="block mt-3 text-base sm:text-lg lg:text-xl tracking-[0.18em] uppercase font-light bg-gradient-to-br from-[#fff4d6] via-[#e8c98a] to-[#a17a35] bg-clip-text text-transparent">
-            — Autentična Tajlandska Masaža Beograd
-          </span>
+          {/* SEO-only text — preserves the H1 keyword phrase without showing the subtitle visually */}
+          <span className="sr-only"> — Autentična Tajlandska Masaža Beograd</span>
         </h1>
 
         <p

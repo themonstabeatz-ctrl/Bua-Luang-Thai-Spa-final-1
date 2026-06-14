@@ -15,6 +15,7 @@ CLIENT_SUBJECTS = {
     "en": "Thank you for contacting us — Bua Luang Thai Spa",
     "ru": "Спасибо, что связались с нами — Bua Luang Thai Spa",
     "zh": "感谢您与我们联系 — Bua Luang Thai Spa",
+    "th": "ขอบคุณที่ติดต่อเรา — Bua Luang Thai Spa",
 }
 
 
@@ -91,6 +92,20 @@ CLIENT_COPY = {
         "team": "您的 Bua Luang Thai Spa 团队",
         "hours_label": "营业时间",
         "hours_value": "周一至周日：10:00 — 22:00",
+    },
+    "th": {
+        "greeting": "เรียนคุณ {name},",
+        "intro": "ขอบคุณที่ติดต่อ Bua Luang Thai Spa เราได้รับข้อความของคุณเรียบร้อยแล้ว",
+        "review": "ทีมงานของเราจะตรวจสอบคำถามของคุณและจะติดต่อกลับโดยเร็วที่สุดเพื่อยืนยันรายละเอียดหรือเวลานัดหมายสำหรับทรีตเมนต์ของคุณ",
+        "data_heading": "ข้อมูลที่คุณส่ง",
+        "phone_label": "โทรศัพท์",
+        "phone_empty": "(ไม่ได้ระบุ)",
+        "message_label": "ข้อความ / บริการ",
+        "closing": "เราหวังเป็นอย่างยิ่งที่จะช่วยให้คุณค้นพบความสงบและความสมดุลภายใน",
+        "signoff": "ด้วยความเคารพ,",
+        "team": "ทีมงาน Bua Luang Thai Spa ของคุณ",
+        "hours_label": "เวลาทำการ",
+        "hours_value": "จันทร์ — อาทิตย์: 10:00 — 22:00",
     },
 }
 
