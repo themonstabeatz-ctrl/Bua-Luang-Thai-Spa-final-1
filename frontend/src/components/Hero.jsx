@@ -29,7 +29,7 @@ export const Hero = () => {
         <div
           data-testid="hero-eyebrow"
           className="inline-flex items-center gap-3 text-[11px] sm:text-xs tracking-[0.42em] uppercase text-[#f4e4bf] mb-6"
-          style={{ textShadow: "0 2px 12px rgba(0,0,0,0.95), 0 1px 3px rgba(0,0,0,0.9)" }}
+          style={{ textShadow: "0 1px 0 rgba(0,0,0,1), 1px 1px 0 rgba(0,0,0,1), 0 2px 2px rgba(0,0,0,0.95)" }}
         >
           <span className="h-px w-10 bg-gradient-to-r from-transparent to-[#e8c98a]" />
           {t.hero.eyebrow}
@@ -38,10 +38,11 @@ export const Hero = () => {
 
         <h1
           data-testid="hero-title"
-          className="font-serif text-5xl sm:text-6xl lg:text-7xl xl:text-[88px] leading-[1.02] tracking-tight mx-auto"
+          className="font-serif text-5xl sm:text-6xl lg:text-7xl xl:text-[88px] leading-[1.02] tracking-tight mx-auto uppercase"
           style={{
             fontFamily: "'Cormorant Garamond', 'Playfair Display', serif",
-            filter: "drop-shadow(0 6px 24px rgba(0,0,0,0.95)) drop-shadow(0 2px 6px rgba(0,0,0,0.9))",
+            filter:
+              "drop-shadow(0 2px 0 rgba(0,0,0,1)) drop-shadow(2px 2px 0 rgba(0,0,0,1)) drop-shadow(-1px 1px 0 rgba(0,0,0,1)) drop-shadow(0 4px 3px rgba(0,0,0,0.9))",
           }}
         >
           <span className="block bg-gradient-to-br from-[#fff4d6] via-[#e8c98a] to-[#a17a35] bg-clip-text text-transparent">
