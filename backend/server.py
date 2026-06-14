@@ -4,15 +4,14 @@ from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
-import smtplib
 import asyncio
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+
+import resend
 
 from email_templates import render_client_email, render_owner_email
 
@@ -29,6 +28,13 @@ logger = logging.getLogger(__name__)
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+resend.api_key = os.environ['RESEND_API_KEY']
+
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', 'onboarding@resend.dev')
+SENDER_NAME = os.environ.get('SENDER_NAME', 'Bua Luang Thai Spa')
+REPLY_TO_EMAIL = os.environ.get('REPLY_TO_EMAIL', 'bualuangthailandspa@gmail.com')
+OWNER_EMAIL = os.environ.get('OWNER_EMAIL', 'bualuangthailandspa@gmail.com')
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
@@ -58,40 +64,26 @@ class ContactMessage(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
-# ---- Email helper ----
-def _send_email_sync(to_email: str, subject: str, html_body: str, text_body: str) -> None:
-    host = os.environ['SMTP_HOST']
-    port = int(os.environ.get('SMTP_PORT', '587'))
-    user = os.environ['SMTP_USER']
-    password = os.environ['SMTP_PASSWORD']
-    from_name = os.environ.get('SMTP_FROM_NAME', 'Bua Luang Thai Spa')
-
-    msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = f"{from_name} <{user}>"
-    msg['To'] = to_email
-    msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
-    msg.attach(MIMEText(html_body, 'html', 'utf-8'))
-
-    with smtplib.SMTP(host, port, timeout=20) as server:
-        server.starttls()
-        server.login(user, password)
-        server.sendmail(user, [to_email], msg.as_string())
-
-
-async def _send_async(to_email: str, subject: str, html_body: str, text_body: str) -> tuple[bool, Optional[str]]:
+# ---- Resend helper ----
+async def _resend_send(to_email: str, subject: str, html_body: str, text_body: str) -> tuple[bool, Optional[str]]:
+    params = {
+        "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
+        "to": [to_email],
+        "subject": subject,
+        "html": html_body,
+        "text": text_body,
+        "reply_to": REPLY_TO_EMAIL,
+    }
     try:
-        await asyncio.get_event_loop().run_in_executor(
-            None, _send_email_sync, to_email, subject, html_body, text_body
-        )
+        result = await asyncio.to_thread(resend.Emails.send, params)
+        logger.info("Resend OK for %s id=%s", to_email, getattr(result, "get", lambda *_: None)("id"))
         return True, None
     except Exception as exc:  # noqa: BLE001
-        logger.exception("SMTP send failed for %s", to_email)
+        logger.exception("Resend send failed for %s", to_email)
         return False, str(exc)
 
 
 async def _send_and_update(record_id: str, payload: dict) -> None:
-    """Send both client confirmation + owner notification, update DB record."""
     name = payload["name"]
     to_client = payload["email"]
     phone = payload["phone"] or ""
@@ -99,32 +91,25 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
     language = payload["language"]
     submitted_at = payload["created_at"]
 
-    # 1. Client confirmation (in submitter's selected language)
+    # 1) Client confirmation (translated)
     c_subject, c_html, c_text = render_client_email(language, name, phone, message)
-    client_sent, client_err = await _send_async(to_client, c_subject, c_html, c_text)
+    client_sent, client_err = await _resend_send(to_client, c_subject, c_html, c_text)
 
-    # 2. Owner notification — always in Serbian, always to the spa inbox
-    owner_inbox = os.environ.get("SMTP_USER", "")
+    # 2) Owner notification (always Serbian, to OWNER_EMAIL)
     o_subject, o_html, o_text = render_owner_email(
-        name=name,
-        email=to_client,
-        phone=phone,
-        message=message,
-        language=language,
-        submitted_at_iso=submitted_at,
+        name=name, email=to_client, phone=phone, message=message,
+        language=language, submitted_at_iso=submitted_at,
     )
-    owner_sent, owner_err = await _send_async(owner_inbox, o_subject, o_html, o_text)
+    owner_sent, owner_err = await _resend_send(OWNER_EMAIL, o_subject, o_html, o_text)
 
     err = client_err or owner_err
     await db.contact_messages.update_one(
         {"id": record_id},
-        {
-            "$set": {
-                "client_email_sent": client_sent,
-                "owner_email_sent": owner_sent,
-                "email_error": err,
-            }
-        },
+        {"$set": {
+            "client_email_sent": client_sent,
+            "owner_email_sent": owner_sent,
+            "email_error": err,
+        }},
     )
 
 
@@ -149,7 +134,6 @@ async def create_contact_message(payload: ContactCreate, background_tasks: Backg
     await db.contact_messages.insert_one(doc)
 
     background_tasks.add_task(_send_and_update, record.id, doc)
-
     return record
 
 

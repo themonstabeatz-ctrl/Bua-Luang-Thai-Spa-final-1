@@ -16,7 +16,7 @@ export const Footer = () => {
           {/* Logo without dark wrap — multiply blend so black PNG bg blends into the warm gold footer */}
           <img
             src={ASSETS.logo}
-            alt="Bua Luang Thai Spa"
+            alt="Bua Luang Thai Spa Beograd - Tradicionalna Tajlandska masaza logo"
             data-testid="footer-logo"
             className="h-28 sm:h-32 w-auto"
             style={{ mixBlendMode: "multiply" }}

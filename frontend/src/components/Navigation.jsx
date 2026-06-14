@@ -69,7 +69,7 @@ export const Navigation = () => {
         >
           <img
             src={ASSETS.logo}
-            alt="Bua Luang Thai Spa"
+            alt="Bua Luang Thai Spa Beograd - Tradicionalna Tajlandska masaza logo"
             className="h-12 w-auto transition-transform duration-500 group-hover:scale-105"
             style={{
               mixBlendMode: "screen",

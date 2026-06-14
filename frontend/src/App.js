@@ -56,7 +56,7 @@ const BuddhaShowcase = () => {
       {/* Floating, transparent logo with scroll fade */}
       <img
         src={ASSETS.logo}
-        alt="Bua Luang Thai Spa"
+        alt="Bua Luang Thai Spa Beograd - Autentična Tajlandska masaža logo"
         data-testid="buddha-logo"
         className="pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[58vh] w-auto max-w-[90vw]"
         style={{

@@ -18,9 +18,10 @@ export const Hero = () => {
       }}
     >
       <div className="relative z-10 w-full max-w-5xl mx-auto px-6 sm:px-10 lg:px-14 pt-32 pb-32 text-center">
+        {/* Logo — transparent against dark spa scene via screen blend */}
         <img
           src={ASSETS.logo}
-          alt="Bua Luang Thai Spa"
+          alt="Bua Luang Thai Spa Beograd - Tradicionalna Tajlandska masaza logo"
           data-testid="hero-logo"
           className="mx-auto h-32 sm:h-44 lg:h-52 w-auto mb-6"
           style={{ mixBlendMode: "screen", filter: "drop-shadow(0 6px 24px rgba(0,0,0,0.45))" }}
@@ -38,15 +39,18 @@ export const Hero = () => {
 
         <h1
           data-testid="hero-title"
-          className="font-serif text-5xl sm:text-6xl lg:text-7xl xl:text-[88px] leading-[1.02] tracking-tight mx-auto uppercase"
+          className="font-serif mx-auto"
           style={{
             fontFamily: "'Cormorant Garamond', 'Playfair Display', serif",
             filter:
               "drop-shadow(0 2px 0 rgba(0,0,0,1)) drop-shadow(2px 2px 0 rgba(0,0,0,1)) drop-shadow(-1px 1px 0 rgba(0,0,0,1)) drop-shadow(0 4px 3px rgba(0,0,0,0.9))",
           }}
         >
-          <span className="block bg-gradient-to-br from-[#fff4d6] via-[#e8c98a] to-[#a17a35] bg-clip-text text-transparent">
-            {t.hero.title}
+          <span className="block text-5xl sm:text-6xl lg:text-7xl xl:text-[88px] leading-[1.02] tracking-tight uppercase bg-gradient-to-br from-[#fff4d6] via-[#e8c98a] to-[#a17a35] bg-clip-text text-transparent">
+            Bua Luang Thai Spa
+          </span>
+          <span className="block mt-3 text-base sm:text-lg lg:text-xl tracking-[0.18em] uppercase font-light bg-gradient-to-br from-[#fff4d6] via-[#e8c98a] to-[#a17a35] bg-clip-text text-transparent">
+            — Autentična Tajlandska Masaža Beograd
           </span>
         </h1>
 
