@@ -358,6 +358,12 @@ export const translations = {
       quickLinks: "Brzi linkovi",
       followUs: "Pratite nas",
     },
+    chat: {
+      title: "Kontaktirajte nas",
+      subtitle: "Brzi odgovor preko poruka",
+      whatsapp: "Kontaktirajte nas preko WhatsApp-a",
+      viber: "Kontaktirajte nas preko Viber-a",
+    },
   },
 
   en: {
@@ -418,6 +424,12 @@ export const translations = {
       rights: "All rights reserved.",
       quickLinks: "Quick links",
       followUs: "Follow us",
+    },
+    chat: {
+      title: "Contact us",
+      subtitle: "Quick reply via messaging",
+      whatsapp: "Contact us on WhatsApp",
+      viber: "Contact us on Viber",
     },
   },
 
@@ -480,6 +492,12 @@ export const translations = {
       quickLinks: "Навигация",
       followUs: "Подписывайтесь",
     },
+    chat: {
+      title: "Свяжитесь с нами",
+      subtitle: "Быстрый ответ через мессенджер",
+      whatsapp: "Связаться с нами в WhatsApp",
+      viber: "Связаться с нами в Viber",
+    },
   },
 
   zh: {
@@ -538,6 +556,12 @@ export const translations = {
       rights: "版权所有。",
       quickLinks: "快速链接",
       followUs: "关注我们",
+    },
+    chat: {
+      title: "联系我们",
+      subtitle: "通过消息快速回复",
+      whatsapp: "通过 WhatsApp 联系我们",
+      viber: "通过 Viber 联系我们",
     },
   },
 };

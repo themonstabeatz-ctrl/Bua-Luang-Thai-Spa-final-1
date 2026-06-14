@@ -1,0 +1,7 @@
+# robots.txt — Bua Luang Thai Spa Belgrade
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+Sitemap: https://bualuangthaispa.rs/sitemap.xml

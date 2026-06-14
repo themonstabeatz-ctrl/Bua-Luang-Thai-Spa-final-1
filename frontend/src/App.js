@@ -8,6 +8,7 @@ import { AboutSection } from "@/components/AboutSection";
 import { PricingSection } from "@/components/PricingSection";
 import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
+import { ChatFloater } from "@/components/ChatFloater";
 import { ASSETS } from "@/constants/assets";
 import "@/App.css";
 
@@ -80,6 +81,7 @@ const Home = () => {
       <PricingSection />
       <ContactSection />
       <Footer />
+      <ChatFloater />
     </div>
   );
 };
