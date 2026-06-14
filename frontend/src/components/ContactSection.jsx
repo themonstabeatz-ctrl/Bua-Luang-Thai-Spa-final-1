@@ -69,7 +69,7 @@ export const ContactSection = () => {
     <section
       id="contact"
       data-testid="contact-section"
-      className="relative py-28 sm:py-36"
+      className="relative w-full bg-gradient-to-b from-[#f5e7c4] via-[#f8edd4] to-[#fbf3dc] py-28 sm:py-36"
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14">
         <div className="text-center mb-16">

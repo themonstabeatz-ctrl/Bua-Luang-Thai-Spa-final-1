@@ -8,12 +8,301 @@ export const LANGUAGES = [
   { code: "zh", label: "ZH", name: "中文", flag: "🇨🇳" },
 ];
 
+const SR_PRICING = {
+  eyebrow: "Cenovnik",
+  title: "Birajte ritual koji vam odgovara",
+  subtitle: "Cene su orijentacione i biće potvrđene prilikom rezervacije.",
+  currency: "RSD",
+  note: "* Sve cene podležu promenama. Trajanja u minutama.",
+  showDescription: "Pogledaj opis",
+  hideDescription: "Sakrij opis",
+  rows: [
+    {
+      name: "Tradicionalna Tajlandska Masaža",
+      subname: "Thai Traditional",
+      options: [
+        { duration: 60, price: 4500 },
+        { duration: 90, price: 5500 },
+      ],
+      description:
+        "Autentični tretman bez ulja koji kombinuje akupresuru i pasivno istezanje za oslobađanje od stresa i povećanje fleksibilnosti celog tela.",
+    },
+    {
+      name: "Aroma Masaža",
+      subname: "Aroma Massage",
+      options: [
+        { duration: 60, price: 4300 },
+        { duration: 90, price: 5300 },
+      ],
+      description:
+        "Opuštajuća masaža toplim prirodnim uljima i blagim pokretima koja hidrira kožu, smiruje um i dubinski regeneriše nervni sistem.",
+    },
+    {
+      name: "Masaža sa Toplim Tajlandskim Biljnim Kompresama",
+      subname: "Thai Herbal Hot Compress",
+      options: [
+        { duration: 90, price: 5900 },
+        { duration: 120, price: 6900 },
+      ],
+      description:
+        "Terapijski tretman toplim zavežljajima lekovitog tajlandskog bilja koji ublažava hronični bol, ukočenost i poboljšava cirkulaciju.",
+    },
+    {
+      name: "Masaža Vrata, Glave i Ramena",
+      subname: "Neck, Head and Shoulders",
+      options: [
+        { duration: 30, price: 2500 },
+        { duration: 45, price: 3000 },
+        { duration: 60, price: 3500 },
+      ],
+      description:
+        "Ciljani tretman usmeren na gornji deo tela, idealan za brzo oslobađanje od napetosti uzrokovane dugim sedenjem i stresom.",
+    },
+    {
+      name: "Deep Tissue Masaža",
+      subname: "Deep Tissue Massage",
+      options: [
+        { duration: 60, price: 4500 },
+        { duration: 90, price: 5500 },
+      ],
+      description:
+        "Intenzivna masaža snažnijeg pritiska koja prodire u duboke slojeve mišića, otklanja hronične čvorove i ubrzava oporavak.",
+    },
+    {
+      name: "Masaža Stopala",
+      subname: "Foot Massage",
+      options: [
+        { duration: 30, price: 2500 },
+        { duration: 45, price: 3000 },
+        { duration: 60, price: 3500 },
+      ],
+      description:
+        "Refleksološki tretman stopala koji stimuliše ključne tačke, uklanja osećaj teških nogu i balansira energiju čitavog organizma.",
+    },
+  ],
+};
+
+const EN_PRICING = {
+  eyebrow: "Pricing",
+  title: "Choose the ritual that suits you",
+  subtitle: "Prices are indicative and will be confirmed at booking.",
+  currency: "RSD",
+  note: "* All prices are subject to change. Durations in minutes.",
+  showDescription: "View description",
+  hideDescription: "Hide description",
+  rows: [
+    {
+      name: "Traditional Thai Massage",
+      subname: "Thai Traditional",
+      options: [
+        { duration: 60, price: 4500 },
+        { duration: 90, price: 5500 },
+      ],
+      description:
+        "An authentic oil-free treatment that combines acupressure and passive stretching to release stress and boost full-body flexibility.",
+    },
+    {
+      name: "Aroma Massage",
+      subname: "Aroma Massage",
+      options: [
+        { duration: 60, price: 4300 },
+        { duration: 90, price: 5300 },
+      ],
+      description:
+        "A relaxing massage with warm natural oils and gentle strokes that hydrates the skin, calms the mind and deeply regenerates the nervous system.",
+    },
+    {
+      name: "Massage with Warm Thai Herbal Compresses",
+      subname: "Thai Herbal Hot Compress",
+      options: [
+        { duration: 90, price: 5900 },
+        { duration: 120, price: 6900 },
+      ],
+      description:
+        "A therapeutic treatment with warm pouches of Thai medicinal herbs that eases chronic pain, stiffness and improves circulation.",
+    },
+    {
+      name: "Neck, Head and Shoulders Massage",
+      subname: "Neck, Head and Shoulders",
+      options: [
+        { duration: 30, price: 2500 },
+        { duration: 45, price: 3000 },
+        { duration: 60, price: 3500 },
+      ],
+      description:
+        "A targeted treatment for the upper body — perfect for quickly releasing tension caused by long hours of sitting and stress.",
+    },
+    {
+      name: "Deep Tissue Massage",
+      subname: "Deep Tissue Massage",
+      options: [
+        { duration: 60, price: 4500 },
+        { duration: 90, price: 5500 },
+      ],
+      description:
+        "An intense, firm-pressure massage that reaches deep muscle layers, releases chronic knots and accelerates recovery.",
+    },
+    {
+      name: "Foot Massage",
+      subname: "Foot Massage",
+      options: [
+        { duration: 30, price: 2500 },
+        { duration: 45, price: 3000 },
+        { duration: 60, price: 3500 },
+      ],
+      description:
+        "A reflexology foot treatment that stimulates key points, relieves heavy-legs sensation and balances the energy of the whole body.",
+    },
+  ],
+};
+
+const RU_PRICING = {
+  eyebrow: "Цены",
+  title: "Выберите подходящий ритуал",
+  subtitle: "Цены ориентировочные и подтверждаются при бронировании.",
+  currency: "RSD",
+  note: "* Все цены могут изменяться. Длительность указана в минутах.",
+  showDescription: "Описание",
+  hideDescription: "Скрыть",
+  rows: [
+    {
+      name: "Традиционный тайский массаж",
+      subname: "Thai Traditional",
+      options: [
+        { duration: 60, price: 4500 },
+        { duration: 90, price: 5500 },
+      ],
+      description:
+        "Аутентичная процедура без масел, сочетающая акупрессуру и пассивную растяжку — снимает стресс и повышает гибкость всего тела.",
+    },
+    {
+      name: "Аромамасляный массаж",
+      subname: "Aroma Massage",
+      options: [
+        { duration: 60, price: 4300 },
+        { duration: 90, price: 5300 },
+      ],
+      description:
+        "Расслабляющий массаж с тёплыми натуральными маслами и мягкими движениями — увлажняет кожу, успокаивает ум и восстанавливает нервную систему.",
+    },
+    {
+      name: "Массаж с тёплыми тайскими травяными мешочками",
+      subname: "Thai Herbal Hot Compress",
+      options: [
+        { duration: 90, price: 5900 },
+        { duration: 120, price: 6900 },
+      ],
+      description:
+        "Терапевтическая процедура с тёплыми мешочками с тайскими лекарственными травами — снимает хроническую боль и улучшает кровообращение.",
+    },
+    {
+      name: "Массаж шеи, головы и плеч",
+      subname: "Neck, Head and Shoulders",
+      options: [
+        { duration: 30, price: 2500 },
+        { duration: 45, price: 3000 },
+        { duration: 60, price: 3500 },
+      ],
+      description:
+        "Целенаправленная процедура для верхней части тела — быстро снимает напряжение от долгого сидения и стресса.",
+    },
+    {
+      name: "Глубокий массаж",
+      subname: "Deep Tissue Massage",
+      options: [
+        { duration: 60, price: 4500 },
+        { duration: 90, price: 5500 },
+      ],
+      description:
+        "Интенсивный массаж с сильным давлением, прорабатывающий глубокие слои мышц — устраняет хронические узлы и ускоряет восстановление.",
+    },
+    {
+      name: "Массаж стоп",
+      subname: "Foot Massage",
+      options: [
+        { duration: 30, price: 2500 },
+        { duration: 45, price: 3000 },
+        { duration: 60, price: 3500 },
+      ],
+      description:
+        "Рефлексотерапия стоп: стимулирует ключевые точки, убирает ощущение тяжёлых ног и гармонизирует энергию всего организма.",
+    },
+  ],
+};
+
+const ZH_PRICING = {
+  eyebrow: "价目表",
+  title: "选择属于您的仪式",
+  subtitle: "价格仅供参考，预订时确认。",
+  currency: "RSD",
+  note: "* 价格可能调整。时长以分钟计。",
+  showDescription: "查看说明",
+  hideDescription: "收起",
+  rows: [
+    {
+      name: "传统泰式按摩",
+      subname: "Thai Traditional",
+      options: [
+        { duration: 60, price: 4500 },
+        { duration: 90, price: 5500 },
+      ],
+      description: "正宗无油疗程，结合穴位按压与被动伸展，舒缓压力并提升全身柔韧度。",
+    },
+    {
+      name: "芳香精油按摩",
+      subname: "Aroma Massage",
+      options: [
+        { duration: 60, price: 4300 },
+        { duration: 90, price: 5300 },
+      ],
+      description: "温暖的天然精油配合轻柔手法，滋润肌肤，安抚心神，深层修复神经系统。",
+    },
+    {
+      name: "泰式热草药包按摩",
+      subname: "Thai Herbal Hot Compress",
+      options: [
+        { duration: 90, price: 5900 },
+        { duration: 120, price: 6900 },
+      ],
+      description: "温热的泰式药草包敷于身体，缓解慢性疼痛和僵硬，并促进血液循环。",
+    },
+    {
+      name: "颈、头、肩按摩",
+      subname: "Neck, Head and Shoulders",
+      options: [
+        { duration: 30, price: 2500 },
+        { duration: 45, price: 3000 },
+        { duration: 60, price: 3500 },
+      ],
+      description: "针对上半身的疗程，能快速释放久坐和压力带来的紧张感。",
+    },
+    {
+      name: "深层组织按摩",
+      subname: "Deep Tissue Massage",
+      options: [
+        { duration: 60, price: 4500 },
+        { duration: 90, price: 5500 },
+      ],
+      description: "强力深层按摩，作用于深层肌肉组织，化解慢性结节并加快恢复。",
+    },
+    {
+      name: "足部按摩",
+      subname: "Foot Massage",
+      options: [
+        { duration: 30, price: 2500 },
+        { duration: 45, price: 3000 },
+        { duration: 60, price: 3500 },
+      ],
+      description: "足部反射疗法，刺激关键反射点，缓解双腿沉重感，平衡全身能量。",
+    },
+  ],
+};
+
 export const translations = {
   sr: {
     nav: {
       home: "Početna",
       about: "O nama",
-      massages: "Masaže",
       pricing: "Cenovnik",
       contact: "Kontakt",
       book: "Rezerviši",
@@ -36,55 +325,7 @@ export const translations = {
         "Ako tražite tajlandsku masažu u Beogradu koja je više od opuštanja, došli ste na pravo mesto.",
       ],
     },
-    massages: {
-      eyebrow: "Naše masaže",
-      title: "Tretmani inspirisani tradicijom",
-      subtitle:
-        "Svaki tretman pažljivo se izvodi po metodama prenetim generacijama tajlandskih majstora.",
-      items: [
-        {
-          name: "Tradicionalna Tajlandska Masaža",
-          desc: "Klasična suva masaža sa pasivnim istezanjem i akupresurnim pritiscima duž energetskih linija.",
-        },
-        {
-          name: "Aroma Oil Masaža",
-          desc: "Topla aromatična ulja, blagi pokreti i duboka relaksacija mišića — bekstvo za čula.",
-        },
-        {
-          name: "Thai Herbal Compress",
-          desc: "Topli zavežljaji od tajlandskih lekovitih biljaka koji oslobađaju napetost i otvaraju cirkulaciju.",
-        },
-        {
-          name: "Deep Tissue & Sportska",
-          desc: "Intenzivan tretman za napete mišiće, idealan za sportiste i one sa sedentarnim radom.",
-        },
-        {
-          name: "Foot Reflexology",
-          desc: "Refleksološki pritisak na ključne tačke stopala koji uravnotežuje celokupan organizam.",
-        },
-        {
-          name: "Couple Spa Ritual",
-          desc: "Privatni paket za dvoje — sveće, ulja, tišina i potpuna posvećenost zajedničkom predahu.",
-        },
-      ],
-    },
-    pricing: {
-      eyebrow: "Cenovnik",
-      title: "Birajte ritual koji vam odgovara",
-      subtitle: "Cene su orijentacione i biće potvrđene prilikom rezervacije.",
-      currency: "RSD",
-      note: "* Konačan cenovnik biće naknadno dodat. Sve cene podležu promenama.",
-      rows: [
-        { name: "Tradicionalna Tajlandska", duration: "60 min", price: 4500 },
-        { name: "Tradicionalna Tajlandska", duration: "90 min", price: 6300 },
-        { name: "Aroma Oil Masaža", duration: "60 min", price: 5200 },
-        { name: "Aroma Oil Masaža", duration: "90 min", price: 7000 },
-        { name: "Thai Herbal Compress", duration: "75 min", price: 6800 },
-        { name: "Deep Tissue", duration: "60 min", price: 5500 },
-        { name: "Foot Reflexology", duration: "45 min", price: 3800 },
-        { name: "Couple Spa Ritual", duration: "90 min", price: 13500 },
-      ],
-    },
+    pricing: SR_PRICING,
     contact: {
       eyebrow: "Kontakt",
       title: "Zakažite svoj trenutak tišine",
@@ -122,7 +363,6 @@ export const translations = {
     nav: {
       home: "Home",
       about: "About",
-      massages: "Massages",
       pricing: "Pricing",
       contact: "Contact",
       book: "Book Now",
@@ -144,61 +384,8 @@ export const translations = {
         "Every massage is tailored to you — to your energy, your level of tension, and the needs of your body. Through a combination of careful pressure, passive stretching, and natural oils, the treatment supports your flexibility, circulation, and inner peace. The goal is simple: that you leave lighter, calmer, and reconnected with yourself.",
         "If you are looking for a Thai massage in Belgrade that is more than relaxation, you have come to the right place.",
       ],
-      stats: [
-        { value: "10+", label: "years of experience" },
-        { value: "100%", label: "authentic Thai" },
-        { value: "5★", label: "guest rating" },
-      ],
     },
-    massages: {
-      eyebrow: "Our massages",
-      title: "Treatments rooted in tradition",
-      subtitle:
-        "Each ritual is performed using methods passed down by Thai masters across generations.",
-      items: [
-        {
-          name: "Traditional Thai Massage",
-          desc: "Classic dry massage with passive stretching and acupressure along the body's energy lines.",
-        },
-        {
-          name: "Aroma Oil Massage",
-          desc: "Warm aromatic oils, gentle strokes and deep muscle relaxation — an escape for the senses.",
-        },
-        {
-          name: "Thai Herbal Compress",
-          desc: "Warm pouches of Thai medicinal herbs that release tension and stimulate circulation.",
-        },
-        {
-          name: "Deep Tissue & Sport",
-          desc: "An intense treatment for tense muscles — ideal for athletes and sedentary lifestyles.",
-        },
-        {
-          name: "Foot Reflexology",
-          desc: "Reflexology pressure on key foot points that brings balance to the whole body.",
-        },
-        {
-          name: "Couple Spa Ritual",
-          desc: "A private ritual for two — candles, oils, silence and shared stillness.",
-        },
-      ],
-    },
-    pricing: {
-      eyebrow: "Pricing",
-      title: "Choose the ritual that suits you",
-      subtitle: "Prices are indicative and will be confirmed at booking.",
-      currency: "RSD",
-      note: "* Final price list will be added later. All prices subject to change.",
-      rows: [
-        { name: "Traditional Thai", duration: "60 min", price: 4500 },
-        { name: "Traditional Thai", duration: "90 min", price: 6300 },
-        { name: "Aroma Oil Massage", duration: "60 min", price: 5200 },
-        { name: "Aroma Oil Massage", duration: "90 min", price: 7000 },
-        { name: "Thai Herbal Compress", duration: "75 min", price: 6800 },
-        { name: "Deep Tissue", duration: "60 min", price: 5500 },
-        { name: "Foot Reflexology", duration: "45 min", price: 3800 },
-        { name: "Couple Spa Ritual", duration: "90 min", price: 13500 },
-      ],
-    },
+    pricing: EN_PRICING,
     contact: {
       eyebrow: "Contact",
       title: "Reserve your moment of stillness",
@@ -236,7 +423,6 @@ export const translations = {
     nav: {
       home: "Главная",
       about: "О нас",
-      massages: "Массажи",
       pricing: "Прайс-лист",
       contact: "Контакты",
       book: "Записаться",
@@ -258,61 +444,8 @@ export const translations = {
         "Каждый массаж адаптирован к вам — вашей энергии, степени напряжения и потребностям вашего тела. Сочетание мягкого давления, пассивной растяжки и натуральных масел поддерживает гибкость, кровообращение и внутренний покой. Цель проста: вы уходите лёгкими, спокойными и в гармонии с собой.",
         "Если вы ищете тайский массаж в Белграде, который больше чем просто расслабление — вы пришли в нужное место.",
       ],
-      stats: [
-        { value: "10+", label: "лет опыта" },
-        { value: "100%", label: "аутентично" },
-        { value: "5★", label: "оценка гостей" },
-      ],
     },
-    massages: {
-      eyebrow: "Наши массажи",
-      title: "Процедуры в духе традиции",
-      subtitle:
-        "Каждый ритуал выполняется по методикам, передаваемым тайскими мастерами из поколения в поколение.",
-      items: [
-        {
-          name: "Традиционный тайский массаж",
-          desc: "Классический сухой массаж с пассивным растяжением и акупрессурой по энергетическим линиям тела.",
-        },
-        {
-          name: "Аромамасляный массаж",
-          desc: "Тёплые ароматические масла, мягкие движения и глубокое расслабление мышц — побег для чувств.",
-        },
-        {
-          name: "Тайский травяной компресс",
-          desc: "Тёплые мешочки с тайскими лекарственными травами снимают напряжение и улучшают кровообращение.",
-        },
-        {
-          name: "Глубокий и спортивный массаж",
-          desc: "Интенсивная процедура для напряжённых мышц — идеально для спортсменов и сидячего образа жизни.",
-        },
-        {
-          name: "Рефлексология стоп",
-          desc: "Рефлексотерапия ключевых точек стоп, гармонизирующая весь организм.",
-        },
-        {
-          name: "Парный СПА-ритуал",
-          desc: "Приватный ритуал для двоих — свечи, масла, тишина и общее уединение.",
-        },
-      ],
-    },
-    pricing: {
-      eyebrow: "Цены",
-      title: "Выберите подходящий ритуал",
-      subtitle: "Цены ориентировочные и подтверждаются при бронировании.",
-      currency: "RSD",
-      note: "* Окончательный прайс-лист будет добавлен позже. Цены могут изменяться.",
-      rows: [
-        { name: "Традиционный тайский", duration: "60 мин", price: 4500 },
-        { name: "Традиционный тайский", duration: "90 мин", price: 6300 },
-        { name: "Аромамасляный массаж", duration: "60 мин", price: 5200 },
-        { name: "Аромамасляный массаж", duration: "90 мин", price: 7000 },
-        { name: "Травяной компресс", duration: "75 мин", price: 6800 },
-        { name: "Глубокий массаж", duration: "60 мин", price: 5500 },
-        { name: "Рефлексология стоп", duration: "45 мин", price: 3800 },
-        { name: "Парный ритуал", duration: "90 мин", price: 13500 },
-      ],
-    },
+    pricing: RU_PRICING,
     contact: {
       eyebrow: "Контакты",
       title: "Забронируйте свой миг тишины",
@@ -350,7 +483,6 @@ export const translations = {
     nav: {
       home: "首页",
       about: "关于我们",
-      massages: "按摩",
       pricing: "价目表",
       contact: "联系",
       book: "立即预约",
@@ -372,60 +504,8 @@ export const translations = {
         "每一次按摩都为您量身定制 —— 依据您的能量、紧张程度和身体所需。结合细致的按压、被动伸展与天然精油，这一疗程能促进您的柔韧度、循环与内在平静。我们的目标很简单：让您轻盈、安宁、与自我重新连接。",
         "如果您寻找的不只是放松，而是真正的泰式按摩体验，您来对地方了。",
       ],
-      stats: [
-        { value: "10+", label: "年经验" },
-        { value: "100%", label: "正宗泰式" },
-        { value: "5★", label: "顾客评分" },
-      ],
     },
-    massages: {
-      eyebrow: "我们的疗程",
-      title: "扎根于传统的疗程",
-      subtitle: "每一项仪式都遵循代代相传的泰国大师手法。",
-      items: [
-        {
-          name: "传统泰式按摩",
-          desc: "经典干式按摩，沿身体能量线进行被动伸展与穴位按压。",
-        },
-        {
-          name: "芳香精油按摩",
-          desc: "温暖的芳香精油、轻柔的手法与深层肌肉放松 —— 感官的逃逸。",
-        },
-        {
-          name: "泰式草药热敷",
-          desc: "温热的泰式草药包，舒缓紧绷并促进循环。",
-        },
-        {
-          name: "深层组织与运动按摩",
-          desc: "针对紧绷肌肉的强力疗程，适合运动者与久坐人士。",
-        },
-        {
-          name: "足部反射疗法",
-          desc: "刺激足部关键反射点，为全身带来平衡。",
-        },
-        {
-          name: "双人SPA仪式",
-          desc: "为两位准备的私密仪式 —— 烛光、精油、宁静与共同的放下。",
-        },
-      ],
-    },
-    pricing: {
-      eyebrow: "价目表",
-      title: "选择属于您的仪式",
-      subtitle: "价格仅供参考，预订时将予以确认。",
-      currency: "RSD",
-      note: "* 最终价目将稍后补充。所有价格可能调整。",
-      rows: [
-        { name: "传统泰式", duration: "60 分钟", price: 4500 },
-        { name: "传统泰式", duration: "90 分钟", price: 6300 },
-        { name: "芳香精油", duration: "60 分钟", price: 5200 },
-        { name: "芳香精油", duration: "90 分钟", price: 7000 },
-        { name: "泰式草药热敷", duration: "75 分钟", price: 6800 },
-        { name: "深层组织", duration: "60 分钟", price: 5500 },
-        { name: "足部反射", duration: "45 分钟", price: 3800 },
-        { name: "双人仪式", duration: "90 分钟", price: 13500 },
-      ],
-    },
+    pricing: ZH_PRICING,
     contact: {
       eyebrow: "联系",
       title: "预约您的宁静时刻",

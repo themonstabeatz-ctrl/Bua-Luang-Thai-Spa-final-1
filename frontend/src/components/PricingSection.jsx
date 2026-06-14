@@ -1,5 +1,85 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLang } from "@/i18n/LanguageContext";
+import { ChevronDown } from "lucide-react";
+
+const formatPrice = (n) => n.toLocaleString("sr-RS");
+
+const PricingRow = ({ row, idx, t }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <li
+      data-testid={`pricing-row-${idx}`}
+      className="border-b border-[rgba(161,122,53,0.18)] last:border-b-0 py-6"
+    >
+      <div className="flex items-start gap-3 sm:gap-5">
+        {/* Left: name + subname + toggle */}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h3
+              className="text-lg sm:text-2xl font-serif text-[#3a312a] leading-tight"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              {row.name}
+            </h3>
+            <span className="text-[11px] uppercase tracking-[0.28em] text-[#a17a35]/75">
+              {row.subname}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            data-testid={`pricing-toggle-${idx}`}
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            className="mt-2 inline-flex items-center gap-1.5 text-xs sm:text-sm tracking-[0.16em] uppercase text-[#a17a35] hover:text-[#7a5a22] transition-colors font-medium"
+          >
+            {open ? t.pricing.hideDescription : t.pricing.showDescription}
+            <ChevronDown
+              className={`h-3.5 w-3.5 transition-transform duration-300 ${
+                open ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Right: durations + prices stacked */}
+        <div className="flex flex-col items-end gap-1.5 text-right shrink-0 pt-1">
+          {row.options.map((opt, i) => (
+            <div key={i} className="flex items-baseline gap-3 whitespace-nowrap">
+              <span className="text-[10px] sm:text-xs uppercase tracking-[0.24em] text-[#a17a35]/90 font-medium tabular-nums">
+                {opt.duration} MIN
+              </span>
+              <span className="hidden sm:inline-block w-6 self-end mb-[6px] border-b border-dotted border-[rgba(161,122,53,0.45)]" />
+              <span>
+                <span className="text-base sm:text-xl font-semibold bg-gradient-to-r from-[#a17a35] to-[#7a5a22] bg-clip-text text-transparent tabular-nums">
+                  {formatPrice(opt.price)}
+                </span>
+                <span className="ml-1 text-[10px] tracking-[0.18em] text-[#a17a35]/85 font-medium">
+                  {t.pricing.currency}
+                </span>
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Description toggle */}
+      <div
+        data-testid={`pricing-description-${idx}`}
+        className="grid transition-all duration-300 ease-out"
+        style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
+      >
+        <div className="overflow-hidden">
+          <div className="mt-4 rounded-xl bg-[rgba(161,122,53,0.07)] border border-[rgba(161,122,53,0.20)] px-5 py-4">
+            <p className="text-sm sm:text-[15px] text-[#3a312a]/85 leading-relaxed font-light italic">
+              {row.description}
+            </p>
+          </div>
+        </div>
+      </div>
+    </li>
+  );
+};
 
 export const PricingSection = () => {
   const { t } = useLang();
@@ -28,48 +108,15 @@ export const PricingSection = () => {
           </p>
         </div>
 
-        <ul
-          data-testid="pricing-list"
-          className="divide-y divide-[rgba(161,122,53,0.18)]"
-        >
+        <ul data-testid="pricing-list">
           {t.pricing.rows.map((row, idx) => (
-            <li
-              key={idx}
-              data-testid={`pricing-row-${idx}`}
-              className="group flex items-baseline gap-3 sm:gap-5 py-5 hover:bg-[rgba(161,122,53,0.05)] -mx-3 sm:-mx-5 px-3 sm:px-5 rounded-lg transition-colors duration-300"
-            >
-              <span
-                className="text-base sm:text-xl font-serif text-[#3a312a] leading-snug whitespace-nowrap"
-                style={{ fontFamily: "'Cormorant Garamond', serif" }}
-              >
-                {row.name}
-              </span>
-              <span
-                aria-hidden
-                className="hidden sm:block flex-1 self-end mb-[10px] border-b border-dotted border-[rgba(161,122,53,0.45)]"
-              />
-              <span className="text-[10px] sm:text-xs uppercase tracking-[0.26em] text-[#a17a35]/90 font-medium whitespace-nowrap">
-                {row.duration}
-              </span>
-              <span
-                aria-hidden
-                className="hidden sm:block w-10 self-end mb-[10px] border-b border-dotted border-[rgba(161,122,53,0.45)]"
-              />
-              <span className="whitespace-nowrap text-right ml-auto sm:ml-0">
-                <span className="text-lg sm:text-2xl font-semibold bg-gradient-to-r from-[#a17a35] to-[#7a5a22] bg-clip-text text-transparent">
-                  {row.price.toLocaleString("sr-RS")}
-                </span>
-                <span className="ml-1.5 text-[10px] sm:text-xs tracking-[0.2em] text-[#a17a35]/90 font-medium">
-                  {t.pricing.currency}
-                </span>
-              </span>
-            </li>
+            <PricingRow key={idx} row={row} idx={idx} t={t} />
           ))}
         </ul>
 
         <p
           data-testid="pricing-note"
-          className="mt-6 text-center text-xs text-[#7a6e5e] italic"
+          className="mt-8 text-center text-xs text-[#7a6e5e] italic"
         >
           {t.pricing.note}
         </p>

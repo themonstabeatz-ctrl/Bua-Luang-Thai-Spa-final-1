@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { LanguageProvider } from "@/i18n/LanguageContext";
@@ -11,36 +11,73 @@ import { Footer } from "@/components/Footer";
 import { ASSETS } from "@/constants/assets";
 import "@/App.css";
 
+const BuddhaShowcase = () => {
+  const sectionRef = useRef(null);
+  const [opacity, setOpacity] = useState(0);
+
+  useEffect(() => {
+    const handler = () => {
+      const el = sectionRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      // 0 when section is far from center, 1 when its center is the viewport center
+      const sectionCenter = rect.top + rect.height / 2;
+      const viewportCenter = vh / 2;
+      const distance = Math.abs(sectionCenter - viewportCenter);
+      const maxDistance = vh / 2 + rect.height / 2;
+      const t = Math.max(0, 1 - distance / maxDistance);
+      // ease-in-out curve so fade feels smooth
+      const eased = t * t * (3 - 2 * t);
+      setOpacity(eased);
+    };
+    handler();
+    window.addEventListener("scroll", handler, { passive: true });
+    window.addEventListener("resize", handler);
+    return () => {
+      window.removeEventListener("scroll", handler);
+      window.removeEventListener("resize", handler);
+    };
+  }, []);
+
+  return (
+    <section
+      ref={sectionRef}
+      data-testid="buddha-showcase"
+      className="relative w-full overflow-hidden"
+      style={{
+        backgroundImage: `url(${ASSETS.buddhaBg})`,
+        backgroundAttachment: "fixed",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "95vh",
+      }}
+    >
+      {/* Floating, transparent logo with scroll fade */}
+      <img
+        src={ASSETS.logo}
+        alt="Bua Luang Thai Spa"
+        data-testid="buddha-logo"
+        className="pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[58vh] w-auto max-w-[90vw]"
+        style={{
+          mixBlendMode: "screen",
+          opacity,
+          transition: "opacity 120ms linear",
+          filter: "drop-shadow(0 10px 40px rgba(0,0,0,0.55))",
+        }}
+      />
+    </section>
+  );
+};
+
 const Home = () => {
   return (
     <div className="relative">
       <Navigation />
-
-      {/* Hero — fixed candle-lit spa scene, no filter */}
       <Hero />
-
-      {/* About — full-width solid cream. Slides up over fixed hero (parallax). */}
       <AboutSection />
-
-      {/* Buddha reveal — fixed Buddha image visible immediately below About,
-         while user scrolls past it, before Pricing slides up over it. */}
-      <section
-        data-testid="buddha-showcase"
-        aria-hidden
-        className="relative w-full"
-        style={{
-          backgroundImage: `url(${ASSETS.buddhaBg})`,
-          backgroundAttachment: "fixed",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          minHeight: "85vh",
-        }}
-      />
-
-      {/* Pricing — full-width solid cream. Slides up over the Buddha image. */}
+      <BuddhaShowcase />
       <PricingSection />
-
-      {/* Contact + Footer — solid cream */}
       <ContactSection />
       <Footer />
     </div>
