@@ -30,15 +30,10 @@ export const translations = {
       eyebrow: "O nama",
       title: "BUA LUANG THAI SPA",
       paragraphs: [
-        "Tajlandska masaža Beograd — Dobrodošli u prostor posvećen vašem telu, vašem miru i vašem balansu.",
+        "Tajlandska masaža Beograd – Dobrodošli u prostor posvećen vašem telu, vašem miru i vašem balansu.",
         "Naš salon u srcu Beograda nudi autentičnu tajlandsku masažu koju s ljubavlju i znanjem izvode terapeutkinje sa samog izvora tajlandske tradicije. Njihovo višegodišnje iskustvo i posvećenost donose vam tretmane koji nisu samo relaksacija, već duboka nega tela i duha.",
-        "Svaka masaža prilagođena je vama — vašoj energiji, stepenu napetosti i potrebama tela. Kombinacijom pažljivog pritiska, pasivnog istezanja i prirodnih ulja, tretman deluje na vašu fleksibilnost, cirkulaciju i unutrašnji mir. Cilj je jednostavan: da izađete lakši, smireniji i povezani sa sobom.",
+        "Svaka masaža prilagođena je vama – vašoj energiji, stepenu napetosti i potrebama tela. Kombinacijom pažljivog pritiska, pasivnog istezanja i prirodnih ulja, tretman deluje na vašu fleksibilnost, cirkulaciju i unutrašnji mir. Cilj je jednostavan: da izađete lakši, smireniji i povezani sa sobom.",
         "Ako tražite tajlandsku masažu u Beogradu koja je više od opuštanja, došli ste na pravo mesto.",
-      ],
-      stats: [
-        { value: "10+", label: "godina iskustva" },
-        { value: "100%", label: "autentično tajlandski" },
-        { value: "5★", label: "ocena gostiju" },
       ],
     },
     massages: {

@@ -1,6 +1,6 @@
 .App {
   min-height: 100vh;
-  background: #0a0705;
+  background: #fdfaf3;
 }
 
 html {
@@ -8,30 +8,31 @@ html {
 }
 
 body {
-  background: #0a0705;
-  color: #ffffff;
+  background: #fdfaf3;
+  color: #2b2620;
   font-family: "Manrope", "Inter", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: rgba(196, 154, 76, 0.35);
-  color: #f4e4bf;
+  background: rgba(161, 122, 53, 0.22);
+  color: #5a4017;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0705;
+  background: #f5ecdb;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #a17a35, #c49a4c);
+  background: linear-gradient(180deg, #c9a45a, #a17a35);
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #c49a4c, #e8c98a);
+  background: linear-gradient(180deg, #a17a35, #7a5a22);
 }
 
 @keyframes bounce-slow {

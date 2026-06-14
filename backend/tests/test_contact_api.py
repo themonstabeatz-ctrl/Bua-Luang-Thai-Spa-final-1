@@ -40,8 +40,9 @@ class TestContactCreate:
         assert data["email"] == "test_sr@example.com"
         assert data["language"] == "sr"
         assert isinstance(data["email_sent"], bool)
-        if not data["email_sent"]:
-            assert data.get("email_error")
+        # Email is sent via BackgroundTasks, so on the immediate response email_sent
+        # will typically be False and email_error None. SMTP outcome is written
+        # to the DB record by the background task. Accept either state here.
         assert isinstance(data.get("id"), str) and len(data["id"]) > 0
         assert data.get("created_at")
 

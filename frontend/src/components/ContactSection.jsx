@@ -62,6 +62,9 @@ export const ContactSection = () => {
     },
   ];
 
+  const inputCls =
+    "w-full bg-transparent border-b border-[rgba(161,122,53,0.35)] focus:border-[#a17a35] outline-none py-2.5 text-[#2b2620] placeholder:text-[#a09686] transition-colors";
+
   return (
     <section
       id="contact"
@@ -70,19 +73,19 @@ export const ContactSection = () => {
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14">
         <div className="text-center mb-16">
-          <div className="text-[11px] tracking-[0.42em] uppercase text-[#c49a4c] mb-6 inline-flex items-center gap-3">
-            <span className="h-px w-10 bg-[#c49a4c]" />
+          <div className="text-[11px] tracking-[0.42em] uppercase text-[#a17a35] mb-6 inline-flex items-center gap-3">
+            <span className="h-px w-10 bg-[#a17a35]" />
             {t.contact.eyebrow}
-            <span className="h-px w-10 bg-[#c49a4c]" />
+            <span className="h-px w-10 bg-[#a17a35]" />
           </div>
           <h2
             data-testid="contact-title"
-            className="font-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.05] bg-gradient-to-br from-[#f4e4bf] via-[#e8c98a] to-[#a17a35] bg-clip-text text-transparent"
+            className="font-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.05] bg-gradient-to-br from-[#c9a45a] via-[#a17a35] to-[#7a5a22] bg-clip-text text-transparent"
             style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', serif" }}
           >
             {t.contact.title}
           </h2>
-          <p className="mt-5 text-white/65 max-w-xl mx-auto font-light">
+          <p className="mt-5 text-[#5a4f44] max-w-xl mx-auto font-light">
             {t.contact.subtitle}
           </p>
         </div>
@@ -93,10 +96,10 @@ export const ContactSection = () => {
             <form
               data-testid="contact-form"
               onSubmit={onSubmit}
-              className="rounded-2xl border border-[rgba(196,154,76,0.25)] bg-[rgba(15,10,7,0.7)] backdrop-blur-sm p-7 sm:p-9 space-y-5"
+              className="rounded-2xl border border-[rgba(161,122,53,0.22)] bg-white/85 backdrop-blur-sm p-7 sm:p-9 space-y-5 shadow-[0_18px_60px_rgba(80,55,18,0.08)]"
             >
               <div>
-                <label className="block text-[11px] tracking-[0.3em] uppercase text-[#c49a4c] mb-2">
+                <label className="block text-[11px] tracking-[0.3em] uppercase text-[#a17a35] mb-2">
                   {t.contact.form.name}
                 </label>
                 <input
@@ -105,12 +108,12 @@ export const ContactSection = () => {
                   name="name"
                   value={form.name}
                   onChange={onChange}
-                  className="w-full bg-transparent border-b border-[rgba(196,154,76,0.4)] focus:border-[#e8c98a] outline-none py-2.5 text-white placeholder:text-white/30 transition-colors"
+                  className={inputCls}
                 />
               </div>
               <div className="grid sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-[11px] tracking-[0.3em] uppercase text-[#c49a4c] mb-2">
+                  <label className="block text-[11px] tracking-[0.3em] uppercase text-[#a17a35] mb-2">
                     {t.contact.form.email}
                   </label>
                   <input
@@ -120,11 +123,11 @@ export const ContactSection = () => {
                     name="email"
                     value={form.email}
                     onChange={onChange}
-                    className="w-full bg-transparent border-b border-[rgba(196,154,76,0.4)] focus:border-[#e8c98a] outline-none py-2.5 text-white placeholder:text-white/30 transition-colors"
+                    className={inputCls}
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] tracking-[0.3em] uppercase text-[#c49a4c] mb-2">
+                  <label className="block text-[11px] tracking-[0.3em] uppercase text-[#a17a35] mb-2">
                     {t.contact.form.phone}
                   </label>
                   <input
@@ -132,12 +135,12 @@ export const ContactSection = () => {
                     name="phone"
                     value={form.phone}
                     onChange={onChange}
-                    className="w-full bg-transparent border-b border-[rgba(196,154,76,0.4)] focus:border-[#e8c98a] outline-none py-2.5 text-white placeholder:text-white/30 transition-colors"
+                    className={inputCls}
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-[11px] tracking-[0.3em] uppercase text-[#c49a4c] mb-2">
+                <label className="block text-[11px] tracking-[0.3em] uppercase text-[#a17a35] mb-2">
                   {t.contact.form.message}
                 </label>
                 <textarea
@@ -147,7 +150,7 @@ export const ContactSection = () => {
                   rows={5}
                   value={form.message}
                   onChange={onChange}
-                  className="w-full bg-transparent border-b border-[rgba(196,154,76,0.4)] focus:border-[#e8c98a] outline-none py-2.5 text-white placeholder:text-white/30 transition-colors resize-none"
+                  className={`${inputCls} resize-none`}
                 />
               </div>
 
@@ -155,7 +158,7 @@ export const ContactSection = () => {
                 type="submit"
                 data-testid="contact-submit"
                 disabled={submitting}
-                className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full text-sm tracking-[0.22em] uppercase font-medium bg-gradient-to-r from-[#a17a35] via-[#d4ad5e] to-[#a17a35] text-[#0a0705] hover:shadow-[0_0_36px_rgba(212,173,94,0.55)] transition-shadow duration-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="group inline-flex items-center justify-center gap-3 px-8 py-4 rounded-full text-sm tracking-[0.22em] uppercase font-medium bg-gradient-to-r from-[#a17a35] via-[#d4ad5e] to-[#a17a35] text-white hover:shadow-[0_12px_36px_rgba(161,122,53,0.45)] transition-shadow duration-500 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {submitting ? t.contact.form.sending : t.contact.form.submit}
                 <Send className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -166,14 +169,14 @@ export const ContactSection = () => {
               {infoItems.map(({ Icon, label, value, href, testid }) => {
                 const inner = (
                   <div className="flex items-start gap-4">
-                    <div className="h-10 w-10 flex-shrink-0 rounded-full bg-[rgba(196,154,76,0.12)] border border-[rgba(196,154,76,0.35)] flex items-center justify-center text-[#e8c98a]">
+                    <div className="h-10 w-10 flex-shrink-0 rounded-full bg-[rgba(161,122,53,0.10)] border border-[rgba(161,122,53,0.30)] flex items-center justify-center text-[#a17a35]">
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-[10px] uppercase tracking-[0.3em] text-[#c49a4c]">
+                      <div className="text-[10px] uppercase tracking-[0.3em] text-[#a17a35]">
                         {label}
                       </div>
-                      <div className="mt-1 text-sm text-white/85 leading-snug break-words">
+                      <div className="mt-1 text-sm text-[#3a312a] leading-snug break-words">
                         {value}
                       </div>
                     </div>
@@ -184,7 +187,7 @@ export const ContactSection = () => {
                     key={testid}
                     data-testid={testid}
                     href={href}
-                    className="block p-4 rounded-xl border border-[rgba(196,154,76,0.18)] bg-[rgba(20,13,9,0.5)] hover:border-[#c49a4c] transition-colors"
+                    className="block p-4 rounded-xl border border-[rgba(161,122,53,0.18)] bg-white/70 hover:border-[#a17a35] hover:shadow-[0_8px_24px_rgba(161,122,53,0.18)] transition-all"
                   >
                     {inner}
                   </a>
@@ -192,7 +195,7 @@ export const ContactSection = () => {
                   <div
                     key={testid}
                     data-testid={testid}
-                    className="p-4 rounded-xl border border-[rgba(196,154,76,0.18)] bg-[rgba(20,13,9,0.5)]"
+                    className="p-4 rounded-xl border border-[rgba(161,122,53,0.18)] bg-white/70"
                   >
                     {inner}
                   </div>
@@ -204,7 +207,7 @@ export const ContactSection = () => {
           {/* RIGHT: map */}
           <div
             data-testid="contact-map"
-            className="rounded-2xl overflow-hidden border border-[rgba(196,154,76,0.25)] bg-[rgba(20,13,9,0.6)] min-h-[480px] lg:min-h-full relative"
+            className="rounded-2xl overflow-hidden border border-[rgba(161,122,53,0.25)] bg-white min-h-[480px] lg:min-h-full relative shadow-[0_18px_60px_rgba(80,55,18,0.08)]"
           >
             <iframe
               title="Belgrade map"
@@ -212,13 +215,12 @@ export const ContactSection = () => {
               className="w-full h-full min-h-[480px]"
               style={{
                 border: 0,
-                filter: "invert(0.92) hue-rotate(180deg) saturate(0.65) brightness(0.85) contrast(1.05)",
+                filter: "saturate(0.78) sepia(0.10) hue-rotate(-10deg) brightness(1.02)",
               }}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[rgba(10,7,5,0.18)] via-transparent to-[rgba(10,7,5,0.45)] mix-blend-multiply" />
-            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-[rgba(196,154,76,0.18)] rounded-2xl" />
+            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-[rgba(161,122,53,0.18)] rounded-2xl" />
           </div>
         </div>
       </div>

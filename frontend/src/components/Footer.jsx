@@ -9,30 +9,33 @@ export const Footer = () => {
   return (
     <footer
       data-testid="footer"
-      className="relative pt-20 pb-10 border-t border-[rgba(196,154,76,0.18)]"
+      className="relative pt-20 pb-10 border-t border-[rgba(161,122,53,0.22)] bg-gradient-to-b from-[#fbf3e3] to-[#f7ead0]"
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14 grid md:grid-cols-3 gap-12">
         <div>
-          <img
-            src={ASSETS.logo}
-            alt="Bua Luang Thai Spa"
-            className="h-20 w-auto"
-          />
-          <p className="mt-4 text-sm text-white/55 leading-relaxed max-w-xs">
+          {/* Logo on light background — wrap in a soft dark card so the dark-on-dark logo shows clearly */}
+          <div className="inline-block rounded-2xl bg-[#0a0705] px-6 py-5">
+            <img
+              src={ASSETS.logo}
+              alt="Bua Luang Thai Spa"
+              className="h-20 w-auto"
+            />
+          </div>
+          <p className="mt-4 text-sm text-[#5a4f44] leading-relaxed max-w-xs">
             {t.footer.tagline}
           </p>
         </div>
 
         <div>
-          <div className="text-[11px] tracking-[0.32em] uppercase text-[#c49a4c] mb-5">
+          <div className="text-[11px] tracking-[0.32em] uppercase text-[#a17a35] mb-5">
             {t.footer.quickLinks}
           </div>
-          <ul className="space-y-2.5 text-sm text-white/75">
-            {["home", "about", "massages", "pricing", "contact"].map((k) => (
+          <ul className="space-y-2.5 text-sm text-[#3a312a]">
+            {["home", "about", "pricing", "contact"].map((k) => (
               <li key={k}>
                 <a
                   href={`#${k}`}
-                  className="hover:text-[#e8c98a] transition-colors"
+                  className="hover:text-[#a17a35] transition-colors"
                   data-testid={`footer-link-${k}`}
                 >
                   {t.nav[k]}
@@ -43,41 +46,41 @@ export const Footer = () => {
         </div>
 
         <div>
-          <div className="text-[11px] tracking-[0.32em] uppercase text-[#c49a4c] mb-5">
+          <div className="text-[11px] tracking-[0.32em] uppercase text-[#a17a35] mb-5">
             {t.footer.followUs}
           </div>
-          <div className="space-y-3 text-sm text-white/75">
+          <div className="space-y-3 text-sm text-[#3a312a]">
             <a
               href="mailto:bualuangthailandspa@gmail.com"
-              className="flex items-center gap-3 hover:text-[#e8c98a] transition-colors"
+              className="flex items-center gap-3 hover:text-[#a17a35] transition-colors"
               data-testid="footer-email"
             >
-              <Mail className="h-4 w-4 text-[#c49a4c]" />
+              <Mail className="h-4 w-4 text-[#a17a35]" />
               bualuangthailandspa@gmail.com
             </a>
             <a
               href="tel:+38162625500"
-              className="flex items-center gap-3 hover:text-[#e8c98a] transition-colors"
+              className="flex items-center gap-3 hover:text-[#a17a35] transition-colors"
               data-testid="footer-phone"
             >
-              <Phone className="h-4 w-4 text-[#c49a4c]" />
+              <Phone className="h-4 w-4 text-[#a17a35]" />
               +381 62 625 500
             </a>
             <a
               href="https://instagram.com/bualuang_thai_spa"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 hover:text-[#e8c98a] transition-colors"
+              className="flex items-center gap-3 hover:text-[#a17a35] transition-colors"
               data-testid="footer-instagram"
             >
-              <Instagram className="h-4 w-4 text-[#c49a4c]" />
+              <Instagram className="h-4 w-4 text-[#a17a35]" />
               @bualuang_thai_spa
             </a>
           </div>
         </div>
       </div>
 
-      <div className="mt-14 pt-6 border-t border-[rgba(196,154,76,0.12)] text-center text-xs text-white/40 tracking-wider">
+      <div className="mt-14 pt-6 border-t border-[rgba(161,122,53,0.18)] text-center text-xs text-[#7a6e5e] tracking-wider">
         © {year} Bua Luang Thai Spa. {t.footer.rights}
       </div>
     </footer>

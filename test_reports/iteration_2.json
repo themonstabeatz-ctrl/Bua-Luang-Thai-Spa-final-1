@@ -1,0 +1,35 @@
+{
+  "summary": "Iteration 2 full re-test of Bua Luang Thai Spa landing page after the dark-to-light visual overhaul and Massages section removal. All 9 backend pytest cases pass. All 11 frontend UI assertions pass: light cream body bg (rgb(253,250,243)), transparent + white-text nav at top switching to blurred white + dark text after 30px scroll, 4 nav links (Početna/O nama/Cenovnik/Kontakt) with NO 'Masaže' link, AboutSection with title 'BUA LUANG THAI SPA' + 4 paragraphs + no statistics, MassagesSection completely absent (no data-testid='massages-section', no 'Tretmani inspirisani tradicijom' text), pricing list with 8 rows + dotted gold leaders + RSD currency, language switcher correctly toggles Početna ↔ Home ↔ Главная ↔ 首页 for SR/EN/RU/ZH, and contact form submission produces a sonner success toast 'Hvala! Poslali smo vam potvrdu na email.' Backend POST /api/contact now uses BackgroundTasks → returns immediately, SMTP outcome written async to DB record (acceptable per spec; sandbox SMTP still 535 from Gmail).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/contact (background SMTP task)", "issue": "Confirmation email still fails with 535 BadCredentials from Gmail in this sandbox (verified in previous iteration). API now correctly returns immediately and the background task updates the DB record. This is acceptable per the agent-to-agent context note."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_contact_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "/app/frontend/src/i18n/translations.js still carries the `massages` section copy (eyebrow/title/items) for SR/EN/RU/ZH even though the MassagesSection component is no longer imported. Not a bug, just dead translation data — consider pruning for tidier i18n payloads.",
+    "Navigation translation key `t.nav.massages` is still defined in all locales though the link was removed. Same as above — dead key, no functional impact.",
+    "GET /api/contact still has no pagination (returns up to 500). Fine for MVP, flag for scale.",
+    "Background SMTP task swallows exceptions into the DB record (good), but there is no retry policy. Acceptable for MVP — flag if reliable delivery becomes a requirement."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_contact_api.py (relaxed email_error assertion because POST now returns before background SMTP task runs)"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "none required",
+  "seed_data_creation": "Added a few new TEST_ records via the FE form and pytest (TEST_FE Iter2, TEST_Sr User, TEST_EN/RU/ZH, TEST_ListCheck) to contact_messages collection.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend uses BackgroundTasks for SMTP send; POST /api/contact returns immediately with email_sent=false/email_error=null and the background task later writes outcome. Do NOT assert email_error is non-null on the immediate POST response. Test data has TEST_ prefix. data-testids are stable: main-nav, nav-logo, nav-link-{home,about,pricing,contact}, language-switcher, lang-option-{sr,en,ru,zh}, hero-section, hero-title, about-section, about-title, about-paragraph-0..3, pricing-section, pricing-list, pricing-row-0..7, contact-form, contact-submit, footer. Nav becomes scrolled state after window.scrollY > 30.",
+  "rca_of_issue": "The only failing backend test (test_create_contact_sr) was due to a behavior change introduced this iteration: SMTP send moved into FastAPI BackgroundTasks. The old assertion required email_error to be populated whenever email_sent=False; now the immediate POST response returns email_sent=False with email_error=None because the background task hasn't run yet. Fix: relaxed the assertion to only verify shape (bool field present) — actual SMTP outcome is persisted by the background task to the DB record and can be observed via GET /api/contact a moment later."
+}

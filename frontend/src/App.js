@@ -5,11 +5,9 @@ import { LanguageProvider } from "@/i18n/LanguageContext";
 import { Navigation } from "@/components/Navigation";
 import { Hero } from "@/components/Hero";
 import { AboutSection } from "@/components/AboutSection";
-import { MassagesSection } from "@/components/MassagesSection";
 import { PricingSection } from "@/components/PricingSection";
 import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
-import { ASSETS } from "@/constants/assets";
 import "@/App.css";
 
 const Home = () => {
@@ -17,23 +15,20 @@ const Home = () => {
     <div className="relative">
       <Navigation />
       <Hero />
-      {/* Content slabs that slide over the fixed hero */}
+      {/* Bright content slabs that slide up over the fixed hero */}
       <div
         data-testid="content-stack"
-        className="relative z-[2] text-white"
+        className="relative z-[2]"
         style={{
-          backgroundColor: "#0a0705",
-          backgroundImage: `linear-gradient(180deg, rgba(10,7,5,0.97) 0%, rgba(10,7,5,0.985) 100%), url(${ASSETS.patternBg})`,
-          backgroundRepeat: "repeat",
-          backgroundSize: "640px auto",
+          background:
+            "linear-gradient(180deg, #fbf6ec 0%, #fdfaf3 35%, #ffffff 100%)",
+          color: "#2b2620",
         }}
       >
         <AboutSection />
-        <div className="h-px max-w-5xl mx-auto bg-gradient-to-r from-transparent via-[rgba(196,154,76,0.35)] to-transparent" />
-        <MassagesSection />
-        <div className="h-px max-w-5xl mx-auto bg-gradient-to-r from-transparent via-[rgba(196,154,76,0.35)] to-transparent" />
+        <div className="h-px max-w-5xl mx-auto bg-gradient-to-r from-transparent via-[rgba(161,122,53,0.35)] to-transparent" />
         <PricingSection />
-        <div className="h-px max-w-5xl mx-auto bg-gradient-to-r from-transparent via-[rgba(196,154,76,0.35)] to-transparent" />
+        <div className="h-px max-w-5xl mx-auto bg-gradient-to-r from-transparent via-[rgba(161,122,53,0.35)] to-transparent" />
         <ContactSection />
         <Footer />
       </div>
@@ -44,20 +39,21 @@ const Home = () => {
 function App() {
   return (
     <LanguageProvider>
-      <div className="App min-h-screen bg-[#0a0705] text-white">
+      <div className="App min-h-screen bg-[#fdfaf3] text-[#2b2620]">
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
           </Routes>
         </BrowserRouter>
         <Toaster
-          theme="dark"
+          theme="light"
           position="top-center"
           toastOptions={{
             style: {
-              background: "#140d09",
-              border: "1px solid rgba(196,154,76,0.35)",
-              color: "#f4e4bf",
+              background: "#ffffff",
+              border: "1px solid rgba(161,122,53,0.35)",
+              color: "#3a312a",
+              boxShadow: "0 14px 40px rgba(60, 45, 20, 0.12)",
             },
           }}
         />
