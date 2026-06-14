@@ -13,15 +13,16 @@ export const Footer = () => {
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14 grid md:grid-cols-3 gap-12">
         <div>
-          {/* Logo on light background — wrap in a soft dark card so the dark-on-dark logo shows clearly */}
-          <div className="inline-block rounded-2xl bg-[#0a0705] px-6 py-5">
+          {/* Bigger logo, kept inside dark badge so the gold/white print stays legible */}
+          <div className="inline-block rounded-2xl bg-[#0a0705] px-8 py-6 shadow-[0_18px_60px_rgba(20,12,4,0.20)]">
             <img
               src={ASSETS.logo}
               alt="Bua Luang Thai Spa"
-              className="h-20 w-auto"
+              data-testid="footer-logo"
+              className="h-44 sm:h-52 lg:h-56 w-auto"
             />
           </div>
-          <p className="mt-4 text-sm text-[#5a4f44] leading-relaxed max-w-xs">
+          <p className="mt-5 text-sm text-[#5a4f44] leading-relaxed max-w-xs">
             {t.footer.tagline}
           </p>
         </div>

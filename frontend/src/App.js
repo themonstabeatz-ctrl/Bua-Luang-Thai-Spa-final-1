@@ -11,45 +11,38 @@ import { Footer } from "@/components/Footer";
 import { ASSETS } from "@/constants/assets";
 import "@/App.css";
 
-// Each parallax stack uses a fixed background so the contained content
-// visually slides over the still spa / Buddha imagery.
-const fixedBg = (url) => ({
-  backgroundImage: `url(${url})`,
-  backgroundAttachment: "fixed",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-});
-
 const Home = () => {
   return (
     <div className="relative">
       <Navigation />
 
-      {/* Parallax stack 1 — Hero + About glide over the candle-lit spa image */}
-      <div className="parallax-stack" style={fixedBg(ASSETS.heroBg)}>
-        <Hero />
-        <AboutSection />
-      </div>
+      {/* Hero — fixed candle-lit spa scene, no filter */}
+      <Hero />
 
-      {/* Buddha showcase — a tall fixed-background panel between About & Pricing */}
-      <div
+      {/* About — full-width solid cream. Slides up over fixed hero (parallax). */}
+      <AboutSection />
+
+      {/* Buddha reveal — fixed Buddha image visible immediately below About,
+         while user scrolls past it, before Pricing slides up over it. */}
+      <section
         data-testid="buddha-showcase"
-        className="parallax-stack relative w-full"
-        style={{ ...fixedBg(ASSETS.buddhaBg), minHeight: "70vh" }}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(10,7,5,0.12)_0%,rgba(10,7,5,0.55)_100%)]" />
-      </div>
+        aria-hidden
+        className="relative w-full"
+        style={{
+          backgroundImage: `url(${ASSETS.buddhaBg})`,
+          backgroundAttachment: "fixed",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          minHeight: "85vh",
+        }}
+      />
 
-      {/* Parallax stack 2 — Pricing rides over the same Buddha image */}
-      <div className="parallax-stack" style={fixedBg(ASSETS.buddhaBg)}>
-        <PricingSection />
-      </div>
+      {/* Pricing — full-width solid cream. Slides up over the Buddha image. */}
+      <PricingSection />
 
-      {/* Solid bright section for Contact + Footer */}
-      <div className="relative bg-gradient-to-b from-[#fbf6ec] via-[#fdfaf3] to-[#ffffff] text-[#2b2620]">
-        <ContactSection />
-        <Footer />
-      </div>
+      {/* Contact + Footer — solid cream */}
+      <ContactSection />
+      <Footer />
     </div>
   );
 };
