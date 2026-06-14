@@ -47,6 +47,7 @@ class ContactCreate(BaseModel):
     phone: Optional[str] = Field(default=None, max_length=40)
     message: str = Field(min_length=1, max_length=4000)
     language: str = Field(default="sr")
+    message_serbian: Optional[str] = Field(default=None, max_length=4000)
 
 
 class ContactMessage(BaseModel):
@@ -57,6 +58,7 @@ class ContactMessage(BaseModel):
     email: str
     phone: Optional[str] = None
     message: str
+    message_serbian: Optional[str] = None
     language: str = "sr"
     client_email_sent: bool = False
     owner_email_sent: bool = False
@@ -88,16 +90,17 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
     to_client = payload["email"]
     phone = payload["phone"] or ""
     message = payload["message"]
+    message_serbian = payload.get("message_serbian") or message
     language = payload["language"]
     submitted_at = payload["created_at"]
 
-    # 1) Client confirmation (translated)
+    # 1) Client confirmation (translated to client's selected language)
     c_subject, c_html, c_text = render_client_email(language, name, phone, message)
     client_sent, client_err = await _resend_send(to_client, c_subject, c_html, c_text)
 
-    # 2) Owner notification (always Serbian, to OWNER_EMAIL)
+    # 2) Owner notification — ALWAYS Serbian, ALWAYS Serbian massage details
     o_subject, o_html, o_text = render_owner_email(
-        name=name, email=to_client, phone=phone, message=message,
+        name=name, email=to_client, phone=phone, message=message_serbian,
         language=language, submitted_at_iso=submitted_at,
     )
     owner_sent, owner_err = await _resend_send(OWNER_EMAIL, o_subject, o_html, o_text)
@@ -126,6 +129,7 @@ async def create_contact_message(payload: ContactCreate, background_tasks: Backg
         email=payload.email,
         phone=(payload.phone or "").strip() or None,
         message=payload.message.strip(),
+        message_serbian=(payload.message_serbian or "").strip() or None,
         language=payload.language,
     )
 

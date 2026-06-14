@@ -1,12 +1,56 @@
 import React, { useState } from "react";
 import { useLang } from "@/i18n/LanguageContext";
 import { Reveal } from "@/components/Reveal";
-import { ChevronDown } from "lucide-react";
+import { useSelection } from "@/contexts/SelectionContext";
+import { translations } from "@/i18n/translations";
+import { ChevronDown, Check } from "lucide-react";
 
 const formatPrice = (n) => n.toLocaleString("sr-RS");
 
-const PricingRow = ({ row, idx, t }) => {
+const SR_PRICING = translations.sr.pricing;
+
+const fillTemplate = (tpl, { name, duration, price }) =>
+  tpl
+    .replace("{name}", name)
+    .replace("{duration}", duration)
+    .replace("{price}", formatPrice(price));
+
+const PricingRow = ({ row, idx, t, lang }) => {
   const [open, setOpen] = useState(false);
+  const { selection, selectTreatment } = useSelection();
+
+  const handleSelect = (opt, optIdx) => {
+    const localMsg = fillTemplate(t.pricing.selectedTemplate, {
+      name: row.name,
+      duration: opt.duration,
+      price: opt.price,
+    });
+    const srRow = SR_PRICING.rows[idx];
+    const srOpt = srRow.options[optIdx] || opt;
+    const serbianMsg = fillTemplate(SR_PRICING.selectedTemplate, {
+      name: srRow.name,
+      duration: srOpt.duration,
+      price: srOpt.price,
+    });
+
+    selectTreatment({
+      rowIdx: idx,
+      optIdx,
+      message: localMsg,
+      messageSerbian: serbianMsg,
+      name: row.name,
+      nameSerbian: srRow.name,
+      duration: opt.duration,
+      price: opt.price,
+    });
+
+    // Smooth scroll to contact form
+    setTimeout(() => {
+      const contact = document.getElementById("contact");
+      if (contact) contact.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  };
+
   return (
     <div
       data-testid={`pricing-row-${idx}`}
@@ -42,23 +86,50 @@ const PricingRow = ({ row, idx, t }) => {
           </button>
         </div>
 
-        <div className="flex flex-col items-end gap-1.5 text-right shrink-0 pt-1">
-          {row.options.map((opt, i) => (
-            <div key={i} className="flex items-baseline gap-3 whitespace-nowrap">
-              <span className="text-[10px] sm:text-xs uppercase tracking-[0.24em] text-[#a17a35]/90 font-medium tabular-nums">
-                {opt.duration} MIN
-              </span>
-              <span className="hidden sm:inline-block w-6 self-end mb-[6px] border-b border-dotted border-[rgba(161,122,53,0.45)]" />
-              <span>
-                <span className="text-base sm:text-xl font-semibold bg-gradient-to-r from-[#a17a35] to-[#7a5a22] bg-clip-text text-transparent tabular-nums">
-                  {formatPrice(opt.price)}
+        <div className="flex flex-col items-end gap-2 text-right shrink-0 pt-1">
+          {row.options.map((opt, i) => {
+            const isSelected =
+              selection &&
+              selection.rowIdx === idx &&
+              selection.optIdx === i;
+            return (
+              <button
+                key={i}
+                type="button"
+                data-testid={`pricing-select-${idx}-${i}`}
+                onClick={() => handleSelect(opt, i)}
+                aria-pressed={isSelected}
+                className={`group/opt flex items-baseline gap-2.5 sm:gap-3 whitespace-nowrap rounded-full pl-2 pr-3 sm:pl-2.5 sm:pr-4 py-1.5 border transition-all duration-300 ${
+                  isSelected
+                    ? "border-[#a17a35] bg-[rgba(161,122,53,0.10)] shadow-[0_4px_14px_rgba(161,122,53,0.22)]"
+                    : "border-transparent hover:border-[rgba(161,122,53,0.40)] hover:bg-[rgba(161,122,53,0.06)]"
+                }`}
+              >
+                <span
+                  className={`flex items-center justify-center h-5 w-5 sm:h-5 sm:w-5 rounded-full border transition-all ${
+                    isSelected
+                      ? "border-[#a17a35] bg-gradient-to-br from-[#c9a45a] to-[#7a5a22]"
+                      : "border-[rgba(161,122,53,0.55)] bg-transparent group-hover/opt:border-[#a17a35]"
+                  }`}
+                  aria-hidden
+                >
+                  {isSelected && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
                 </span>
-                <span className="ml-1 text-[10px] tracking-[0.18em] text-[#a17a35]/85 font-medium">
-                  {t.pricing.currency}
+                <span className="text-[10px] sm:text-xs uppercase tracking-[0.24em] text-[#a17a35]/90 font-medium tabular-nums">
+                  {opt.duration} MIN
                 </span>
-              </span>
-            </div>
-          ))}
+                <span className="hidden sm:inline-block w-6 self-end mb-[6px] border-b border-dotted border-[rgba(161,122,53,0.45)]" />
+                <span>
+                  <span className="text-base sm:text-xl font-semibold bg-gradient-to-r from-[#a17a35] to-[#7a5a22] bg-clip-text text-transparent tabular-nums">
+                    {formatPrice(opt.price)}
+                  </span>
+                  <span className="ml-1 text-[10px] tracking-[0.18em] text-[#a17a35]/85 font-medium">
+                    {t.pricing.currency}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -80,7 +151,7 @@ const PricingRow = ({ row, idx, t }) => {
 };
 
 export const PricingSection = () => {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   return (
     <section
       id="pricing"
@@ -99,8 +170,12 @@ export const PricingSection = () => {
           <Reveal direction="top" duration={900} delay={120}>
             <h2
               data-testid="pricing-title"
-              className="font-serif text-4xl sm:text-5xl lg:text-6xl leading-[1.05] bg-gradient-to-br from-[#c9a45a] via-[#a17a35] to-[#7a5a22] bg-clip-text text-transparent"
-              style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', serif" }}
+              className="font-serif text-4xl sm:text-5xl lg:text-6xl tracking-tight bg-gradient-to-br from-[#c9a45a] via-[#a17a35] to-[#7a5a22] bg-clip-text text-transparent"
+              style={{
+                fontFamily: "'Cormorant Garamond', 'Playfair Display', serif",
+                lineHeight: 1.22,
+                paddingBottom: "0.18em",
+              }}
             >
               {t.pricing.title}
             </h2>
@@ -115,7 +190,7 @@ export const PricingSection = () => {
               duration={850}
               delay={idx * 70}
             >
-              <PricingRow row={row} idx={idx} t={t} />
+              <PricingRow row={row} idx={idx} t={t} lang={lang} />
             </Reveal>
           ))}
         </div>

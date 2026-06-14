@@ -219,6 +219,15 @@ def render_client_email(language: str, name: str, phone: str, message: str) -> t
 
 OWNER_SUBJECT = "🚨 NOVA PORUKA SA SAJTA – Bua Luang Thai Spa"
 
+# Native Serbian display labels for the language the visitor used on the site.
+LANGUAGE_DISPLAY_SR = {
+    "sr": "Srpski",
+    "en": "Engleski",
+    "ru": "Ruski",
+    "zh": "Kineski",
+    "th": "Tajlandski",
+}
+
 
 def render_owner_email(
     name: str,
@@ -233,7 +242,8 @@ def render_owner_email(
     safe_email = _html_escape(email)
     safe_phone = _html_escape(phone) if phone else "—"
     safe_message = _html_escape(message).replace("\n", "<br/>")
-    safe_lang = _html_escape((language or "sr").upper())
+    lang_display = LANGUAGE_DISPLAY_SR.get((language or "sr").lower(), (language or "sr").upper())
+    safe_lang = _html_escape(lang_display)
     safe_time = _html_escape(submitted_at_iso.replace("T", " ").split(".")[0] + " UTC")
 
     rows = [
@@ -280,7 +290,7 @@ def render_owner_email(
         f"Email adresa: {email}\n"
         f"Broj telefona: {phone or '—'}\n"
         f"Poruka: {message}\n"
-        f"Izabrani jezik: {(language or 'sr').upper()}\n"
+        f"Izabrani jezik: {lang_display}\n"
         f"Datum/vreme: {submitted_at_iso}\n"
     )
 

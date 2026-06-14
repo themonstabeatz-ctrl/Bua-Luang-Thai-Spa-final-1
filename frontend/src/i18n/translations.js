@@ -11,12 +11,15 @@ export const LANGUAGES = [
 
 const SR_PRICING = {
   eyebrow: "Cenovnik",
-  title: "Birajte ritual koji vam odgovara",
+  title: "Izaberite ritual koji vam odgovara",
   subtitle: "Cene su orijentacione i biće potvrđene prilikom rezervacije.",
   currency: "RSD",
   note: "* Sve cene podležu promenama. Trajanja u minutama.",
   showDescription: "Pogledaj opis",
   hideDescription: "Sakrij opis",
+  selectLabel: "Izaberi",
+  selectedLabel: "Izabrano",
+  selectedTemplate: "Odabrano: {name} — {duration} MIN — {price} RSD",
   rows: [
     {
       name: "Tradicionalna Tajlandska Masaža",
@@ -91,6 +94,9 @@ const EN_PRICING = {
   note: "* All prices are subject to change. Durations in minutes.",
   showDescription: "View description",
   hideDescription: "Hide description",
+  selectLabel: "Select",
+  selectedLabel: "Selected",
+  selectedTemplate: "Selected: {name} — {duration} MIN — {price} RSD",
   rows: [
     {
       name: "Traditional Thai Massage",
@@ -165,6 +171,9 @@ const RU_PRICING = {
   note: "* Все цены могут изменяться. Длительность указана в минутах.",
   showDescription: "Описание",
   hideDescription: "Скрыть",
+  selectLabel: "Выбрать",
+  selectedLabel: "Выбрано",
+  selectedTemplate: "Выбрано: {name} — {duration} мин — {price} RSD",
   rows: [
     {
       name: "Традиционный тайский массаж",
@@ -239,6 +248,9 @@ const ZH_PRICING = {
   note: "* 价格可能调整。时长以分钟计。",
   showDescription: "查看说明",
   hideDescription: "收起",
+  selectLabel: "选择",
+  selectedLabel: "已选择",
+  selectedTemplate: "已选择：{name} — {duration} 分钟 — {price} RSD",
   rows: [
     {
       name: "传统泰式按摩",
@@ -307,6 +319,9 @@ const TH_PRICING = {
   note: "* ราคาทั้งหมดอาจเปลี่ยนแปลงได้ ระยะเวลาเป็นนาที",
   showDescription: "ดูรายละเอียด",
   hideDescription: "ซ่อน",
+  selectLabel: "เลือก",
+  selectedLabel: "เลือกแล้ว",
+  selectedTemplate: "เลือกแล้ว: {name} — {duration} นาที — {price} RSD",
   rows: [
     {
       name: "นวดแผนไทยดั้งเดิม",

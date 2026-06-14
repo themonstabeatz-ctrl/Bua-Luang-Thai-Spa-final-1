@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { LanguageProvider } from "@/i18n/LanguageContext";
+import { SelectionProvider } from "@/contexts/SelectionContext";
 import { Navigation } from "@/components/Navigation";
 import { Hero } from "@/components/Hero";
 import { AboutSection } from "@/components/AboutSection";
@@ -89,25 +90,27 @@ const Home = () => {
 function App() {
   return (
     <LanguageProvider>
-      <div className="App min-h-screen bg-[#0a0705] text-[#2b2620]">
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-          </Routes>
-        </BrowserRouter>
-        <Toaster
-          theme="light"
-          position="top-center"
-          toastOptions={{
-            style: {
-              background: "#ffffff",
-              border: "1px solid rgba(161,122,53,0.35)",
-              color: "#3a312a",
-              boxShadow: "0 14px 40px rgba(60, 45, 20, 0.12)",
-            },
-          }}
-        />
-      </div>
+      <SelectionProvider>
+        <div className="App min-h-screen bg-[#0a0705] text-[#2b2620]">
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Home />} />
+            </Routes>
+          </BrowserRouter>
+          <Toaster
+            theme="light"
+            position="top-center"
+            toastOptions={{
+              style: {
+                background: "#ffffff",
+                border: "1px solid rgba(161,122,53,0.35)",
+                color: "#3a312a",
+                boxShadow: "0 14px 40px rgba(60, 45, 20, 0.12)",
+              },
+            }}
+          />
+        </div>
+      </SelectionProvider>
     </LanguageProvider>
   );
 }

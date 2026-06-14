@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useLang } from "@/i18n/LanguageContext";
+import { useSelection } from "@/contexts/SelectionContext";
 import { Phone, Send } from "lucide-react";
 import { toast } from "sonner";
 
@@ -11,20 +12,42 @@ const initial = { name: "", email: "", phone: "", message: "" };
 
 export const ContactSection = () => {
   const { t, lang } = useLang();
+  const { selection } = useSelection();
   const [form, setForm] = useState(initial);
   const [submitting, setSubmitting] = useState(false);
+  const [messageSerbian, setMessageSerbian] = useState(null);
 
-  const onChange = (e) =>
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  // Auto-populate message when a treatment is selected in the Pricing section,
+  // and update the Serbian copy used in the owner notification email.
+  useEffect(() => {
+    if (!selection) return;
+    setForm((prev) => ({ ...prev, message: selection.message }));
+    setMessageSerbian(selection.messageSerbian);
+  }, [selection]);
+
+  // If user manually edits the message, drop the cached Serbian translation so
+  // we don't ship a stale "Odabrano: …" line to the owner.
+  const onChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "message" && messageSerbian && value !== form.message) {
+      setMessageSerbian(null);
+    }
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
     if (submitting) return;
     setSubmitting(true);
     try {
-      await axios.post(`${API}/contact`, { ...form, language: lang });
+      await axios.post(`${API}/contact`, {
+        ...form,
+        language: lang,
+        message_serbian: messageSerbian || undefined,
+      });
       toast.success(t.contact.form.success);
       setForm(initial);
+      setMessageSerbian(null);
     } catch (err) {
       console.error(err);
       toast.error(t.contact.form.error);
