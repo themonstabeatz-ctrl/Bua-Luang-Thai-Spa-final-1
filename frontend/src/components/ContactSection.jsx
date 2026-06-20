@@ -38,26 +38,11 @@ export const ContactSection = () => {
   const [timeWheelOpen, setTimeWheelOpen] = useState(false);
 
   const dateFpRef = useRef(null);
-  const timeWrapperRef = useRef(null);
 
-  // Close the wheel when clicking outside of its wrapper.
-  useEffect(() => {
-    if (!timeWheelOpen) return;
-    const onDocClick = (e) => {
-      if (
-        timeWrapperRef.current &&
-        !timeWrapperRef.current.contains(e.target)
-      ) {
-        setTimeWheelOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onDocClick);
-    document.addEventListener("touchstart", onDocClick);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      document.removeEventListener("touchstart", onDocClick);
-    };
-  }, [timeWheelOpen]);
+  // NOTE: outside-click closing of the time wheel is INTENTIONALLY disabled.
+  // Per product spec, the wheel must only close when the user explicitly
+  // taps the in-modal "Potvrdi" (Confirm) button. Escape still closes it
+  // (see the keyboard handler inside <TimeWheelPicker>).
 
   // Auto-populate message when a treatment is selected in the Pricing section,
   // and update the Serbian copy used in the owner notification email.
@@ -229,6 +214,14 @@ export const ContactSection = () => {
                       minDate: minDateIso,
                       disableMobile: true,
                       monthSelectorType: "static",
+                      // `static: true` anchors the calendar inside the input
+                      // wrapper instead of repositioning relative to the
+                      // document, which makes Flatpickr skip its internal
+                      // `getDocumentStyleSheet()` loop. That loop crashes
+                      // with `SecurityError: Failed to read 'cssRules'…` on
+                      // mobile browsers as soon as a cross-origin CSS is
+                      // present (Google Fonts, flagcdn, etc.).
+                      static: true,
                       ...(dateLocale ? { locale: dateLocale } : {}),
                     }}
                     onChange={(dates) => {
@@ -274,7 +267,7 @@ export const ContactSection = () => {
                     }}
                   />
                 </div>
-                <div className="relative" ref={timeWrapperRef}>
+                <div className="relative">
                   <label className="block text-[11px] tracking-[0.3em] uppercase text-[#a17a35] mb-2">
                     {t.contact.form.timeLabel}
                   </label>
@@ -333,8 +326,8 @@ export const ContactSection = () => {
                 <button
                   type="submit"
                   data-testid="contact-submit"
-                  disabled={submitting}
-                  className="group inline-flex items-center justify-center gap-3 px-7 py-4 rounded-full text-sm tracking-[0.22em] uppercase font-medium bg-gradient-to-r from-[#a17a35] via-[#d4ad5e] to-[#a17a35] text-white hover:shadow-[0_12px_36px_rgba(161,122,53,0.45)] transition-shadow duration-500 disabled:opacity-60 disabled:cursor-not-allowed flex-1"
+                  disabled={submitting || !form.date || !form.time}
+                  className="group inline-flex items-center justify-center gap-3 px-7 py-4 rounded-full text-sm tracking-[0.22em] uppercase font-medium bg-gradient-to-r from-[#a17a35] via-[#d4ad5e] to-[#a17a35] text-white hover:shadow-[0_12px_36px_rgba(161,122,53,0.45)] transition-shadow duration-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none flex-1"
                 >
                   {submitting ? t.contact.form.sending : t.contact.form.submit}
                   <Send className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

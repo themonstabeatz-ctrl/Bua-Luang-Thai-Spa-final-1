@@ -373,3 +373,55 @@ code {
         border-bottom-color: inherit;
     }
 }
+
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MOBILE PORTRAIT — Hero image keeps the masseuse on the left visible.
+   The hero uses a `background-image` on the section, so we steer
+   `background-position` toward the left edge whenever the viewport is in
+   portrait orientation on a phone. Also disable `background-attachment: fixed`
+   on touch devices because iOS Safari ignores it and it causes janky paints
+   on Android.
+   ───────────────────────────────────────────────────────────────────────── */
+@media (orientation: portrait) and (max-width: 900px) {
+    [data-testid="hero-section"] {
+        background-position: 30% center !important;
+        background-attachment: scroll !important;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MOBILE LANDSCAPE — short viewport. The opaque scrolled nav-bar covers the
+   Buddha statue. Force the header to stay fully transparent regardless of
+   scroll position, and remove its bottom border / shadow. Also tighten the
+   hero's vertical padding so the logo and "AUTENTIČNA TAJLANDSKA TRADICIJA"
+   eyebrow text fit inside the visible viewport without being pushed below
+   the fold.
+   ───────────────────────────────────────────────────────────────────────── */
+@media (orientation: landscape) and (max-height: 500px) {
+    header[data-testid="main-nav"] {
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        border-bottom: 0 !important;
+        box-shadow: none !important;
+    }
+    /* Pull the hero content up so the logo / eyebrow sit higher in the
+       compressed landscape viewport. */
+    [data-testid="hero-section"] > div {
+        padding-top: 4.5rem !important;
+        padding-bottom: 2rem !important;
+    }
+    [data-testid="hero-logo"] {
+        height: 4.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    [data-testid="hero-eyebrow"] {
+        margin-bottom: 0.5rem !important;
+    }
+    /* Slightly tighter H1 so the rest of the composition stays visible. */
+    [data-testid="hero-title"] > span:first-child {
+        font-size: 2.5rem !important;
+        line-height: 1.05 !important;
+    }
+}
