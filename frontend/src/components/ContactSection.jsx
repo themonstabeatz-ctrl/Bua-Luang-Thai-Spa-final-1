@@ -69,8 +69,11 @@ export const ContactSection = () => {
     }
     setSubmitting(true);
     try {
+      const { date, time, ...rest } = form;
       await axios.post(`${API}/contact`, {
-        ...form,
+        ...rest,
+        appointment_date: date,
+        appointment_time: time,
         language: lang,
         message_serbian: messageSerbian || undefined,
         selected_treatment: selectedTreatmentPayload || undefined,
@@ -194,8 +197,8 @@ export const ContactSection = () => {
                       altInput: false,
                       minDate: minDateIso,
                       disableMobile: true,
-                      locale: dateLocale,
                       monthSelectorType: "static",
+                      ...(dateLocale ? { locale: dateLocale } : {}),
                     }}
                     onChange={(dates) => {
                       const d = dates[0];
@@ -209,24 +212,35 @@ export const ContactSection = () => {
                       // Store ISO (yyyy-mm-dd) for the backend; user sees d.m.Y.
                       setForm((p) => ({ ...p, date: `${y}-${m}-${day}` }));
                     }}
-                    render={({ defaultValue, ...props }, ref) => (
-                      <div className="relative">
-                        <input
-                          {...props}
-                          ref={ref}
-                          data-testid="contact-input-date"
-                          required
-                          readOnly
-                          placeholder={t.contact.form.datePlaceholder}
-                          defaultValue={defaultValue}
-                          className={pickerInputCls}
-                        />
-                        <CalendarIcon
-                          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-[#a17a35]"
-                          strokeWidth={1.6}
-                        />
-                      </div>
-                    )}
+                    render={({ defaultValue, value: _v, ...props }, ref) => {
+                      // react-flatpickr injects helper keys we must not pass to the
+                      // native <input> (e.g. `render`, `options`). Strip them out
+                      // before spreading so React does not warn.
+                      const {
+                        render: _r,
+                        options: _o,
+                        onChange: _oc,
+                        ...inputProps
+                      } = props;
+                      return (
+                        <div className="relative">
+                          <input
+                            {...inputProps}
+                            ref={ref}
+                            data-testid="contact-input-date"
+                            required
+                            readOnly
+                            placeholder={t.contact.form.datePlaceholder}
+                            defaultValue={defaultValue}
+                            className={pickerInputCls}
+                          />
+                          <CalendarIcon
+                            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-[#a17a35]"
+                            strokeWidth={1.6}
+                          />
+                        </div>
+                      );
+                    }}
                   />
                 </div>
                 <div className="relative">
@@ -258,24 +272,32 @@ export const ContactSection = () => {
                       const mm = String(d.getMinutes()).padStart(2, "0");
                       setForm((p) => ({ ...p, time: `${hh}:${mm}` }));
                     }}
-                    render={({ defaultValue, ...props }, ref) => (
-                      <div className="relative">
-                        <input
-                          {...props}
-                          ref={ref}
-                          data-testid="contact-input-time"
-                          required
-                          readOnly
-                          placeholder={t.contact.form.timePlaceholder}
-                          defaultValue={defaultValue}
-                          className={pickerInputCls}
-                        />
-                        <ClockIcon
-                          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-[#a17a35]"
-                          strokeWidth={1.6}
-                        />
-                      </div>
-                    )}
+                    render={({ defaultValue, value: _v, ...props }, ref) => {
+                      const {
+                        render: _r,
+                        options: _o,
+                        onChange: _oc,
+                        ...inputProps
+                      } = props;
+                      return (
+                        <div className="relative">
+                          <input
+                            {...inputProps}
+                            ref={ref}
+                            data-testid="contact-input-time"
+                            required
+                            readOnly
+                            placeholder={t.contact.form.timePlaceholder}
+                            defaultValue={defaultValue}
+                            className={pickerInputCls}
+                          />
+                          <ClockIcon
+                            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-[#a17a35]"
+                            strokeWidth={1.6}
+                          />
+                        </div>
+                      );
+                    }}
                   />
                 </div>
               </div>

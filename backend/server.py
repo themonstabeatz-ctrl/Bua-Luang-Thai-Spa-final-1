@@ -73,6 +73,9 @@ class ContactMessage(BaseModel):
     client_email_sent: bool = False
     owner_email_sent: bool = False
     email_error: Optional[str] = None
+    appointment_date: Optional[str] = None
+    appointment_time: Optional[str] = None
+    selected_treatment: Optional[SelectedTreatment] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -150,16 +153,15 @@ async def create_contact_message(payload: ContactCreate, background_tasks: Backg
         message=payload.message.strip(),
         message_serbian=(payload.message_serbian or "").strip() or None,
         language=payload.language,
+        appointment_date=(payload.appointment_date or "").strip() or None,
+        appointment_time=(payload.appointment_time or "").strip() or None,
+        selected_treatment=payload.selected_treatment,
     )
 
     doc = record.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     if payload.selected_treatment:
         doc['selected_treatment'] = payload.selected_treatment.model_dump()
-    if payload.appointment_date:
-        doc['appointment_date'] = payload.appointment_date.strip()
-    if payload.appointment_time:
-        doc['appointment_time'] = payload.appointment_time.strip()
     await db.contact_messages.insert_one(doc)
 
     background_tasks.add_task(_send_and_update, record.id, doc)

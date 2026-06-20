@@ -1,0 +1,41 @@
+{
+  "summary": "Iteration 5 regression: verified that the iteration_4 critical bug (frontend sending date/time keys vs backend appointment_date/appointment_time) is FIXED end-to-end. UI submission now persists appointment_date + appointment_time to MongoDB. flatpickr 'invalid locale undefined' warning and React 'Invalid value for prop render' DOM warning are both gone. ChatFloater hrefs verified.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "backend/tests/test_appointment_persistence.py::test_frontend_compatible_payload_date_time_keys",
+        "issue": "Test is now obsolete and still FAILS. It was written to reproduce the OLD broken contract where the frontend sent raw `date`/`time` keys and the backend silently dropped them. The actual fix moved the frontend to send `appointment_date`/`appointment_time` (correct keys). So a raw `{date, time}` payload still legitimately gets ignored by the backend (Pydantic extra='ignore' on ContactCreate) and persists nulls — which is the now-correct behavior because the live frontend no longer sends that shape. The test should be DELETED or rewritten to assert that the LIVE frontend payload (appointment_date/appointment_time) persists. The first test in the same file (test_backend_persists_appointment_date_time_with_correct_keys) PASSES."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_appointment_persistence.py",
+    "/app/test_reports/pytest/iter5_appointment.xml"
+  ],
+  "action_items": [
+    "Decide on test_frontend_compatible_payload_date_time_keys: either delete it (now an obsolete reproduction of the old bug) or rewrite to assert the post-fix payload shape (`appointment_date`/`appointment_time`) persists. As written, it documents an old contract that no longer matches reality."
+  ],
+  "critical_code_review_comments": [
+    "ContactSection.jsx — explicit `appointment_date`/`appointment_time` keys are now sent and the `render` prop strips `render`, `options`, `onChange` before spreading to the native <input>. Clean.",
+    "ContactSection.jsx — flatpickr `locale` is now spread conditionally only when defined (sr/th fall back to default English). The earlier `locale: undefined` warning is gone.",
+    "server.py — ContactCreate + ContactMessage both declare appointment_date / appointment_time / selected_treatment; create_contact_message passes them through. Verified persisted via live POST + GET.",
+    "ChatFloater — WhatsApp href contains the seasonal Serbian greeting and booking template; Viber href = `viber://chat?number=%2B38162625500` with no `text=` param, matching spec exactly."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (1/1 contract test passing; 2nd test in file is obsolete docs-of-old-bug, see action item)",
+    "frontend": "100% (Flatpickr submit + console clean + ChatFloater hrefs correct)"
+  },
+  "test_credentials": "none",
+  "seed_data_creation": "Live POST created MongoDB record id=a060308e-8582-4285-9ac0-81e81b3258cc (TEST_E2E_Iter5, appointment_date=2026-07-15, appointment_time=14:30). Also TEST_AppointmentBackendKeys / TEST_AppointmentFrontendKeys via pytest. Safe to leave or purge by TEST_ prefix.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iteration_4 critical bug (frontend/backend key mismatch on appointment booking) is RESOLVED. E2E verified via real Flatpickr UI: user-picked 15.07.2026 / 14:30 -> Mongo record had appointment_date='2026-07-15', appointment_time='14:30', owner_email_sent=true. Console has zero flatpickr locale warnings and zero React render-prop warnings. Viber href matches spec (viber://chat?number=%2B38162625500). Only remaining cleanup item: backend test file still contains a now-obsolete failing test that reproduces the OLD bug (sending raw date/time keys); needs to be deleted or rewritten — not a product bug.",
+  "rca of the issue": "Original RCA (iteration_4): frontend ContactSection spread {date,time} into axios POST; backend ContactCreate declared appointment_date/appointment_time and Pydantic silently dropped extras, so booking slot was never stored. Mitigation (applied by main agent and verified here): (1) onSubmit destructures {date,time,...rest} and posts {...rest, appointment_date:date, appointment_time:time, ...}; (2) ContactMessage now also persists these fields; (3) render prop strips non-DOM keys before spreading; (4) flatpickr locale spread conditionally. Live E2E now writes correct values to Mongo and triggers owner email containing the slot."
+}
