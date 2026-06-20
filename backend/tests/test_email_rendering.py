@@ -82,8 +82,10 @@ class TestClientEmail:
         assert TREATMENT_DESC_LOCAL[lang] in html
         # Price formatted with Serbian thousands separator (.)
         assert "5.300" in html
-        # Datetime
-        assert "2026-07-01" in html
+        # Datetime — date must be DD/MM/YYYY (European format used in emails)
+        assert "01/07/2026" in html
+        # ISO form must NOT leak into emails
+        assert "2026-07-01" not in html
         assert "18:30" in html
         # Instagram link
         assert INSTAGRAM_URL in html
@@ -173,8 +175,9 @@ class TestOwnerEmail:
         assert "5.300" in html
         assert "5,300" not in html
 
-        # Appointment date/time
-        assert "2026-07-01" in html
+        # Appointment date/time — DD/MM/YYYY in owner notification too
+        assert "01/07/2026" in html
+        assert "2026-07-01" not in html
         assert "18:30" in html
 
         # Plain text also Serbian

@@ -61,6 +61,26 @@ def _format_price(n):
     return f"{int(n):,}".replace(",", ".")
 
 
+def _format_date_eu(date_str):
+    """Convert an ISO yyyy-mm-dd date string into European DD/MM/YYYY format.
+
+    Used for every email-facing date (client confirmation + owner notification)
+    so visitors and the owner both see the booking date as e.g. 20/06/2026.
+    Any non-ISO input is returned unchanged so we never crash on edge cases.
+    """
+    if not date_str:
+        return ""
+    s = str(date_str).strip()
+    # Already in DD/MM/YYYY or DD.MM.YYYY form
+    if len(s) == 10 and (s[2] in "./" and s[5] in "./"):
+        return s.replace(".", "/")
+    # ISO yyyy-mm-dd
+    if len(s) >= 10 and s[4] == "-" and s[7] == "-":
+        y, m, d = s[0:4], s[5:7], s[8:10]
+        return f"{d}/{m}/{y}"
+    return s
+
+
 def _treatment_block_html(language, treatment, appt_date=None, appt_time=None):
     c = CLIENT_TREATMENT_COPY.get(language, CLIENT_TREATMENT_COPY["sr"])
     name = _html_escape(str(treatment.get("name", "")))
@@ -68,10 +88,11 @@ def _treatment_block_html(language, treatment, appt_date=None, appt_time=None):
     price = treatment.get("price", 0)
     description = _html_escape(str(treatment.get("description") or ""))
     dt_value = ""
-    if appt_date and appt_time:
-        dt_value = f"{appt_date} · {appt_time}"
-    elif appt_date:
-        dt_value = appt_date
+    fmt_date = _format_date_eu(appt_date)
+    if fmt_date and appt_time:
+        dt_value = f"{fmt_date} · {appt_time}"
+    elif fmt_date:
+        dt_value = fmt_date
     elif appt_time:
         dt_value = appt_time
     dt_block = (
@@ -390,8 +411,8 @@ def render_owner_email(
         ("Email adresa", f'<a href="mailto:{safe_email}" style="color:#a17a35;text-decoration:none;">{safe_email}</a>'),
         ("Broj telefona", safe_phone if not phone else f'<a href="tel:{_html_escape(phone)}" style="color:#a17a35;text-decoration:none;">{safe_phone}</a>'),
         ("Datum i vreme termina", _html_escape(
-            f"{appointment_date} u {appointment_time}" if (appointment_date and appointment_time)
-            else (appointment_date or appointment_time or "—")
+            f"{_format_date_eu(appointment_date)} u {appointment_time}" if (appointment_date and appointment_time)
+            else (_format_date_eu(appointment_date) or appointment_time or "—")
         )),
         ("Poruka / Zahtev za termin", safe_message),
         ("Izabrani jezik na sajtu", safe_lang),
@@ -445,7 +466,7 @@ def render_owner_email(
         if appointment_date or appointment_time:
             plain_treatment += (
                 f"  Datum i vreme: "
-                f"{(appointment_date or '')}{(' u ' + appointment_time) if appointment_time else ''}\n"
+                f"{(_format_date_eu(appointment_date) or '')}{(' u ' + appointment_time) if appointment_time else ''}\n"
             )
         if treatment.get("description"):
             plain_treatment += f"  Opis: {treatment['description']}\n"
@@ -457,7 +478,7 @@ def render_owner_email(
         f"Email adresa: {email}\n"
         f"Broj telefona: {phone or '—'}\n"
         f"Datum i vreme termina: "
-        f"{(appointment_date or '—')}{(' u ' + appointment_time) if appointment_time else ''}\n"
+        f"{(_format_date_eu(appointment_date) or '—')}{(' u ' + appointment_time) if appointment_time else ''}\n"
         f"Poruka: {message}\n"
         f"Izabrani jezik: {lang_display}\n"
         f"Datum/vreme slanja: {submitted_at_iso}\n"
