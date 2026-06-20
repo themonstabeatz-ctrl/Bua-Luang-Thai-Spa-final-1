@@ -1,14 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
+import Flatpickr from "react-flatpickr";
+import { Russian } from "flatpickr/dist/l10n/ru.js";
+import { Mandarin } from "flatpickr/dist/l10n/zh.js";
+// Flatpickr does not ship a built-in Serbian or Thai locale by default in the
+// react-flatpickr bundle, so the default English locale is used as a graceful
+// fallback for `sr` and `th` (still respects the d.m.Y format).
 import { useLang } from "@/i18n/LanguageContext";
 import { useSelection } from "@/contexts/SelectionContext";
-import { Phone, Send } from "lucide-react";
+import { Phone, Send, Calendar as CalendarIcon, Clock as ClockIcon } from "lucide-react";
 import { toast } from "sonner";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const initial = { name: "", email: "", phone: "", date: "", time: "", message: "" };
+
+// Map our app languages to Flatpickr locales (fallback to default English).
+const LOCALE_MAP = { ru: Russian, zh: Mandarin };
 
 export const ContactSection = () => {
   const { t, lang } = useLang();
@@ -17,8 +26,9 @@ export const ContactSection = () => {
   const [submitting, setSubmitting] = useState(false);
   const [messageSerbian, setMessageSerbian] = useState(null);
 
-  // Auto-populate message when a treatment is selected in the Pricing section,
-  // and update the Serbian copy used in the owner notification email.
+  const dateFpRef = useRef(null);
+  const timeFpRef = useRef(null);
+
   // Auto-populate message when a treatment is selected in the Pricing section,
   // and update the Serbian copy used in the owner notification email.
   useEffect(() => {
@@ -40,15 +50,6 @@ export const ContactSection = () => {
   // we don't ship a stale "Odabrano: …" line to the owner.
   const onChange = (e) => {
     const { name, value } = e.target;
-    // Enforce business-hours window for the time picker (10:00 – 22:00).
-    if (name === "time" && value) {
-      const [hh, mm] = value.split(":").map(Number);
-      const minutes = hh * 60 + mm;
-      if (minutes < 600 || minutes > 1320) {
-        toast.error("Radno vreme: 10:00 — 22:00");
-        return;
-      }
-    }
     if (name === "message" && messageSerbian && value !== form.message) {
       setMessageSerbian(null);
     }
@@ -58,6 +59,14 @@ export const ContactSection = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
     if (submitting) return;
+    if (!form.date || !form.time) {
+      toast.error(
+        lang === "sr"
+          ? "Molimo izaberite datum i vreme."
+          : "Please select a date and time."
+      );
+      return;
+    }
     setSubmitting(true);
     try {
       await axios.post(`${API}/contact`, {
@@ -69,6 +78,8 @@ export const ContactSection = () => {
       toast.success(t.contact.form.success);
       setForm(initial);
       setMessageSerbian(null);
+      dateFpRef.current?.flatpickr?.clear?.();
+      timeFpRef.current?.flatpickr?.clear?.();
     } catch (err) {
       console.error(err);
       toast.error(t.contact.form.error);
@@ -79,6 +90,22 @@ export const ContactSection = () => {
 
   const inputCls =
     "w-full bg-transparent border-b border-[rgba(161,122,53,0.35)] focus:border-[#a17a35] outline-none py-2.5 text-[#2b2620] placeholder:text-[#a09686] transition-colors";
+
+  // Tailored picker classes — large, premium feel with gold borders.
+  const pickerInputCls =
+    "buaa-picker-input w-full bg-transparent border-b-2 border-[rgba(161,122,53,0.45)] focus:border-[#a17a35] outline-none py-4 pr-12 text-lg sm:text-xl text-[#2b2620] placeholder:text-[#bba98a] tracking-wider font-light transition-colors cursor-pointer";
+
+  const dateLocale = useMemo(() => LOCALE_MAP[lang] || undefined, [lang]);
+
+  // ISO yyyy-mm-dd today (browser/local time) — used as the earliest allowed
+  // booking date so a user cannot pick a past day.
+  const minDateIso = useMemo(() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }, []);
 
   return (
     <section
@@ -155,35 +182,100 @@ export const ContactSection = () => {
                 </div>
               </div>
               <div className="grid sm:grid-cols-2 gap-5">
-                <div>
+                <div className="relative">
                   <label className="block text-[11px] tracking-[0.3em] uppercase text-[#a17a35] mb-2">
                     {t.contact.form.dateLabel}
                   </label>
-                  <input
-                    data-testid="contact-input-date"
-                    required
-                    type="date"
-                    name="date"
+                  <Flatpickr
+                    ref={dateFpRef}
                     value={form.date}
-                    onChange={onChange}
-                    className={`${inputCls} contact-datepicker`}
+                    options={{
+                      dateFormat: "d.m.Y",
+                      altInput: false,
+                      minDate: minDateIso,
+                      disableMobile: true,
+                      locale: dateLocale,
+                      monthSelectorType: "static",
+                    }}
+                    onChange={(dates) => {
+                      const d = dates[0];
+                      if (!d) {
+                        setForm((p) => ({ ...p, date: "" }));
+                        return;
+                      }
+                      const y = d.getFullYear();
+                      const m = String(d.getMonth() + 1).padStart(2, "0");
+                      const day = String(d.getDate()).padStart(2, "0");
+                      // Store ISO (yyyy-mm-dd) for the backend; user sees d.m.Y.
+                      setForm((p) => ({ ...p, date: `${y}-${m}-${day}` }));
+                    }}
+                    render={({ defaultValue, ...props }, ref) => (
+                      <div className="relative">
+                        <input
+                          {...props}
+                          ref={ref}
+                          data-testid="contact-input-date"
+                          required
+                          readOnly
+                          placeholder={t.contact.form.datePlaceholder}
+                          defaultValue={defaultValue}
+                          className={pickerInputCls}
+                        />
+                        <CalendarIcon
+                          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-[#a17a35]"
+                          strokeWidth={1.6}
+                        />
+                      </div>
+                    )}
                   />
                 </div>
-                <div>
+                <div className="relative">
                   <label className="block text-[11px] tracking-[0.3em] uppercase text-[#a17a35] mb-2">
                     {t.contact.form.timeLabel}
                   </label>
-                  <input
-                    data-testid="contact-input-time"
-                    required
-                    type="time"
-                    name="time"
+                  <Flatpickr
+                    ref={timeFpRef}
                     value={form.time}
-                    onChange={onChange}
-                    min="10:00"
-                    max="22:00"
-                    step="900"
-                    className={`${inputCls} contact-timepicker`}
+                    options={{
+                      enableTime: true,
+                      noCalendar: true,
+                      dateFormat: "H:i",
+                      time_24hr: true,
+                      minTime: "10:00",
+                      maxTime: "22:00",
+                      minuteIncrement: 30,
+                      defaultHour: 10,
+                      defaultMinute: 0,
+                      disableMobile: true,
+                    }}
+                    onChange={(dates) => {
+                      const d = dates[0];
+                      if (!d) {
+                        setForm((p) => ({ ...p, time: "" }));
+                        return;
+                      }
+                      const hh = String(d.getHours()).padStart(2, "0");
+                      const mm = String(d.getMinutes()).padStart(2, "0");
+                      setForm((p) => ({ ...p, time: `${hh}:${mm}` }));
+                    }}
+                    render={({ defaultValue, ...props }, ref) => (
+                      <div className="relative">
+                        <input
+                          {...props}
+                          ref={ref}
+                          data-testid="contact-input-time"
+                          required
+                          readOnly
+                          placeholder={t.contact.form.timePlaceholder}
+                          defaultValue={defaultValue}
+                          className={pickerInputCls}
+                        />
+                        <ClockIcon
+                          className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-[#a17a35]"
+                          strokeWidth={1.6}
+                        />
+                      </div>
+                    )}
                   />
                 </div>
               </div>

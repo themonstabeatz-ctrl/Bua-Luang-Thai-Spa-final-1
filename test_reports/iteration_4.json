@@ -1,0 +1,50 @@
+{
+  "summary": "Iteration 4: Custom Flatpickr-based date/time pickers + seasonal chat greeting tested. Frontend pickers look and behave correctly (gold/cream theme, readonly inputs, no native mm/dd/yyyy placeholder, past dates disabled, DD.MM.YYYY display, 10:00-22:00 clamp verified by hour=23 being clamped to 22, 30-min increments, noCalendar=true on the time popup, gold Calendar/Clock icons). Form submits successfully and pickers clear. ChatFloater greeting and Viber URL contract are correct (WA text starts with 'Dobar dan!' for current Belgrade hour, Viber href is exactly 'viber://chat?number=%2B38162625500' with no text=). HOWEVER a CRITICAL frontend/backend integration bug was found: the frontend sends `date` and `time` as top-level keys in the POST /api/contact body, but the backend Pydantic model `ContactCreate` expects `appointment_date` and `appointment_time`. Pydantic silently drops the extra keys, so the booking date and time are LOST on every submission (verified via captured request body and a new pytest test that fails). Backend pytest: 10/12 pass; the 2 new appointment-persistence tests fail.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "POST /api/contact", "issue": "Frontend payload contract mismatch. Frontend ContactSection.jsx spreads {...form} which contains `date` and `time` keys. Backend ContactCreate model declares `appointment_date` / `appointment_time` — extras are silently ignored by Pydantic, so every booking loses its date/time. Verified by reading the actual POST body sent by the live UI: {\"date\":\"2026-06-30\",\"time\":\"14:30\",...}. Persisted Mongo doc has neither appointment_date nor appointment_time. Owner email also omits the booking slot.", "priority": "CRITICAL"}
+    ],
+    "minor": [
+      {"endpoint": "GET /api/contact", "issue": "ContactMessage response model lacks appointment_date / appointment_time / selected_treatment fields. Even when those are correctly persisted to Mongo, FastAPI strips them from the GET response because response_model=List[ContactMessage] filters them out. Reading historical bookings via the API is therefore impossible."},
+      {"endpoint": "POST /api/contact (background SMTP)", "issue": "Resend now returns success in this sandbox (client_email_sent=true, owner_email_sent=true) — no longer a blocker."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "Booking submission", "issue": "Form POSTs `date` and `time` top-level keys; these need to be renamed to `appointment_date` / `appointment_time` (or backend must accept aliases). Currently a 200 OK is returned but the booking slot never reaches MongoDB or the owner email. This is the same critical bug as the backend entry above — fix is on the frontend side (cleaner) or via Pydantic Field(alias=...) on backend.", "affected_selectors": ["contact-input-date", "contact-input-time", "contact-submit"]}
+    ],
+    "design_issues": [
+      {"screen": "Kontakt section", "issues": ["Console warning repeated many times: 'flatpickr: invalid locale undefined'. Triggered because LOCALE_MAP returns undefined for sr/th and `locale: undefined` is still passed into Flatpickr options. Fix by spreading the option conditionally (e.g. ...(dateLocale ? { locale: dateLocale } : {})).", "React DOM warning: 'Invalid value for prop `render` input'. Caused by spreading ALL props (including the function-valued `render`) onto the <input> via {...props} inside the render prop. Should destructure and drop non-DOM props before spreading."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_contact_api.py",
+    "/app/backend/tests/test_appointment_persistence.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "[CRITICAL] Align frontend/backend booking contract. Recommended: in ContactSection.jsx onSubmit, send `appointment_date: form.date` and `appointment_time: form.time` instead of spreading raw `...form`. Alternatively, add Pydantic Field aliases on backend (appointment_date: ... = Field(alias='date')).",
+    "[HIGH] Extend ContactMessage response model to surface appointment_date, appointment_time, selected_treatment so GET /api/contact actually returns the booking details that are already persisted.",
+    "[MEDIUM] Suppress the 'flatpickr: invalid locale undefined' console warning by passing `locale` only when defined.",
+    "[LOW] Stop spreading the `render` function-valued prop onto the native <input> to silence the React DOM warning."
+  ],
+  "critical_code_review_comments": [
+    "ContactSection.jsx line 73: `{...form, language: lang, ...}` is the root cause of the booking-loss bug. Be explicit about the wire contract instead of spreading state shape.",
+    "server.py: ContactCreate validates appointment_date/time as plain strings up to 40/20 chars — no format validation. Consider regex or pydantic constrained types to reject obviously malformed payloads early.",
+    "ContactMessage (response model) drifted from the actual Mongo schema. Either align both or stop using it as a response_model.",
+    "react-flatpickr `locale: undefined` should be guarded — passing undefined trips a warning every render and pollutes the console.",
+    "Owner email template likely depends on appointment fields; since the frontend never delivers them today, owner notifications currently never contain the requested date/time.",
+    "Date/time visual+behavior implementation itself is well done — gold theme applied, minTime/maxTime clamp confirmed working (hour=23 forced down to 22), readonly inputs, custom placeholders per locale all wired up."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_appointment_persistence.py (new — documents and verifies the booking date/time persistence contract)"
+  ],
+  "success_rate": {"backend": "83% (10/12 pytest)", "frontend": "85% (pickers + chat work visually; submission silently loses booking slot)"},
+  "test_credentials": "none required",
+  "seed_data_creation": "Added TEST_AppointmentBackendKeys, TEST_AppointmentFrontendKeys, plus the existing TEST_* records from previous iteration in contact_messages.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Frontend Flatpickr pickers verified end-to-end via Playwright: placeholders correct, DD.MM.YYYY display, past dates disabled (20 disabled days observed), time clamped to 10-22 with 30-min steps (hour=23 forced to 22), 14:30 selection persists, readonly attribute set, gold icons present, custom CSS theme applied. ChatFloater: WA href text first line was 'Dobar dan!' (current Belgrade ~13:15 UTC+1, summer, so Apr-Sep day-greeting band 10-20 → correct). Viber href = 'viber://chat?number=%2B38162625500' — NO text= param. Backend contract bug: frontend wire payload uses keys `date` and `time` but backend Pydantic field names are `appointment_date` / `appointment_time` — see /app/backend/tests/test_appointment_persistence.py for the failing assertion that documents this. Once the main agent renames either side, re-run pytest with REACT_APP_BACKEND_URL exported.",
+  "rca_of_issue": "ROOT CAUSE: In /app/frontend/src/components/ContactSection.jsx onSubmit (around line 72), the body is built as `{...form, language: lang, ...}`. The local `form` state was initialised with keys {name, email, phone, date, time, message}. The backend ContactCreate Pydantic model in /app/backend/server.py declares the corresponding booking fields as `appointment_date` and `appointment_time`. Pydantic v2's default behaviour is to ignore extra fields silently, so `date` and `time` never bind to the model and never reach the doc inserted into Mongo. The 200 OK gives a false sense of success. FIX OPTIONS (pick one): (1) Frontend — in onSubmit map to backend keys: const { date, time, ...rest } = form; axios.post(..., { ...rest, appointment_date: date, appointment_time: time, language: lang, ... }). (2) Backend — add aliases on ContactCreate: appointment_date: Optional[str] = Field(default=None, max_length=40, alias='date'); appointment_time: Optional[str] = Field(default=None, max_length=20, alias='time'); model_config = ConfigDict(populate_by_name=True). After fix, re-run /app/backend/tests/test_appointment_persistence.py — both tests should pass."
+}
