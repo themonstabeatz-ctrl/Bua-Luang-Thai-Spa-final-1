@@ -14,6 +14,7 @@ import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 import { ChatFloater } from "@/components/ChatFloater";
 import { Reveal } from "@/components/Reveal";
+import { LastBookedSlot } from "@/components/LastBookedSlot";
 import { ASSETS } from "@/constants/assets";
 import { ChevronRight, Phone } from "lucide-react";
 
@@ -186,6 +187,7 @@ export const ServicePage = ({ lang }) => {
                   </Link>
                 ))}
               </div>
+              <LastBookedSlot className="mt-6" />
             </section>
           </Reveal>
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useLang } from "@/i18n/LanguageContext";
 import { Reveal } from "@/components/Reveal";
+import { LastBookedSlot } from "@/components/LastBookedSlot";
 import { useSelection } from "@/contexts/SelectionContext";
 import { translations } from "@/i18n/translations";
 import { ChevronDown, Check } from "lucide-react";
@@ -196,6 +197,8 @@ export const PricingSection = () => {
             </Reveal>
           ))}
         </div>
+
+        <LastBookedSlot className="mt-8" />
       </div>
     </section>
   );
