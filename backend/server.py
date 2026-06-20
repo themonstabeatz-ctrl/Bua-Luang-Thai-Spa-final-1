@@ -56,6 +56,8 @@ class ContactCreate(BaseModel):
     language: str = Field(default="sr")
     message_serbian: Optional[str] = Field(default=None, max_length=4000)
     selected_treatment: Optional[SelectedTreatment] = None
+    appointment_date: Optional[str] = Field(default=None, max_length=40)
+    appointment_time: Optional[str] = Field(default=None, max_length=20)
 
 
 class ContactMessage(BaseModel):
@@ -104,8 +106,13 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
 
     # 1) Client confirmation (translated to client's selected language)
     treatment = payload.get("selected_treatment")
+    appt_date = payload.get("appointment_date")
+    appt_time = payload.get("appointment_time")
     c_subject, c_html, c_text = render_client_email(
-        language, name, phone, message, treatment=treatment
+        language, name, phone, message,
+        treatment=treatment,
+        appointment_date=appt_date,
+        appointment_time=appt_time,
     )
     client_sent, client_err = await _resend_send(to_client, c_subject, c_html, c_text)
 
@@ -113,6 +120,7 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
     o_subject, o_html, o_text = render_owner_email(
         name=name, email=to_client, phone=phone, message=message_serbian,
         language=language, submitted_at_iso=submitted_at,
+        appointment_date=appt_date, appointment_time=appt_time,
     )
     owner_sent, owner_err = await _resend_send(OWNER_EMAIL, o_subject, o_html, o_text)
 
@@ -148,6 +156,10 @@ async def create_contact_message(payload: ContactCreate, background_tasks: Backg
     doc['created_at'] = doc['created_at'].isoformat()
     if payload.selected_treatment:
         doc['selected_treatment'] = payload.selected_treatment.model_dump()
+    if payload.appointment_date:
+        doc['appointment_date'] = payload.appointment_date.strip()
+    if payload.appointment_time:
+        doc['appointment_time'] = payload.appointment_time.strip()
     await db.contact_messages.insert_one(doc)
 
     background_tasks.add_task(_send_and_update, record.id, doc)

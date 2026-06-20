@@ -8,7 +8,7 @@ import { toast } from "sonner";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const initial = { name: "", email: "", phone: "", message: "" };
+const initial = { name: "", email: "", phone: "", date: "", time: "", message: "" };
 
 export const ContactSection = () => {
   const { t, lang } = useLang();
@@ -141,6 +141,37 @@ export const ContactSection = () => {
                     name="phone"
                     value={form.phone}
                     onChange={onChange}
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-[11px] tracking-[0.3em] uppercase text-[#a17a35] mb-2">
+                    {t.contact.form.dateLabel}
+                  </label>
+                  <input
+                    data-testid="contact-input-date"
+                    required
+                    type="date"
+                    name="date"
+                    value={form.date}
+                    onChange={onChange}
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] tracking-[0.3em] uppercase text-[#a17a35] mb-2">
+                    {t.contact.form.timeLabel}
+                  </label>
+                  <input
+                    data-testid="contact-input-time"
+                    required
+                    type="time"
+                    name="time"
+                    value={form.time}
+                    onChange={onChange}
+                    step="900"
                     className={inputCls}
                   />
                 </div>

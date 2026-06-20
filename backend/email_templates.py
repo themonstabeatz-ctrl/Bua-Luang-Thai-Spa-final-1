@@ -1,5 +1,7 @@
 """HTML email templates for Bua Luang Thai Spa."""
 
+from typing import Optional
+
 LOGO_URL = (
     "https://customer-assets.emergentagent.com/job_bua-luang-spa/artifacts/"
     "5esihdex_Bua%20luang%20logo%20crna%20senka.png"
@@ -15,6 +17,7 @@ CLIENT_TREATMENT_COPY = {
     "sr": {
         "block_heading": "Vaš odabrani tretman", "name_label": "Naziv masaže",
         "duration_label": "Trajanje", "duration_unit": "MIN",
+        "datetime_label": "Odabrani datum i vreme",
         "description_label": "Opis", "price_label": "Cena", "currency": "RSD",
         "call_us_heading": "Pozovite nas", "call_us_cta": "Pozovi sada",
         "instagram_cta": "Pratite nas na Instagramu",
@@ -22,6 +25,7 @@ CLIENT_TREATMENT_COPY = {
     "en": {
         "block_heading": "Your selected treatment", "name_label": "Massage name",
         "duration_label": "Duration", "duration_unit": "MIN",
+        "datetime_label": "Selected date and time",
         "description_label": "Description", "price_label": "Price", "currency": "RSD",
         "call_us_heading": "Call us", "call_us_cta": "Call now",
         "instagram_cta": "Follow us on Instagram",
@@ -29,6 +33,7 @@ CLIENT_TREATMENT_COPY = {
     "ru": {
         "block_heading": "Выбранная процедура", "name_label": "Название массажа",
         "duration_label": "Длительность", "duration_unit": "мин",
+        "datetime_label": "Выбранная дата и время",
         "description_label": "Описание", "price_label": "Цена", "currency": "RSD",
         "call_us_heading": "Позвоните нам", "call_us_cta": "Позвонить",
         "instagram_cta": "Подпишитесь на нас в Instagram",
@@ -36,6 +41,7 @@ CLIENT_TREATMENT_COPY = {
     "zh": {
         "block_heading": "您选择的疗程", "name_label": "按摩名称",
         "duration_label": "时长", "duration_unit": "分钟",
+        "datetime_label": "选择的日期和时间",
         "description_label": "说明", "price_label": "价格", "currency": "RSD",
         "call_us_heading": "致电我们", "call_us_cta": "立即致电",
         "instagram_cta": "在 Instagram 关注我们",
@@ -43,6 +49,7 @@ CLIENT_TREATMENT_COPY = {
     "th": {
         "block_heading": "ทรีตเมนต์ที่คุณเลือก", "name_label": "ชื่อนวด",
         "duration_label": "ระยะเวลา", "duration_unit": "นาที",
+        "datetime_label": "วันและเวลาที่เลือก",
         "description_label": "รายละเอียด", "price_label": "ราคา", "currency": "RSD",
         "call_us_heading": "โทรหาเรา", "call_us_cta": "โทรเลย",
         "instagram_cta": "ติดตามเราที่ Instagram",
@@ -54,12 +61,24 @@ def _format_price(n):
     return f"{int(n):,}".replace(",", ".")
 
 
-def _treatment_block_html(language, treatment):
+def _treatment_block_html(language, treatment, appt_date=None, appt_time=None):
     c = CLIENT_TREATMENT_COPY.get(language, CLIENT_TREATMENT_COPY["sr"])
     name = _html_escape(str(treatment.get("name", "")))
     duration = treatment.get("duration", "")
     price = treatment.get("price", 0)
     description = _html_escape(str(treatment.get("description") or ""))
+    dt_value = ""
+    if appt_date and appt_time:
+        dt_value = f"{appt_date} · {appt_time}"
+    elif appt_date:
+        dt_value = appt_date
+    elif appt_time:
+        dt_value = appt_time
+    dt_block = (
+        f"""<tr><td style="padding:10px 16px;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#a17a35;vertical-align:top;border-top:1px solid rgba(161,122,53,0.18);">{c['datetime_label']}</td>
+            <td style="padding:10px 16px;font-family:Georgia,serif;font-size:16px;color:#7a5a22;font-weight:600;border-top:1px solid rgba(161,122,53,0.18);">{_html_escape(dt_value)}</td></tr>"""
+        if dt_value else ""
+    )
     desc_block = (
         f"""<tr><td colspan="2" style="padding:10px 16px 0 16px;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#a17a35;">{c['description_label']}</td></tr>
             <tr><td colspan="2" style="padding:6px 16px 14px 16px;font-size:14px;line-height:1.7;color:#3a312a;font-style:italic;">{description}</td></tr>"""
@@ -72,6 +91,7 @@ def _treatment_block_html(language, treatment):
             <td style="padding:10px 16px;font-family:Georgia,'Cormorant Garamond',serif;font-size:18px;color:#3a312a;border-top:1px solid rgba(161,122,53,0.18);">{name}</td></tr>
         <tr><td style="padding:10px 16px;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#a17a35;vertical-align:top;border-top:1px solid rgba(161,122,53,0.18);">{c['duration_label']}</td>
             <td style="padding:10px 16px;font-size:15px;color:#3a312a;border-top:1px solid rgba(161,122,53,0.18);">{duration} {c['duration_unit']}</td></tr>
+        {dt_block}
         {desc_block}
         <tr><td style="padding:14px 16px 18px 16px;font-family:Arial,sans-serif;font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#a17a35;vertical-align:top;border-top:1px solid rgba(161,122,53,0.30);">{c['price_label']}</td>
             <td style="padding:14px 16px 18px 16px;font-family:Georgia,serif;font-size:22px;font-weight:600;color:#7a5a22;border-top:1px solid rgba(161,122,53,0.30);">{_format_price(price)} <span style="font-size:13px;color:#a17a35;letter-spacing:0.14em;">{c['currency']}</span></td></tr>
@@ -243,7 +263,7 @@ def _shell(inner_html: str) -> str:
 </html>"""
 
 
-def render_client_email(language: str, name: str, phone: str, message: str, treatment=None) -> tuple[str, str, str]:
+def render_client_email(language: str, name: str, phone: str, message: str, treatment=None, appointment_date=None, appointment_time=None) -> tuple[str, str, str]:
     """Return (subject, html, plain_text) for the client confirmation email."""
     lang = language if language in CLIENT_COPY else "sr"
     c = CLIENT_COPY[lang]
@@ -253,7 +273,10 @@ def render_client_email(language: str, name: str, phone: str, message: str, trea
     safe_phone = _html_escape(phone) if phone else c["phone_empty"]
     safe_message = _html_escape(message).replace("\n", "<br/>")
 
-    treatment_block = _treatment_block_html(lang, treatment) if treatment else ""
+    treatment_block = (
+        _treatment_block_html(lang, treatment, appointment_date, appointment_time)
+        if treatment else ""
+    )
     call_us_block = _call_us_block_html(lang)
     instagram_block = _instagram_block_html(lang)
 
@@ -343,6 +366,8 @@ def render_owner_email(
     message: str,
     language: str,
     submitted_at_iso: str,
+    appointment_date: Optional[str] = None,
+    appointment_time: Optional[str] = None,
 ) -> tuple[str, str, str]:
     """Return (subject, html, plain_text) for the internal owner notification email."""
     safe_name = _html_escape(name)
@@ -357,6 +382,10 @@ def render_owner_email(
         ("Ime i prezime", safe_name),
         ("Email adresa", f'<a href="mailto:{safe_email}" style="color:#a17a35;text-decoration:none;">{safe_email}</a>'),
         ("Broj telefona", safe_phone if not phone else f'<a href="tel:{_html_escape(phone)}" style="color:#a17a35;text-decoration:none;">{safe_phone}</a>'),
+        ("Datum i vreme termina", _html_escape(
+            f"{appointment_date} u {appointment_time}" if (appointment_date and appointment_time)
+            else (appointment_date or appointment_time or "—")
+        )),
         ("Poruka / Zahtev za termin", safe_message),
         ("Izabrani jezik na sajtu", safe_lang),
         ("Datum i vreme slanja", safe_time),
