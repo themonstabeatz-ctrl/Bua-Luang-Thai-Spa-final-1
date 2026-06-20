@@ -10,11 +10,21 @@ import { useLang } from "@/i18n/LanguageContext";
 import { useSelection } from "@/contexts/SelectionContext";
 import { Phone, Send, Calendar as CalendarIcon, Clock as ClockIcon } from "lucide-react";
 import { toast } from "sonner";
+import { TimeWheelPicker } from "./TimeWheelPicker";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const initial = { name: "", email: "", phone: "", date: "", time: "", message: "" };
+
+// Localized labels for the custom scroll-wheel time picker.
+const WHEEL_LABELS = {
+  sr: { hour: "Sat", minute: "Min", confirm: "Potvrdi", cancel: "Otkaži" },
+  en: { hour: "Hour", minute: "Min", confirm: "Confirm", cancel: "Cancel" },
+  ru: { hour: "Час", minute: "Мин", confirm: "Подтвердить", cancel: "Отмена" },
+  zh: { hour: "时", minute: "分", confirm: "确认", cancel: "取消" },
+  th: { hour: "ชม.", minute: "นาที", confirm: "ยืนยัน", cancel: "ยกเลิก" },
+};
 
 // Map our app languages to Flatpickr locales (fallback to default English).
 const LOCALE_MAP = { ru: Russian, zh: Mandarin };
@@ -25,9 +35,29 @@ export const ContactSection = () => {
   const [form, setForm] = useState(initial);
   const [submitting, setSubmitting] = useState(false);
   const [messageSerbian, setMessageSerbian] = useState(null);
+  const [timeWheelOpen, setTimeWheelOpen] = useState(false);
 
   const dateFpRef = useRef(null);
-  const timeFpRef = useRef(null);
+  const timeWrapperRef = useRef(null);
+
+  // Close the wheel when clicking outside of its wrapper.
+  useEffect(() => {
+    if (!timeWheelOpen) return;
+    const onDocClick = (e) => {
+      if (
+        timeWrapperRef.current &&
+        !timeWrapperRef.current.contains(e.target)
+      ) {
+        setTimeWheelOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("touchstart", onDocClick);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("touchstart", onDocClick);
+    };
+  }, [timeWheelOpen]);
 
   // Auto-populate message when a treatment is selected in the Pricing section,
   // and update the Serbian copy used in the owner notification email.
@@ -82,7 +112,6 @@ export const ContactSection = () => {
       setForm(initial);
       setMessageSerbian(null);
       dateFpRef.current?.flatpickr?.clear?.();
-      timeFpRef.current?.flatpickr?.clear?.();
     } catch (err) {
       console.error(err);
       toast.error(t.contact.form.error);
@@ -243,61 +272,43 @@ export const ContactSection = () => {
                     }}
                   />
                 </div>
-                <div className="relative">
+                <div className="relative" ref={timeWrapperRef}>
                   <label className="block text-[11px] tracking-[0.3em] uppercase text-[#a17a35] mb-2">
                     {t.contact.form.timeLabel}
                   </label>
-                  <Flatpickr
-                    ref={timeFpRef}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      data-testid="contact-input-time"
+                      required
+                      readOnly
+                      placeholder={t.contact.form.timePlaceholder}
+                      value={form.time}
+                      onClick={() => setTimeWheelOpen(true)}
+                      onFocus={() => setTimeWheelOpen(true)}
+                      className={pickerInputCls}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setTimeWheelOpen((v) => !v)}
+                      aria-label={t.contact.form.timeLabel}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-[#a17a35] hover:text-[#7a5a22] transition-colors"
+                    >
+                      <ClockIcon className="h-6 w-6" strokeWidth={1.6} />
+                    </button>
+                  </div>
+                  <TimeWheelPicker
+                    open={timeWheelOpen}
                     value={form.time}
-                    options={{
-                      enableTime: true,
-                      noCalendar: true,
-                      dateFormat: "H:i",
-                      time_24hr: true,
-                      minTime: "10:00",
-                      maxTime: "22:00",
-                      minuteIncrement: 30,
-                      defaultHour: 10,
-                      defaultMinute: 0,
-                      disableMobile: true,
+                    onChange={(hhmm) =>
+                      setForm((p) => ({ ...p, time: hhmm }))
+                    }
+                    onConfirm={(hhmm) => {
+                      setForm((p) => ({ ...p, time: hhmm }));
+                      setTimeWheelOpen(false);
                     }}
-                    onChange={(dates) => {
-                      const d = dates[0];
-                      if (!d) {
-                        setForm((p) => ({ ...p, time: "" }));
-                        return;
-                      }
-                      const hh = String(d.getHours()).padStart(2, "0");
-                      const mm = String(d.getMinutes()).padStart(2, "0");
-                      setForm((p) => ({ ...p, time: `${hh}:${mm}` }));
-                    }}
-                    render={({ defaultValue, value: _v, ...props }, ref) => {
-                      const {
-                        render: _r,
-                        options: _o,
-                        onChange: _oc,
-                        ...inputProps
-                      } = props;
-                      return (
-                        <div className="relative">
-                          <input
-                            {...inputProps}
-                            ref={ref}
-                            data-testid="contact-input-time"
-                            required
-                            readOnly
-                            placeholder={t.contact.form.timePlaceholder}
-                            defaultValue={defaultValue}
-                            className={pickerInputCls}
-                          />
-                          <ClockIcon
-                            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-[#a17a35]"
-                            strokeWidth={1.6}
-                          />
-                        </div>
-                      );
-                    }}
+                    onCancel={() => setTimeWheelOpen(false)}
+                    labels={WHEEL_LABELS[lang] || WHEEL_LABELS.en}
                   />
                 </div>
               </div>

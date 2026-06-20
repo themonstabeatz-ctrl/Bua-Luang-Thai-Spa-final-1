@@ -1,0 +1,37 @@
+{
+  "summary": "Iteration 6: Frontend-only verification of the new iOS-style scroll-wheel time picker that replaces the previously-used Flatpickr time picker in the Kontakt form. All 9 acceptance criteria from the spec pass on desktop (1920x1080) and mobile (390x844). End-to-end form submission persists appointment_time='18:30' and appointment_date='2026-06-25' to MongoDB via POST /api/contact and is retrievable via GET /api/contact. Zero console errors, zero React warnings (including no 'unique key' / no act() warnings).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/frontend/src/components/TimeWheelPicker.jsx",
+    "/app/frontend/src/components/ContactSection.jsx"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "TimeWheelPicker.jsx — HOURS = [10..22] (13 items, strictly clamped), MINUTES = [0,15,30,45]; padding-row keys are 'pt-i' / 'pb-i' and item keys use the numeric value, so the React key-uniqueness contract is respected — verified no 'each child should have a unique key' warning in the console during scroll/click/lang-switch.",
+    "TimeWheelPicker.jsx — Scroll-snap (scrollSnapType: 'y mandatory') + per-item scrollSnapAlign center is implemented. Settle timer (90ms debounce) corrects sub-pixel mis-snaps via smooth scroll; isProgrammatic guard prevents re-entrant onChange. Escape closes via window keydown listener, Enter triggers confirm.",
+    "TimeWheelPicker.jsx — Centre 'lens' band uses top: calc(50% - ITEM_HEIGHT/2 + 14px) to offset for the column label height (10px text + mb-2). Visually verified to land on the selected row both for hours and minutes.",
+    "ContactSection.jsx — Outside-click listener bound to timeWrapperRef on mousedown+touchstart; verified by clicking the section title and seeing the picker disappear (count=0). Escape also closes (handled inside TimeWheelPicker).",
+    "ContactSection.jsx — Soft UX note (NOT a bug — spec is ambiguous): TimeWheelPicker writes through to form.time on every item click via onChange. Therefore tapping 'Otkaži' after picking items does NOT revert to the prior value; it only closes the picker. Spec line 'Cancel closes WITHOUT changing the input value (if user had no value before)' is partially satisfied (no prior value -> field still ends up with the last clicked value). If strict revert is required, the picker should keep an internal draft hour/minute state and only flush on Confirm.",
+    "ContactSection.jsx — WHEEL_LABELS covers sr/en/ru/zh/th; fallback to en for unknown languages. All four non-default langs verified end-to-end (Час/Мин/Подтвердить/Отмена, 时/分/确认/取消, ชม./นาที/ยืนยัน/ยกเลิก, Hour/Min/Confirm/Cancel).",
+    "Backend integration unchanged: POST body still carries appointment_date (ISO yyyy-mm-dd) + appointment_time (HH:MM). Mongo document for TEST_WHEEL_1781954957 confirms persistence and owner_email_sent=true."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "n/a (no backend changes in this iteration; live POST/GET smoke verified)",
+    "frontend": "100% (9/9 spec criteria pass)"
+  },
+  "test_credentials": "none",
+  "seed_data_creation": "One contact document persisted via live UI E2E: name='TEST_WHEEL_1781954957', email='test_wheel@example.com', appointment_date='2026-06-25', appointment_time='18:30', language='en', owner_email_sent=true. Safe to purge by TEST_WHEEL_ prefix.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "TimeWheelPicker is fully integrated and stable. Backend contract unchanged from iter5 (appointment_date / appointment_time). data-testids in play: time-wheel-picker, time-wheel-confirm, time-wheel-cancel, contact-input-time, lang-option-{sr|en|ru|zh|th}, language-switcher. Spec criteria verified: hours strictly 10..22 (13 items, no overflow), minutes 00/15/30/45, ivory→cream gradient w/ gold border, rounded-2xl, centred lens band with selected item rendered at text-[26px]/#2b2620 vs others text-[20px]/#a09686, click-to-open via field OR gold clock icon, scroll snap on both wheels, Confirm/Cancel/Escape/outside-click all close, mobile fits in 390px viewport, end-to-end POST persists HH:MM. Optional UX consideration documented under critical_code_review_comments (Cancel does not revert because onChange writes through live).",
+  "rca of the issue": "N/A — no bugs found this iteration."
+}

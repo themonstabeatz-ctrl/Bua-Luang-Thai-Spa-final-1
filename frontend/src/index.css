@@ -213,6 +213,49 @@ span.flatpickr-weekday {
     caret-color: transparent;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   TimeWheelPicker — iOS-style drum/wheel scroll picker for the booking form.
+   The scrollbar is hidden but native momentum scrolling and snap remain.
+   ───────────────────────────────────────────────────────────────────────── */
+.no-scrollbar {
+    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none; /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chromium/Safari */
+}
+.tw-wheel {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    /* Soft top/bottom mask so out-of-focus rows fade away */
+    mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.55) 24%,
+        rgba(0, 0, 0, 1) 50%,
+        rgba(0, 0, 0, 0.55) 76%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.55) 24%,
+        rgba(0, 0, 0, 1) 50%,
+        rgba(0, 0, 0, 0.55) 76%,
+        rgba(0, 0, 0, 0) 100%
+    );
+}
+.tw-item {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+}
+.tw-item.tw-empty {
+    pointer-events: none;
+}
+
 
 body {
     margin: 0;
