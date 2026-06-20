@@ -1,18 +1,10 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { useLang } from "@/i18n/LanguageContext";
 import { ASSETS } from "@/constants/assets";
 import { Instagram, Mail, Phone, Clock } from "lucide-react";
 
-const FOOTER_SEO_LINK = {
-  sr: "Vodič: tajlandska masaža Beograd",
-  en: "Guide: Thai massage Belgrade",
-  ru: "Гид: тайский массаж в Белграде",
-  zh: "指南:贝尔格莱德泰式按摩",
-};
-
 export const Footer = () => {
-  const { t, lang } = useLang();
+  const { t } = useLang();
   const year = new Date().getFullYear();
   return (
     <footer
@@ -49,20 +41,6 @@ export const Footer = () => {
                 </a>
               </li>
             ))}
-            {/* Single tiny SEO link — surfaces the long-form authority page
-                from /sr/o-tajlandskoj-masazi-beograd but only on the Serbian
-                footer (the page itself is Serbian). */}
-            {lang === "sr" && (
-              <li>
-                <Link
-                  to="/sr/o-tajlandskoj-masazi-beograd"
-                  className="hover:text-[#a17a35] transition-colors text-xs opacity-80"
-                  data-testid="footer-link-master-seo"
-                >
-                  {FOOTER_SEO_LINK.sr}
-                </Link>
-              </li>
-            )}
           </ul>
         </div>
 

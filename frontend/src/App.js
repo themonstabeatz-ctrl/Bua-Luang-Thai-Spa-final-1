@@ -15,7 +15,6 @@ import { ASSETS } from "@/constants/assets";
 import { SEOHead } from "@/seo/SEOHead";
 import { HOME_PATH, SERVICE_PATH, LANGS, buildHreflangs, SERVICE_CONTENT, SERVICE_SLUGS } from "@/seo/services";
 import { ServicePage } from "@/pages/ServicePage";
-import { MasterSEOPage } from "@/pages/MasterSEOPage";
 import "@/App.css";
 
 const BuddhaShowcase = () => {
@@ -180,13 +179,6 @@ const ServiceRoute = ({ lang }) => (
   </>
 );
 
-const MasterRoute = () => (
-  <>
-    <LangSync lang="sr" />
-    <MasterSEOPage />
-  </>
-);
-
 function App() {
   return (
     <HelmetProvider>
@@ -211,9 +203,6 @@ function App() {
                     element={<ServiceRoute lang={l} />}
                   />
                 ))}
-
-                {/* Long-form Serbian SEO page (linked from footer) */}
-                <Route path="/sr/o-tajlandskoj-masazi-beograd" element={<MasterRoute />} />
 
                 {/* Catch-all */}
                 <Route path="*" element={<Navigate to="/sr" replace />} />
