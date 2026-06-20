@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { Toaster } from "sonner";
-import { LanguageProvider } from "@/i18n/LanguageContext";
+import { LanguageProvider, useLang } from "@/i18n/LanguageContext";
 import { SelectionProvider } from "@/contexts/SelectionContext";
 import { Navigation } from "@/components/Navigation";
 import { Hero } from "@/components/Hero";
@@ -11,6 +12,10 @@ import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
 import { ChatFloater } from "@/components/ChatFloater";
 import { ASSETS } from "@/constants/assets";
+import { SEOHead } from "@/seo/SEOHead";
+import { HOME_PATH, SERVICE_PATH, LANGS, buildHreflangs, SERVICE_CONTENT, SERVICE_SLUGS } from "@/seo/services";
+import { ServicePage } from "@/pages/ServicePage";
+import { MasterSEOPage } from "@/pages/MasterSEOPage";
 import "@/App.css";
 
 const BuddhaShowcase = () => {
@@ -23,13 +28,11 @@ const BuddhaShowcase = () => {
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight;
-      // 0 when section is far from center, 1 when its center is the viewport center
       const sectionCenter = rect.top + rect.height / 2;
       const viewportCenter = vh / 2;
       const distance = Math.abs(sectionCenter - viewportCenter);
       const maxDistance = vh / 2 + rect.height / 2;
       const t = Math.max(0, 1 - distance / maxDistance);
-      // ease-in-out curve so fade feels smooth
       const eased = t * t * (3 - 2 * t);
       setOpacity(eased);
     };
@@ -55,7 +58,6 @@ const BuddhaShowcase = () => {
         minHeight: "95vh",
       }}
     >
-      {/* Floating, transparent logo with scroll fade */}
       <img
         src={ASSETS.logo}
         alt="Bua Luang Thai Spa Beograd - Autentična Tajlandska masaža logo"
@@ -72,46 +74,167 @@ const BuddhaShowcase = () => {
   );
 };
 
-const Home = () => {
+// Keep the LanguageContext in sync with the current URL prefix.
+const LangSync = ({ lang }) => {
+  const { lang: current, setLang } = useLang();
+  useEffect(() => {
+    if (lang && current !== lang) setLang(lang);
+  }, [lang, current, setLang]);
+  return null;
+};
+
+// Anchor the URL hash (e.g. /sr#contact) once on mount.
+const ScrollToHash = () => {
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (!hash) return;
+    const id = hash.replace("#", "");
+    requestAnimationFrame(() => {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [hash]);
+  return null;
+};
+
+const HOME_SEO = {
+  sr: {
+    title: "Bua Luang Thai Spa Beograd · Autentična Tajlandska Masaža",
+    description:
+      "Luksuzni tajlandski spa u Beogradu — autentični terapeuti iz Tajlanda, premium ambijent, kompletna ponuda tajlandskih masaža. Zakažite termin online.",
+    og: "Najautentičniji tajlandski spa u Beogradu — sertifikovani terapeuti direktno iz Tajlanda.",
+  },
+  en: {
+    title: "Bua Luang Thai Spa Belgrade · Authentic Thai Massage",
+    description:
+      "Luxury Thai spa in Belgrade — authentic certified therapists from Thailand, premium ambiance, full Thai massage menu. Book online today.",
+    og: "Belgrade's most authentic Thai spa — certified therapists directly from Thailand.",
+  },
+  ru: {
+    title: "Bua Luang Thai Spa Белград · Аутентичный тайский массаж",
+    description:
+      "Премиум тайский спа в Белграде — сертифицированные мастера из Таиланда, роскошная атмосфера, полное меню тайских массажей. Запишитесь онлайн.",
+    og: "Самый аутентичный тайский спа в Белграде — мастера прямо из Таиланда.",
+  },
+  zh: {
+    title: "Bua Luang Thai Spa 贝尔格莱德 · 正宗泰式按摩",
+    description:
+      "贝尔格莱德奢华泰式 SPA —— 来自泰国的认证按摩师、精致环境、完整泰式按摩菜单。立即在线预订。",
+    og: "贝尔格莱德最正宗的泰式 SPA —— 来自泰国的认证按摩师。",
+  },
+};
+
+const Home = ({ lang }) => {
+  // Build the hreflang map + the FAQPage schema once per render.
+  const alternates = buildHreflangs(null);
+  const seo = HOME_SEO[lang];
+
+  // Aggregate offer catalog so Google sees the full pricing on the homepage.
+  const offerCatalog = {
+    "@context": "https://schema.org",
+    "@type": "OfferCatalog",
+    name: lang === "sr" ? "Tajlandske masaže Beograd" : "Thai massage services",
+    itemListElement: SERVICE_SLUGS.map((s, i) => {
+      const c = SERVICE_CONTENT[s]?.[lang];
+      if (!c) return null;
+      return {
+        "@type": "Offer",
+        position: i + 1,
+        name: c.name,
+        url: `${SERVICE_PATH[lang]}/${s}`,
+      };
+    }).filter(Boolean),
+  };
+
   return (
-    <div className="relative">
-      <Navigation />
-      <Hero />
-      <AboutSection />
-      <BuddhaShowcase />
-      <PricingSection />
-      <ContactSection />
-      <Footer />
-      <ChatFloater />
-    </div>
+    <>
+      <LangSync lang={lang} />
+      <SEOHead
+        title={seo.title}
+        description={seo.description}
+        ogDescription={seo.og}
+        canonical={HOME_PATH[lang]}
+        lang={lang}
+        alternates={alternates}
+        jsonLd={[offerCatalog]}
+      />
+      <ScrollToHash />
+      <div className="relative">
+        <Navigation />
+        <Hero />
+        <AboutSection />
+        <BuddhaShowcase />
+        <PricingSection />
+        <ContactSection />
+        <Footer />
+        <ChatFloater />
+      </div>
+    </>
   );
 };
 
+const ServiceRoute = ({ lang }) => (
+  <>
+    <LangSync lang={lang} />
+    <ServicePage lang={lang} />
+  </>
+);
+
+const MasterRoute = () => (
+  <>
+    <LangSync lang="sr" />
+    <MasterSEOPage />
+  </>
+);
+
 function App() {
   return (
-    <LanguageProvider>
-      <SelectionProvider>
-        <div className="App min-h-screen bg-[#0a0705] text-[#2b2620]">
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Home />} />
-            </Routes>
-          </BrowserRouter>
-          <Toaster
-            theme="light"
-            position="top-center"
-            toastOptions={{
-              style: {
-                background: "#ffffff",
-                border: "1px solid rgba(161,122,53,0.35)",
-                color: "#3a312a",
-                boxShadow: "0 14px 40px rgba(60, 45, 20, 0.12)",
-              },
-            }}
-          />
-        </div>
-      </SelectionProvider>
-    </LanguageProvider>
+    <HelmetProvider>
+      <LanguageProvider>
+        <SelectionProvider>
+          <div className="App min-h-screen bg-[#0a0705] text-[#2b2620]">
+            <BrowserRouter>
+              <Routes>
+                {/* Root redirects to default Serbian homepage. */}
+                <Route path="/" element={<Navigate to="/sr" replace />} />
+
+                {/* Per-language homepages */}
+                {LANGS.map((l) => (
+                  <Route key={l} path={HOME_PATH[l]} element={<Home lang={l} />} />
+                ))}
+
+                {/* Per-language service detail pages */}
+                {LANGS.map((l) => (
+                  <Route
+                    key={`svc-${l}`}
+                    path={`${SERVICE_PATH[l]}/:slug`}
+                    element={<ServiceRoute lang={l} />}
+                  />
+                ))}
+
+                {/* Long-form Serbian SEO page (linked from footer) */}
+                <Route path="/sr/o-tajlandskoj-masazi-beograd" element={<MasterRoute />} />
+
+                {/* Catch-all */}
+                <Route path="*" element={<Navigate to="/sr" replace />} />
+              </Routes>
+            </BrowserRouter>
+            <Toaster
+              theme="light"
+              position="top-center"
+              toastOptions={{
+                style: {
+                  background: "#ffffff",
+                  border: "1px solid rgba(161,122,53,0.35)",
+                  color: "#3a312a",
+                  boxShadow: "0 14px 40px rgba(60, 45, 20, 0.12)",
+                },
+              }}
+            />
+          </div>
+        </SelectionProvider>
+      </LanguageProvider>
+    </HelmetProvider>
   );
 }
 

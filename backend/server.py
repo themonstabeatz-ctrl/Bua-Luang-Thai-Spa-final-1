@@ -254,6 +254,39 @@ async def list_contact_messages():
     return items
 
 
+@api_router.get("/site-info")
+async def site_info():
+    """Return localised business metadata used by the frontend to populate
+    Schema.org JSON-LD, contact links and the booking footer.
+
+    All sensitive fields (street address, postal code, lat/lng) are read
+    from environment variables so we can drop them in the moment the lease
+    is executed — without redeploying the application.
+    """
+    return {
+        "name": "Bua Luang Thai Spa",
+        "phone": os.environ.get("SALON_PHONE", "+381626255500"),
+        "owner_email": OWNER_EMAIL,
+        "instagram": os.environ.get(
+            "SALON_INSTAGRAM_URL", "https://www.instagram.com/bualuang_thai_spa/"
+        ),
+        "site_base_url": os.environ.get("SITE_BASE_URL", "https://bualuangthaispa.rs"),
+        "address": {
+            "street": os.environ.get("SALON_STREET_ADDRESS", "") or None,
+            "postal_code": os.environ.get("SALON_POSTAL_CODE", "") or None,
+            "city": os.environ.get("SALON_CITY", "Beograd"),
+            "country": os.environ.get("SALON_COUNTRY", "RS"),
+            "latitude": os.environ.get("SALON_LATITUDE", "") or None,
+            "longitude": os.environ.get("SALON_LONGITUDE", "") or None,
+        },
+        "hours": {
+            "opens": "10:00",
+            "closes": "22:00",
+            "days": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        },
+    }
+
+
 app.include_router(api_router)
 
 app.add_middleware(

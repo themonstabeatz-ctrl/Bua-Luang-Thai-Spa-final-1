@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useLang } from "@/i18n/LanguageContext";
 import { ASSETS } from "@/constants/assets";
+import { HOME_PATH } from "@/seo/services";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,9 +32,32 @@ const Flag = ({ iso, className = "" }) => (
 
 export const Navigation = () => {
   const { t, lang, setLang, languages } = useLang();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [logoOpacity, setLogoOpacity] = useState(1);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // True when we are on the per-language homepage; section #anchors only
+  // resolve there. From service pages we route back to the home + hash.
+  const onHome = Object.values(HOME_PATH).includes(location.pathname);
+  const hrefFor = (id) =>
+    onHome ? `#${id}` : `${HOME_PATH[lang]}#${id}`;
+
+  // Switching language navigates to the equivalent route in the target
+  // language so the URL stays the SEO source of truth.
+  const switchLang = (code) => {
+    setLang(code);
+    if (onHome) {
+      navigate(HOME_PATH[code]);
+    } else {
+      // For now any non-home page (e.g. service pages) routes back to the
+      // target language's homepage. Future improvement: map slug → translated
+      // service path. We could not realistically translate every slug today
+      // without producing 404s, so navigating to the home is safe.
+      navigate(HOME_PATH[code]);
+    }
+  };
 
   useEffect(() => {
     const onScroll = () => {
@@ -61,8 +86,8 @@ export const Navigation = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 flex items-center justify-between h-20">
-        <a
-          href="#home"
+        <Link
+          to={HOME_PATH[lang]}
           data-testid="nav-logo"
           className="flex items-center gap-3 group"
           style={{ opacity: logoOpacity, transition: "opacity 200ms linear" }}
@@ -76,13 +101,13 @@ export const Navigation = () => {
               filter: "drop-shadow(0 4px 14px rgba(0,0,0,0.45))",
             }}
           />
-        </a>
+        </Link>
 
         <nav className="hidden lg:flex items-center gap-10">
           {navItems.map((item) => (
             <a
               key={item.id}
-              href={item.href}
+              href={hrefFor(item.id)}
               data-testid={`nav-link-${item.id}`}
               className="relative text-sm tracking-[0.18em] uppercase font-medium transition-colors duration-300 text-white hover:text-[#e8c98a] after:absolute after:left-0 after:-bottom-2 after:h-px after:w-0 after:bg-gradient-to-r after:from-[#a17a35] after:to-[#e8c98a] after:transition-all after:duration-500 hover:after:w-full"
             >
@@ -112,7 +137,7 @@ export const Navigation = () => {
                 <DropdownMenuItem
                   key={l.code}
                   data-testid={`lang-option-${l.code}`}
-                  onClick={() => setLang(l.code)}
+                  onClick={() => switchLang(l.code)}
                   className={`cursor-pointer focus:bg-[rgba(196,154,76,0.18)] focus:text-[#e8c98a] gap-3 ${
                     l.code === lang ? "text-[#e8c98a]" : "text-white"
                   }`}
@@ -125,7 +150,7 @@ export const Navigation = () => {
           </DropdownMenu>
 
           <a
-            href="#contact"
+            href={hrefFor("contact")}
             data-testid="nav-cta"
             className="hidden md:inline-flex items-center px-5 py-2.5 rounded-full text-sm tracking-[0.16em] uppercase font-medium bg-gradient-to-r from-[#a17a35] via-[#d4ad5e] to-[#a17a35] text-[#1a120a] hover:shadow-[0_8px_28px_rgba(212,173,94,0.55)] transition-shadow duration-500"
           >
@@ -153,7 +178,7 @@ export const Navigation = () => {
           {navItems.map((item) => (
             <a
               key={item.id}
-              href={item.href}
+              href={hrefFor(item.id)}
               data-testid={`nav-mobile-link-${item.id}`}
               onClick={() => setMobileOpen(false)}
               className="py-3 text-base tracking-[0.18em] uppercase text-white hover:text-[#e8c98a] border-b border-[rgba(196,154,76,0.18)] last:border-b-0 font-medium"
@@ -162,7 +187,7 @@ export const Navigation = () => {
             </a>
           ))}
           <a
-            href="#contact"
+            href={hrefFor("contact")}
             onClick={() => setMobileOpen(false)}
             data-testid="nav-mobile-cta"
             className="mt-4 text-center px-5 py-3 rounded-full text-sm tracking-[0.16em] uppercase font-medium bg-gradient-to-r from-[#a17a35] via-[#d4ad5e] to-[#a17a35] text-[#1a120a]"
