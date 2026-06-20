@@ -30,6 +30,32 @@ const Wheel = ({ items, value, onChange, label, formatter = pad2 }) => {
   const ref = useRef(null);
   const isProgrammatic = useRef(false);
   const settleTimer = useRef(null);
+  const wheelLock = useRef(false);
+  const touchStartY = useRef(null);
+
+  // Move the wheel by exactly `delta` indices (clamped). Used by the keyboard,
+  // touch and mouse-wheel handlers to enforce single-step movement regardless
+  // of gesture velocity.
+  const stepByDelta = useCallback(
+    (delta) => {
+      if (!delta) return;
+      const node = ref.current;
+      if (!node) return;
+      const curIdx = items.indexOf(value);
+      const next = Math.max(
+        0,
+        Math.min(items.length - 1, (curIdx < 0 ? 0 : curIdx) + delta)
+      );
+      if (items[next] === value) return;
+      isProgrammatic.current = true;
+      node.scrollTo({ top: next * ITEM_HEIGHT, behavior: "smooth" });
+      setTimeout(() => {
+        isProgrammatic.current = false;
+      }, 200);
+      onChange(items[next]);
+    },
+    [items, value, onChange]
+  );
 
   // Scroll programmatically to the active index whenever `value` changes from
   // outside (e.g. parent reset). We guard against the resulting `scroll` event
@@ -68,6 +94,51 @@ const Wheel = ({ items, value, onChange, label, formatter = pad2 }) => {
     }, 90);
   }, [items, value, onChange]);
 
+  // Mouse wheel / trackpad: ALWAYS one step per discrete event. We swallow the
+  // native scroll so velocity can never skip multiple items.
+  const handleWheel = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (wheelLock.current) return;
+      const dir = e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0;
+      if (!dir) return;
+      wheelLock.current = true;
+      stepByDelta(dir);
+      // Re-arm the lock so a single trackpad inertia stream can't cascade
+      // into multi-step jumps. 180ms is long enough to feel intentional and
+      // short enough to still feel snappy when the user spins again.
+      setTimeout(() => {
+        wheelLock.current = false;
+      }, 180);
+    },
+    [stepByDelta]
+  );
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    // wheel must be a non-passive listener to call preventDefault().
+    const onWheel = (e) => handleWheel(e);
+    node.addEventListener("wheel", onWheel, { passive: false });
+    return () => node.removeEventListener("wheel", onWheel);
+  }, [handleWheel]);
+
+  // Touch: cap each swipe to a single step. We measure delta from touchstart
+  // and on touchend pick sign only, ignoring magnitude.
+  const onTouchStart = (e) => {
+    touchStartY.current = e.touches?.[0]?.clientY ?? null;
+  };
+  const onTouchEnd = (e) => {
+    const start = touchStartY.current;
+    touchStartY.current = null;
+    if (start == null) return;
+    const end = e.changedTouches?.[0]?.clientY;
+    if (end == null) return;
+    const dy = start - end; // positive = swipe up = next item
+    if (Math.abs(dy) < 12) return; // tap, not a swipe
+    stepByDelta(dy > 0 ? 1 : -1);
+  };
+
   const onItemClick = (it) => {
     const idx = items.indexOf(it);
     if (idx < 0 || !ref.current) return;
@@ -87,6 +158,8 @@ const Wheel = ({ items, value, onChange, label, formatter = pad2 }) => {
       <div
         ref={ref}
         onScroll={handleScroll}
+        onTouchStart={onTouchStart}
+        onTouchEnd={onTouchEnd}
         className="tw-wheel relative w-[90px] overflow-y-scroll no-scrollbar"
         style={{ height: WHEEL_HEIGHT, scrollSnapType: "y mandatory" }}
       >

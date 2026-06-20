@@ -368,8 +368,15 @@ def render_owner_email(
     submitted_at_iso: str,
     appointment_date: Optional[str] = None,
     appointment_time: Optional[str] = None,
+    treatment: Optional[dict] = None,
 ) -> tuple[str, str, str]:
-    """Return (subject, html, plain_text) for the internal owner notification email."""
+    """Return (subject, html, plain_text) for the internal owner notification email.
+
+    The owner always sees the booking entirely in Serbian. When the visitor
+    selected a treatment in the Pricing section, the `treatment` dict must
+    already carry Serbian copies (name + description); the backend takes care
+    of swapping `name_serbian`/`description_serbian` in before calling this.
+    """
     safe_name = _html_escape(name)
     safe_email = _html_escape(email)
     safe_phone = _html_escape(phone) if phone else "—"
@@ -405,6 +412,13 @@ def render_owner_email(
         for label, value in rows
     )
 
+    # Beautiful Serbian treatment block (Name → Duration → Date/Time →
+    # Description → Price) so the owner sees the booking in full detail.
+    treatment_block = (
+        _treatment_block_html("sr", treatment, appointment_date, appointment_time)
+        if treatment else ""
+    )
+
     inner = f"""
       <h1 style="margin:0 0 6px 0;font-size:22px;line-height:1.2;color:#a17a35;font-weight:400;letter-spacing:0.04em;">
         Nova poruka sa sajta
@@ -415,19 +429,39 @@ def render_owner_email(
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
         {rows_html}
       </table>
+      {treatment_block}
       <p style="margin:24px 0 0 0;font-size:13px;color:#7a6e5e;font-style:italic;">
         Ova poruka je automatski generisana kada je posetilac sajta poslao kontakt formu.
       </p>
     """
+
+    plain_treatment = ""
+    if treatment:
+        plain_treatment = (
+            "\nIzabrani tretman:\n"
+            f"  Naziv masaže: {treatment.get('name','')}\n"
+            f"  Trajanje: {treatment.get('duration','')} MIN\n"
+        )
+        if appointment_date or appointment_time:
+            plain_treatment += (
+                f"  Datum i vreme: "
+                f"{(appointment_date or '')}{(' u ' + appointment_time) if appointment_time else ''}\n"
+            )
+        if treatment.get("description"):
+            plain_treatment += f"  Opis: {treatment['description']}\n"
+        plain_treatment += f"  Cena: {_format_price(treatment.get('price',0))} RSD\n"
 
     plain = (
         "NOVA PORUKA SA SAJTA – Bua Luang Thai Spa\n\n"
         f"Ime i prezime: {name}\n"
         f"Email adresa: {email}\n"
         f"Broj telefona: {phone or '—'}\n"
+        f"Datum i vreme termina: "
+        f"{(appointment_date or '—')}{(' u ' + appointment_time) if appointment_time else ''}\n"
         f"Poruka: {message}\n"
         f"Izabrani jezik: {lang_display}\n"
-        f"Datum/vreme: {submitted_at_iso}\n"
+        f"Datum/vreme slanja: {submitted_at_iso}\n"
+        f"{plain_treatment}"
     )
 
     return OWNER_SUBJECT, _shell(inner), plain

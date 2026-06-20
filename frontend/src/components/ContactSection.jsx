@@ -73,6 +73,8 @@ export const ContactSection = () => {
         duration: selection.duration,
         price: selection.price,
         description: selection.description,
+        name_serbian: selection.nameSerbian,
+        description_serbian: selection.descriptionSerbian,
       }
     : null;
 

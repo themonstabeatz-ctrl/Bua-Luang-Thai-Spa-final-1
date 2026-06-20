@@ -251,6 +251,11 @@ span.flatpickr-weekday {
     cursor: pointer;
     user-select: none;
     outline: none;
+    /* Force a single-item stop per scroll gesture so fast swipes can NOT
+       skip multiple values (e.g., 10→13 or 15→45). Combined with
+       scroll-snap-type: y mandatory on the wheel, each gesture locks onto
+       the very next consecutive item regardless of velocity. */
+    scroll-snap-stop: always;
 }
 .tw-item.tw-empty {
     pointer-events: none;

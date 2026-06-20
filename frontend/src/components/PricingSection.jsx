@@ -43,6 +43,7 @@ const PricingRow = ({ row, idx, t, lang }) => {
       duration: opt.duration,
       price: opt.price,
       description: row.description,
+      descriptionSerbian: srRow.description,
     });
 
     // Smooth scroll to contact form

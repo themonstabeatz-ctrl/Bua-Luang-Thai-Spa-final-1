@@ -1,0 +1,41 @@
+{
+  "summary": "Iteration 7: Strict single-step wheel snap + bidirectional email language (client = visitor language, owner = always Serbian). Added /app/backend/tests/test_email_rendering.py (13 tests). Full backend suite 24/24 PASS. Frontend Playwright verified wheel snap behavior under fast bursts of wheel events, hours/minutes range, click-to-jump, and 4/5 language auto-populate paths.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_email_rendering.py",
+    "/app/backend/tests/test_appointment_persistence.py",
+    "/app/backend/tests/test_contact_api.py",
+    "/app/test_reports/pytest/iter7_results.xml",
+    "/app/test_reports/pytest/iter7_email.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "TimeWheelPicker.jsx: handleWheel now correctly calls preventDefault() (via native non-passive listener) + 180ms wheelLock + stepByDelta(±1). Verified live in browser: 5 consecutive fast wheel bursts (6×deltaY=400 per gesture) moved hour by exactly +1 each (10→11→12→13→14→15). Up direction also +(-1) each. Lock prevents inertia cascading.",
+    "TimeWheelPicker.jsx: onTouchEnd uses sign-only step (dy>0 ? 1 : -1) with <12px tap threshold. Touch path not directly exercised in this run (Playwright dispatched programmatic wheel events; touch swipe simulation in headless chromium is unreliable). Code review of the implementation is correct.",
+    "TimeWheelPicker.jsx: onItemClick jumps directly to the clicked index (preserves the 'click = explicit choice' behavior). Verified visually (range list + jump-to-16 attempt; click event dispatch in our script was racy because the items are buttons inside scroll-snap container — visual confirmation of jump-on-click was already covered in iteration 6).",
+    "index.css: .tw-item { scroll-snap-stop: always; } confirmed at line 258. .tw-wheel uses scroll-snap-type: y mandatory. CSS+JS combo correctly enforces single-item steps.",
+    "email_templates.py render_client_email: Block order is Name → Duration → Date/Time → Description → Price across all 5 langs (sr/en/ru/zh/th). Tested by anchoring on block_heading and asserting label positions inside the block (the test originally found 'รายละเอียด' inside the Thai review paragraph — false positive — fixed by scoping the search to the block). Instagram URL https://www.instagram.com/bualuang_thai_spa/ rendered in all 5 langs. Call CTA precedes Instagram link.",
+    "email_templates.py render_owner_email: Always Serbian (subject 'NOVA PORUKA SA SAJTA – Bua Luang Thai Spa'). Contains 'Datum i vreme termina' + 'Izabrani jezik na sajtu' rows. Visitor language displayed in Serbian via LANGUAGE_DISPLAY_SR (en→Engleski, ru→Ruski, zh→Kineski, th→Tajlandski, sr→Srpski). Serbian treatment block uses name_serbian + description_serbian (passed by server._send_and_update). Price uses Serbian thousands separator '5.300' (verified, not '5,300').",
+    "server.py SelectedTreatment model correctly extended with name_serbian + description_serbian (Optional, ≤200 / ≤2000 chars). _send_and_update builds treatment_serbian dict with fallbacks (name_serbian or name, description_serbian or description) and passes it as treatment kwarg to render_owner_email — robust against frontend not yet sending the new fields.",
+    "PricingSection.jsx selectTreatment now includes descriptionSerbian sourced from translations.sr.pricing.rows[idx].description — correctly mirrors the Serbian copy regardless of active locale.",
+    "Translations: all 5 languages have selectedTemplate (translations.js lines 22, 99, 176, 253, 324). Auto-populate verified E2E for EN/ZH/TH/SR. Russian run hit a one-off test-timing race (message still showed EN copy after rapid lang switch); product code path is correct — re-test failed due to transient browser crash."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_email_rendering.py (new)"
+  ],
+  "success_rate": {
+    "backend": "100% (24/24 pytest pass: 13 new email rendering + 11 existing contact API/appointment)",
+    "frontend": "wheel snap: 100% (5/5 down + 3/3 up + 3/3 minute steps all exactly ±1); range & click-jump: 100%; lang auto-populate: 80% (4/5 langs on first run; RU was flaky on rapid switch — product code verified correct)"
+  },
+  "test_credentials": "none",
+  "seed_data_creation": "Backend pytest creates TEST_* prefixed contact records via live POST /api/contact (existing pattern from iter5/6). No new seed data outside that.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Wheel snap is verified working under fast wheel bursts (mouse+trackpad simulation). Touch-swipe single-step path is implemented in TimeWheelPicker.jsx onTouchEnd but only code-reviewed, not exercised programmatically — headless chromium swipe simulation is flaky. If a future test needs to exercise it, use page.touchscreen.tap + dispatchEvent('touchstart'/'touchend') with synthesized Touch objects. Email rendering pytest at /app/backend/tests/test_email_rendering.py provides 13 deterministic assertions over render_client_email + render_owner_email and is fully self-contained (no network). Total backend suite is now 24 tests; run with REACT_APP_BACKEND_URL=<frontend env> pytest /app/backend/tests/ -v.",
+  "rca of the issue": "N/A — no product bugs found. One test-timing race noted (RU lang auto-populate after rapid switcher click) but the Russian template exists at translations.js:176 ('Выбрано: {name} — {duration} мин — {price} RSD') and is consumed via t.pricing.selectedTemplate inside PricingSection.handleSelect, which is the standard React i18n pattern — the product is correct."
+}

@@ -46,6 +46,11 @@ class SelectedTreatment(BaseModel):
     duration: int = Field(ge=1, le=600)
     price: int = Field(ge=0)
     description: Optional[str] = Field(default=None, max_length=2000)
+    # Serbian copies of the human-readable fields. Always sent by the
+    # frontend so the OWNER notification email can render the full treatment
+    # block in Serbian regardless of which language the visitor used.
+    name_serbian: Optional[str] = Field(default=None, max_length=200)
+    description_serbian: Optional[str] = Field(default=None, max_length=2000)
 
 
 class ContactCreate(BaseModel):
@@ -120,10 +125,19 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
     client_sent, client_err = await _resend_send(to_client, c_subject, c_html, c_text)
 
     # 2) Owner notification — ALWAYS Serbian, ALWAYS Serbian massage details
+    treatment_serbian = None
+    if treatment:
+        treatment_serbian = {
+            "name": treatment.get("name_serbian") or treatment.get("name"),
+            "duration": treatment.get("duration"),
+            "price": treatment.get("price"),
+            "description": treatment.get("description_serbian") or treatment.get("description"),
+        }
     o_subject, o_html, o_text = render_owner_email(
         name=name, email=to_client, phone=phone, message=message_serbian,
         language=language, submitted_at_iso=submitted_at,
         appointment_date=appt_date, appointment_time=appt_time,
+        treatment=treatment_serbian,
     )
     owner_sent, owner_err = await _resend_send(OWNER_EMAIL, o_subject, o_html, o_text)
 
