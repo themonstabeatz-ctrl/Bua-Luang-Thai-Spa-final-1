@@ -16,8 +16,13 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
  * picker opens with no value yet, we anchor to 10:00.
  */
 
-const HOURS = Array.from({ length: 13 }, (_, i) => 10 + i); // 10..22
-const MINUTES = [0, 15, 30, 45];
+const HOURS = Array.from({ length: 12 }, (_, i) => 10 + i); // 10..21
+const MINUTES_FULL = [0, 15, 30, 45];
+const MINUTES_LAST_HOUR = [0]; // when hour === 21, only :00 is bookable
+const LAST_HOUR = 21;
+
+// Minutes available for a given hour. Last booking is strictly 21:00.
+const minutesFor = (hour) => (hour === LAST_HOUR ? MINUTES_LAST_HOUR : MINUTES_FULL);
 
 const ITEM_HEIGHT = 44; // px — must match CSS height of .tw-item
 const VISIBLE_ITEMS = 5; // odd number so the middle slot is the selected one
@@ -210,11 +215,13 @@ export const TimeWheelPicker = ({
   labels = { hour: "SAT", minute: "MIN", confirm: "Potvrdi", cancel: "Otkaži" },
 }) => {
   // Parse incoming value into hour/minute, with safe fallback to 10:00.
+  // Strict business hours: last bookable slot is 21:00 (no 21:15/30/45/22:xx).
   const initial = (() => {
     if (value && /^\d{2}:\d{2}$/.test(value)) {
       const [h, m] = value.split(":").map(Number);
       const hour = HOURS.includes(h) ? h : 10;
-      const minute = MINUTES.includes(m) ? m : 0;
+      const allowedMinutes = minutesFor(hour);
+      const minute = allowedMinutes.includes(m) ? m : 0;
       return { hour, minute };
     }
     return { hour: 10, minute: 0 };
@@ -229,7 +236,9 @@ export const TimeWheelPicker = ({
     if (value && /^\d{2}:\d{2}$/.test(value)) {
       const [h, m] = value.split(":").map(Number);
       if (HOURS.includes(h)) setHour(h);
-      if (MINUTES.includes(m)) setMinute(m);
+      const allowed = minutesFor(HOURS.includes(h) ? h : 10);
+      if (allowed.includes(m)) setMinute(m);
+      else setMinute(0); // snap to :00 when leaving the legal set
     } else {
       setHour(10);
       setMinute(0);
@@ -241,7 +250,10 @@ export const TimeWheelPicker = ({
     if (!open) return;
     const onKey = (e) => {
       if (e.key === "Escape") onCancel?.();
-      if (e.key === "Enter") onConfirm?.(`${pad2(hour)}:${pad2(minute)}`);
+      if (e.key === "Enter") {
+        const m = minutesFor(hour).includes(minute) ? minute : 0;
+        onConfirm?.(`${pad2(hour)}:${pad2(m)}`);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -249,11 +261,23 @@ export const TimeWheelPicker = ({
 
   if (!open) return null;
 
+  // Minutes available for the currently-selected hour (21 → only [0]).
+  const allowedMinutes = minutesFor(hour);
+  // If user lands on 21 with a non-zero minute, clamp the minute to :00
+  // before rendering so the visible value matches a bookable slot.
+  const safeMinute = allowedMinutes.includes(minute) ? minute : 0;
+
   const handleHourChange = (h) => {
     setHour(h);
-    onChange?.(`${pad2(h)}:${pad2(minute)}`);
+    // Snap minute to a legal value for the new hour (e.g. 20:45 → 21:00).
+    const allowed = minutesFor(h);
+    const nextMinute = allowed.includes(minute) ? minute : 0;
+    if (nextMinute !== minute) setMinute(nextMinute);
+    onChange?.(`${pad2(h)}:${pad2(nextMinute)}`);
   };
   const handleMinuteChange = (m) => {
+    // Defensive: refuse minutes that aren't part of the current hour's set.
+    if (!minutesFor(hour).includes(m)) return;
     setMinute(m);
     onChange?.(`${pad2(hour)}:${pad2(m)}`);
   };
@@ -291,8 +315,8 @@ export const TimeWheelPicker = ({
             :
           </div>
           <Wheel
-            items={MINUTES}
-            value={minute}
+            items={allowedMinutes}
+            value={safeMinute}
             onChange={handleMinuteChange}
             label={labels.minute}
           />
@@ -311,7 +335,7 @@ export const TimeWheelPicker = ({
         <button
           type="button"
           data-testid="time-wheel-confirm"
-          onClick={() => onConfirm?.(`${pad2(hour)}:${pad2(minute)}`)}
+          onClick={() => onConfirm?.(`${pad2(hour)}:${pad2(safeMinute)}`)}
           className="flex-1 px-3 py-2 rounded-full text-[11px] tracking-[0.22em] uppercase text-white bg-gradient-to-r from-[#c9a45a] via-[#a17a35] to-[#7a5a22] hover:shadow-[0_8px_22px_rgba(161,122,53,0.40)] transition-shadow"
         >
           {labels.confirm}

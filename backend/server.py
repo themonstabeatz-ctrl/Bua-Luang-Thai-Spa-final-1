@@ -3,10 +3,11 @@ from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import re
 import logging
 import asyncio
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator
 from typing import List, Optional
 import uuid
 from datetime import datetime, timezone
@@ -14,6 +15,7 @@ from datetime import datetime, timezone
 import resend
 
 from email_templates import render_client_email, render_owner_email
+from ics_calendar import build_appointment_ics
 
 
 ROOT_DIR = Path(__file__).parent
@@ -64,6 +66,30 @@ class ContactCreate(BaseModel):
     appointment_date: Optional[str] = Field(default=None, max_length=40)
     appointment_time: Optional[str] = Field(default=None, max_length=20)
 
+    @field_validator("appointment_time")
+    @classmethod
+    def _validate_business_hours(cls, v):
+        """Booking slots are strictly 10:00 — 21:00 in 15-minute steps.
+
+        The salon closes at 22:00 but the last accepted appointment START is
+        21:00. Anything past 21:00 (21:15/30/45, 22:00) MUST be rejected so a
+        malicious or buggy client cannot bypass the wheel picker UI.
+        """
+        if not v:
+            return v
+        s = str(v).strip()
+        if not re.fullmatch(r"[0-2]\d:[0-5]\d", s):
+            raise ValueError("appointment_time must be HH:MM (24h)")
+        hh, mm = s.split(":")
+        h, m = int(hh), int(mm)
+        if h < 10 or h > 21:
+            raise ValueError("appointment_time hour must be between 10 and 21 (inclusive)")
+        if m not in (0, 15, 30, 45):
+            raise ValueError("appointment_time minute must be one of 00, 15, 30, 45")
+        if h == 21 and m != 0:
+            raise ValueError("last bookable slot is 21:00 — 21:15/30/45 are not allowed")
+        return s
+
 
 class ContactMessage(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -85,7 +111,13 @@ class ContactMessage(BaseModel):
 
 
 # ---- Resend helper ----
-async def _resend_send(to_email: str, subject: str, html_body: str, text_body: str) -> tuple[bool, Optional[str]]:
+async def _resend_send(
+    to_email: str,
+    subject: str,
+    html_body: str,
+    text_body: str,
+    attachments: Optional[List[dict]] = None,
+) -> tuple[bool, Optional[str]]:
     params = {
         "from": f"{SENDER_NAME} <{SENDER_EMAIL}>",
         "to": [to_email],
@@ -94,6 +126,9 @@ async def _resend_send(to_email: str, subject: str, html_body: str, text_body: s
         "text": text_body,
         "reply_to": REPLY_TO_EMAIL,
     }
+    if attachments:
+        # Resend expects: [{filename, content (base64 str OR raw bytes), content_type?}]
+        params["attachments"] = attachments
     try:
         result = await asyncio.to_thread(resend.Emails.send, params)
         logger.info("Resend OK for %s id=%s", to_email, getattr(result, "get", lambda *_: None)("id"))
@@ -122,7 +157,35 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
         appointment_date=appt_date,
         appointment_time=appt_time,
     )
-    client_sent, client_err = await _resend_send(to_client, c_subject, c_html, c_text)
+
+    # Build a one-tap .ics calendar attachment when we have a real booking
+    # slot. Visitor's iPhone/Android calendar will offer "Add to Calendar"
+    # automatically on a text/calendar attachment.
+    client_attachments = None
+    if appt_date and appt_time and treatment:
+        try:
+            import base64
+            ics_str = build_appointment_ics(
+                summary=f"Bua Luang Thai Spa — {treatment.get('name', '')}",
+                description=(treatment.get("description") or "").strip(),
+                date_iso=appt_date,
+                time_hhmm=appt_time,
+                duration_minutes=int(treatment.get("duration") or 60),
+                organizer_email=OWNER_EMAIL,
+            )
+            ics_b64 = base64.b64encode(ics_str.encode("utf-8")).decode("ascii")
+            client_attachments = [{
+                "filename": "appointment.ics",
+                "content": ics_b64,
+                "content_type": "text/calendar; charset=utf-8; method=PUBLISH",
+            }]
+        except Exception:
+            logger.exception("Failed to build .ics attachment — sending email without it")
+            client_attachments = None
+
+    client_sent, client_err = await _resend_send(
+        to_client, c_subject, c_html, c_text, attachments=client_attachments,
+    )
 
     # 2) Owner notification — ALWAYS Serbian, ALWAYS Serbian massage details
     treatment_serbian = None
