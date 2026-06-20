@@ -35,6 +35,35 @@ body {
   background: linear-gradient(180deg, #a17a35, #7a5a22);
 }
 
+/* ---- Custom-themed native date & time picker indicators (gold accent) ---- */
+.contact-datepicker,
+.contact-timepicker {
+  color-scheme: light;
+  font-family: "Manrope", "Inter", system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+.contact-datepicker::-webkit-calendar-picker-indicator,
+.contact-timepicker::-webkit-calendar-picker-indicator {
+  filter: invert(48%) sepia(67%) saturate(360%) hue-rotate(2deg) brightness(86%) contrast(89%);
+  opacity: 0.9;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  padding: 4px;
+  border-radius: 4px;
+}
+.contact-datepicker::-webkit-calendar-picker-indicator:hover,
+.contact-timepicker::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background: rgba(161, 122, 53, 0.12);
+}
+.contact-timepicker::-webkit-datetime-edit-ampm-field {
+  display: none; /* force 24h appearance */
+}
+.contact-datepicker:invalid,
+.contact-timepicker:invalid {
+  color: #a09686;
+}
+
 @keyframes bounce-slow {
   0%, 100% { transform: translate(-50%, 0); }
   50% { transform: translate(-50%, 8px); }

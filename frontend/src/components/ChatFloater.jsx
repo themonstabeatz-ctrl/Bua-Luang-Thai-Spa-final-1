@@ -16,10 +16,22 @@ const ViberIcon = ({ className = "" }) => (
   </svg>
 );
 
-// Returns "Dobar dan!" between 10:00 and 19:59, otherwise "Dobro veče!"
+// Belgrade-style seasonal greeting:
+//   05:00–10:00  → "Dobro jutro!" (all year)
+//   Winter (Oct–Mar):
+//      10:00–17:00 → "Dobar dan!"
+//      else        → "Dobro veče!"
+//   Summer (Apr–Sep):
+//      10:00–20:00 → "Dobar dan!"
+//      else        → "Dobro veče!"
 const getGreeting = () => {
-  const h = new Date().getHours();
-  return h >= 10 && h < 20 ? "Dobar dan!" : "Dobro veče!";
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMonth(); // 0=Jan
+  if (h >= 5 && h < 10) return "Dobro jutro!";
+  const isWinter = m >= 9 || m <= 2; // Oct(9)–Mar(2)
+  const dayEnd = isWinter ? 17 : 20;
+  return h >= 10 && h < dayEnd ? "Dobar dan!" : "Dobro veče!";
 };
 
 const buildMessage = (selection) => {

@@ -40,6 +40,15 @@ export const ContactSection = () => {
   // we don't ship a stale "Odabrano: …" line to the owner.
   const onChange = (e) => {
     const { name, value } = e.target;
+    // Enforce business-hours window for the time picker (10:00 – 22:00).
+    if (name === "time" && value) {
+      const [hh, mm] = value.split(":").map(Number);
+      const minutes = hh * 60 + mm;
+      if (minutes < 600 || minutes > 1320) {
+        toast.error("Radno vreme: 10:00 — 22:00");
+        return;
+      }
+    }
     if (name === "message" && messageSerbian && value !== form.message) {
       setMessageSerbian(null);
     }
@@ -157,7 +166,7 @@ export const ContactSection = () => {
                     name="date"
                     value={form.date}
                     onChange={onChange}
-                    className={inputCls}
+                    className={`${inputCls} contact-datepicker`}
                   />
                 </div>
                 <div>
@@ -171,8 +180,10 @@ export const ContactSection = () => {
                     name="time"
                     value={form.time}
                     onChange={onChange}
+                    min="10:00"
+                    max="22:00"
                     step="900"
-                    className={inputCls}
+                    className={`${inputCls} contact-timepicker`}
                   />
                 </div>
               </div>
