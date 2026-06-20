@@ -123,7 +123,7 @@ export const SEOHead = ({
   const localBusiness = buildLocalBusinessSchema(siteInfo, lang, canonicalUrl);
 
   // Normalise the htmlLang attribute (e.g. zh → zh-Hans, sr → sr-RS).
-  const htmlLangMap = { sr: "sr-RS", en: "en-US", ru: "ru-RU", zh: "zh-Hans" };
+  const htmlLangMap = { sr: "sr-RS", en: "en-US", ru: "ru-RU", zh: "zh-Hans", th: "th-TH" };
 
   return (
     <Helmet>

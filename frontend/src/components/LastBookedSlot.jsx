@@ -18,6 +18,7 @@ const COPY = {
   en: (n) => `Last slot booked ${n} minutes ago`,
   ru: (n) => `Последний сеанс забронирован ${n} минут назад`,
   zh: (n) => `最后一次预约是在 ${n} 分钟前`,
+  th: (n) => `จองคิวล่าสุดเมื่อ ${n} นาทีที่แล้ว`,
 };
 
 const MIN_MINUTES = 5;

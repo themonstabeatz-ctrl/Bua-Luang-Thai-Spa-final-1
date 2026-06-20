@@ -155,8 +155,11 @@ CLIENT_COPY = {
             "uspešno primljena."
         ),
         "review": (
-            "Naš tim će pregledati Vaš upit i kontaktirati Vas u najkraćem mogućem "
-            "roku kako bismo potvrdili detalje ili termin Vašeg rituala."
+            "Vaš termin u Bua Luang Thai Spa je uspešno zakazan. Radujemo se "
+            "Vašem dolasku u izabranom vremenu. Naš tim će Vas kontaktirati "
+            "isključivo u slučaju da je traženi termin zauzet, kako bismo "
+            "zajedno pronašli alternativno vreme za Vaš ritual. U suprotnom, "
+            "Vaš termin se smatra potvrđenim."
         ),
         "data_heading": "Podaci koje ste poslali",
         "phone_label": "Telefon",
@@ -175,8 +178,11 @@ CLIENT_COPY = {
             "successfully received."
         ),
         "review": (
-            "Our team will review your inquiry and reach out as soon as possible to "
-            "confirm the details or an appointment for your ritual."
+            "Your appointment at Bua Luang Thai Spa is successfully scheduled. "
+            "We look forward to welcoming you at your selected time. Our team "
+            "will only contact you directly if the requested slot is unavailable "
+            "and we need to arrange an alternative time for your ritual. "
+            "Otherwise, consider your session fully secured."
         ),
         "data_heading": "Your submission",
         "phone_label": "Phone",
@@ -194,8 +200,11 @@ CLIENT_COPY = {
             "Спасибо, что обратились в Bua Luang Thai Spa. Ваше сообщение успешно получено."
         ),
         "review": (
-            "Наша команда рассмотрит ваш запрос и свяжется с вами в кратчайшие сроки, "
-            "чтобы подтвердить детали или время вашего ритуала."
+            "Ваш сеанс в Bua Luang Thai Spa успешно запланирован. Мы будем рады "
+            "приветствовать Вас в выбранное время. Наша команда свяжется с Вами "
+            "лично только в том случае, если выбранное время окажется занято, "
+            "чтобы подобрать альтернативу для Вашего ритуала. В противном случае "
+            "Ваш сеанс считается полностью подтвержденным."
         ),
         "data_heading": "Отправленные данные",
         "phone_label": "Телефон",
@@ -208,23 +217,32 @@ CLIENT_COPY = {
         "hours_value": "Пн — Вс: 10:00 — 22:00",
     },
     "zh": {
-        "greeting": "尊敬的 {name}，",
+        "greeting": "尊敬的 {name},",
         "intro": "感谢您联系 Bua Luang Thai Spa。我们已成功收到您的留言。",
-        "review": "我们的团队将审阅您的咨询，并尽快与您联系以确认细节或您所选疗程的预约时间。",
+        "review": (
+            "您在 Bua Luang Thai Spa 的预约已成功排定。我们期待着在您选择的时间迎接您的光临。"
+            "只有在您要求的时段已满、需要为您调整其他理疗时间时,我们的团队才会直接与您联系。"
+            "否则,请放心,您的专属时段已完全锁定。"
+        ),
         "data_heading": "您提交的信息",
         "phone_label": "电话",
-        "phone_empty": "（未提供）",
+        "phone_empty": "(未提供)",
         "message_label": "留言 / 服务",
         "closing": "期待协助您寻得内心的安宁与平衡。",
-        "signoff": "诚挚问候，",
+        "signoff": "诚挚问候,",
         "team": "您的 Bua Luang Thai Spa 团队",
         "hours_label": "营业时间",
-        "hours_value": "周一至周日：10:00 — 22:00",
+        "hours_value": "周一至周日:10:00 — 22:00",
     },
     "th": {
         "greeting": "เรียนคุณ {name},",
         "intro": "ขอบคุณที่ติดต่อ Bua Luang Thai Spa เราได้รับข้อความของคุณเรียบร้อยแล้ว",
-        "review": "ทีมงานของเราจะตรวจสอบคำถามของคุณและจะติดต่อกลับโดยเร็วที่สุดเพื่อยืนยันรายละเอียดหรือเวลานัดหมายสำหรับทรีตเมนต์ของคุณ",
+        "review": (
+            "การนัดหมายของคุณที่ Bua Luang Thai Spa ได้รับการบันทึกเรียบร้อยแล้ว "
+            "เรายินดีเป็นอย่างยิ่งที่จะได้ต้อนรับคุณตามเวลาที่เลือกไว้ "
+            "ทีมงานของเราจะติดต่อคุณโดยตรงในกรณีที่ช่วงเวลาดังกล่าวไม่ว่างและจำเป็นต้องจัดหาเวลาอื่นที่เหมาะสมสำหรับสปาริต้าของคุณเท่านั้น "
+            "หากไม่มีการติดต่อกลับ ถือว่าเซสชันของคุณได้รับการยืนยันและล็อกเวลาไว้เรียบร้อยแล้ว"
+        ),
         "data_heading": "ข้อมูลที่คุณส่ง",
         "phone_label": "โทรศัพท์",
         "phone_empty": "(ไม่ได้ระบุ)",

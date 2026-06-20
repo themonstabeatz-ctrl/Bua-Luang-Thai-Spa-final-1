@@ -27,11 +27,12 @@ export const SERVICE_PATH = {
   en: "/en/services",
   ru: "/ru/uslugi",
   zh: "/zh/services",
+  th: "/th/services",
 };
 
-export const HOME_PATH = { sr: "/sr", en: "/en", ru: "/ru", zh: "/zh" };
+export const HOME_PATH = { sr: "/sr", en: "/en", ru: "/ru", zh: "/zh", th: "/th" };
 
-export const LANGS = ["sr", "en", "ru", "zh"];
+export const LANGS = ["sr", "en", "ru", "zh", "th"];
 
 // Standard hreflang map for a given path family.
 export const buildHreflangs = (slug) =>
