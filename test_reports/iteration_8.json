@@ -1,0 +1,43 @@
+{
+  "summary": "Iteration 8 — Fresh end-to-end QA pass of the full Bua Luang Thai Spa booking spec. Backend pytest 24/24 PASS (13 email rendering + 11 contact/appointment). Frontend live verification: Flatpickr DD.MM.YYYY form field ✅; iOS time wheel range 10–22 / 00-15-30-45 ✅; strict ±1 single-step snap under 5 rapid wheel bursts both directions ✅; minute wheel single-step ✅ (clamped at boundary by design); auto-populate works in ALL 5 languages (sr/en/ru/zh/th) with localized prefix, treatment name AND price; E2E POST /api/contact returns 200 with appointment_date/time, name_serbian, description_serbian persisted; both client + owner emails sent successfully via Resend (email_error=null). No React/Flatpickr console warnings.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Contact form auto-populate (EN)",
+        "issues": [
+          "EN price uses Serbian-style thousands separator '5.300' instead of English '5,300'. Spec text explicitly allowed '(or similar template)', and SR/RU/ZH/TH all consistently use '.', so this is intentional unified branding rather than a bug. Flagged for awareness only."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_email_rendering.py",
+    "/app/backend/tests/test_appointment_persistence.py",
+    "/app/backend/tests/test_contact_api.py",
+    "/app/test_reports/pytest/iter8_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "email_templates.py _format_date_eu(): correctly converts ISO 'yyyy-mm-dd' → 'DD/MM/YYYY' with safe pass-through for non-ISO inputs. Both client _treatment_block_html and render_owner_email use it. Verified by pytest assertions '01/07/2026' in html AND '2026-07-01' not in html, in both client EN flow and owner SR flow.",
+    "render_owner_email(): subject 'NOVA PORUKA SA SAJTA – Bua Luang Thai Spa', visitor language displayed in Serbian via LANGUAGE_DISPLAY_SR (en→Engleski, ru→Ruski, zh→Kineski, th→Tajlandski, sr→Srpski) — covered by parametrized test_owner_email_always_serbian across all 5 langs. Serbian thousands separator '5.300' verified.",
+    "server.py SelectedTreatment model + _send_and_update: name_serbian / description_serbian round-trip through POST → DB → GET correctly verified live (POST id=173a243b… returned and re-fetched both fields exactly as sent). Treatment block in owner email rendered with name_serbian + description_serbian, independent of visitor language.",
+    "TimeWheelPicker.jsx stepByDelta(): IS CLAMPED (not wrapped) for both hours (10..22) and minutes (00,15,30,45). At boundary 45 the wheel intentionally does not roll to 00, and at 22→ does not roll to 10. The spec example '00→15→30→45→00' was interpreted as 'single step each' rather than wrap-around; current clamped implementation is internally consistent (hours are clamped too) and is documented in the code comment 'fully clamped'. If wrap-around is actually desired, change line 45-48 to use modulo. Flagged as design clarification — not a regression.",
+    "TimeWheelPicker.jsx handleWheel: verified under load — 5 consecutive mouse-wheel events at deltaY=400 each, 260ms apart, produced exactly +1/-1 hour steps: 10→11→12→13→14→15 down, 15→14→13→12→11→10 up. Lock (180ms) + stepByDelta(±1) work as designed.",
+    "ContactSection.jsx Flatpickr: input rendered '20.06.2026' for picked date; dateFormat 'd.m.Y' confirmed. No 'invalid locale undefined' warnings on console.",
+    "Translations / PricingSection.jsx: All 5 langs auto-populated in their native script (sr 'Odabrano: Aroma Masaža', en 'Selected: Aroma Massage', ru 'Выбрано: Аромамасляный массаж', zh '已选择：芳香精油按摩', th 'เลือกแล้ว: นวดอโรมา'). Implementation goes beyond spec by localizing treatment name + duration unit too — visually cleaner."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (24/24 pytest)",
+    "frontend": "~100% (date DD.MM.YYYY ✓, wheel range ✓, wheel strict snap ±1 ✓, auto-populate all 5 langs ✓, E2E submit + persistence + Resend dispatch ✓)"
+  },
+  "test_credentials": "none required",
+  "seed_data_creation": "Live POST created contact id=173a243b-690d-40fe-8e51-551f6ac69bdf (TEST QA E2E iter8). Persisted in db.contact_messages; both client + owner emails dispatched successfully (client_email_sent=true, owner_email_sent=true, email_error=null).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend test runner needs REACT_APP_BACKEND_URL exported in shell before pytest (tests/test_contact_api.py and test_appointment_persistence.py read it via os.environ['REACT_APP_BACKEND_URL']). Use: `export REACT_APP_BACKEND_URL=https://bua-luang-spa.preview.emergentagent.com && pytest backend/tests/ -v`. The TimeWheelPicker minute clamping at boundary (45 stays at 45 instead of wrapping to 00) is intentional per code comment 'fully clamped' — if the product owner wants cyclic minutes, modify stepByDelta to use modular indexing. Headless chromium occasionally crashes on first Playwright launch (SIGSEGV) — simply retry the script.",
+  "rca of the issue": "N/A — no defects found. All 11 spec items verified working as designed. The single design clarification (minute wheel clamp vs wrap, and EN price separator '.' vs ',') are stylistic choices, not bugs."
+}
