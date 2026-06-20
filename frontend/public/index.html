@@ -8,6 +8,20 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
+        <!-- ═══ FAVICON — Bua Luang lotus emblem, Google SERP optimised ═══
+             Multiple PNG variants in 48× multiples + legacy .ico ensure
+             crisp rendering everywhere (Google SERP, browser tabs, iOS home
+             screen, Android PWA). All routes /sr /en /ru /zh /th inherit
+             this head section, so the lotus shows consistently. -->
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+        <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
+        <link rel="icon" type="image/png" sizes="144x144" href="/favicon-144.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+
         <!-- Primary SEO — DEFAULT values only (no canonical/description here).
              react-helmet-async takes over per-route in App.js / SEOHead.jsx
              and emits canonical, description, OG, Twitter and JSON-LD for
