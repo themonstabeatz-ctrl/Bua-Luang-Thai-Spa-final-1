@@ -3,14 +3,6 @@ import { Link } from "react-router-dom";
 import { useLang } from "@/i18n/LanguageContext";
 import { ASSETS } from "@/constants/assets";
 import { Instagram, Mail, Phone, Clock } from "lucide-react";
-import { SERVICE_CONTENT, SERVICE_PATH, SERVICE_SLUGS } from "@/seo/services";
-
-const FOOTER_SERVICES_LABEL = {
-  sr: "Naše Usluge",
-  en: "Our Services",
-  ru: "Наши услуги",
-  zh: "我们的服务",
-};
 
 const FOOTER_SEO_LINK = {
   sr: "Vodič: tajlandska masaža Beograd",
@@ -27,7 +19,7 @@ export const Footer = () => {
       data-testid="footer"
       className="relative pt-12 pb-8 border-t border-[rgba(161,122,53,0.25)] bg-gradient-to-b from-[#fbf3dc] to-[#f5e7c4]"
     >
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14 grid md:grid-cols-4 gap-10 items-start">
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14 grid md:grid-cols-3 gap-10 items-start">
         <div>
           <img
             src={ASSETS.logo}
@@ -57,42 +49,20 @@ export const Footer = () => {
                 </a>
               </li>
             ))}
-            {/* Long-form SEO landing — only surface the SR version (others have
-                their own homepage as authority layer until we expand). */}
+            {/* Single tiny SEO link — surfaces the long-form authority page
+                from /sr/o-tajlandskoj-masazi-beograd but only on the Serbian
+                footer (the page itself is Serbian). */}
             {lang === "sr" && (
               <li>
                 <Link
                   to="/sr/o-tajlandskoj-masazi-beograd"
-                  className="hover:text-[#a17a35] transition-colors"
+                  className="hover:text-[#a17a35] transition-colors text-xs opacity-80"
                   data-testid="footer-link-master-seo"
                 >
                   {FOOTER_SEO_LINK.sr}
                 </Link>
               </li>
             )}
-          </ul>
-        </div>
-
-        <div>
-          <div className="text-[11px] tracking-[0.32em] uppercase text-[#a17a35] mb-4">
-            {FOOTER_SERVICES_LABEL[lang] || FOOTER_SERVICES_LABEL.en}
-          </div>
-          <ul className="space-y-2 text-sm text-[#3a312a]">
-            {SERVICE_SLUGS.map((s) => {
-              const c = SERVICE_CONTENT[s]?.[lang];
-              if (!c) return null;
-              return (
-                <li key={s}>
-                  <Link
-                    to={`${SERVICE_PATH[lang]}/${s}`}
-                    className="hover:text-[#a17a35] transition-colors"
-                    data-testid={`footer-service-${s}`}
-                  >
-                    {c.name}
-                  </Link>
-                </li>
-              );
-            })}
           </ul>
         </div>
 

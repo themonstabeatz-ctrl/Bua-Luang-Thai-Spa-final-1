@@ -104,7 +104,7 @@ export const ServicePage = ({ lang }) => {
     ],
   };
 
-  const otherServices = SERVICE_SLUGS.filter((s) => s !== slug).slice(0, 4);
+  const otherServices = []; // related grid intentionally disabled per user request
 
   return (
     <>
@@ -207,31 +207,6 @@ export const ServicePage = ({ lang }) => {
                 <Phone className="h-4 w-4" /> {CTA_COPY[lang].call}
               </a>
             </div>
-          </Reveal>
-
-          {/* Related — discreet, minimal list */}
-          <Reveal>
-            <section className="border-t border-[rgba(161,122,53,0.18)] pt-10">
-              <div className="text-[10px] tracking-[0.32em] uppercase text-[#a17a35] text-center mb-5">
-                {CTA_COPY[lang].related}
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 max-w-4xl mx-auto">
-                {otherServices.map((s) => {
-                  const c = SERVICE_CONTENT[s]?.[lang];
-                  if (!c) return null;
-                  return (
-                    <Link
-                      key={s}
-                      to={`${SERVICE_PATH[lang]}/${s}`}
-                      className="block rounded-xl bg-white/70 border border-[rgba(161,122,53,0.18)] p-4 hover:border-[#a17a35] transition-colors text-center"
-                      data-testid={`service-related-${s}`}
-                    >
-                      <div className="text-sm font-medium text-[#2b2620]">{c.name}</div>
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
           </Reveal>
         </div>
       </main>
