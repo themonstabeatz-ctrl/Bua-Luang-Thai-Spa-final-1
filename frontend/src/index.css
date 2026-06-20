@@ -1,3 +1,15 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   THAI LANGUAGE TYPOGRAPHY — Thai script (อักษรไทย) renders denser and
+   visually smaller than Latin/Cyrillic/CJK at the same px size. Tailwind's
+   text-* utilities are all rem-based, so bumping the root font-size on the
+   Thai-rooted HTML element scales every text class proportionally
+   (navigation, hero copy, body, pricing labels, footer, widget, etc.) —
+   single-line, zero per-component patches.
+   ───────────────────────────────────────────────────────────────────────── */
+html[lang="th-TH"] {
+    font-size: 112.5%; /* ~+12.5% — restores Thai visual weight parity with SR/EN */
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
