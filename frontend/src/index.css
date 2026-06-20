@@ -377,18 +377,20 @@ code {
 
 /* ─────────────────────────────────────────────────────────────────────────────
    MOBILE PORTRAIT — keep the masseuse (hero) and Buddha statue (showcase)
-   on screen by anchoring their background-image to the strict LEFT edge.
-   Both subjects sit on the left of the original landscape composition, so
-   `background-position: left center` reveals them naturally when the
-   viewport becomes narrow. Also disable `background-attachment: fixed` on
-   touch devices because iOS Safari ignores it and it causes janky paints
-   on Android.
+   on screen by anchoring their background-image to the right focal point.
+   The Buddha sits ~28% from the left edge of the source image, so that
+   exact value centres the statue inside a vertical phone viewport. The
+   hero (masseuse) sits on the very left of its composition, so we keep it
+   at the left edge. We deliberately KEEP `background-attachment: fixed`
+   intact here so the parallax effect remains active on Android browsers
+   (iOS Safari ignores `fixed` regardless, which is acceptable).
    ───────────────────────────────────────────────────────────────────────── */
 @media (orientation: portrait) and (max-width: 900px) {
-    [data-testid="hero-section"],
-    [data-testid="buddha-showcase"] {
+    [data-testid="hero-section"] {
         background-position: left center !important;
-        background-attachment: scroll !important;
+    }
+    [data-testid="buddha-showcase"] {
+        background-position: 28% center !important;
     }
 }
 
@@ -401,12 +403,20 @@ code {
    the fold.
    ───────────────────────────────────────────────────────────────────────── */
 @media (orientation: landscape) and (max-height: 500px) {
-    header[data-testid="main-nav"] {
+    header[data-testid="main-nav"],
+    header[data-testid="main-nav"] > div {
         background: transparent !important;
+        background-color: transparent !important;
+        background-image: none !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         border-bottom: 0 !important;
+        border: 0 !important;
         box-shadow: none !important;
+    }
+    /* The scrolled-state classes are appended via JS; defeat them explicitly. */
+    header[data-testid="main-nav"].bg-\[rgba\(26\,18\,10\,0\.78\)\] {
+        background: transparent !important;
     }
     /* Pull the hero content up so the logo / eyebrow sit higher in the
        compressed landscape viewport. */
@@ -421,7 +431,6 @@ code {
     [data-testid="hero-eyebrow"] {
         margin-bottom: 0.5rem !important;
     }
-    /* Slightly tighter H1 so the rest of the composition stays visible. */
     [data-testid="hero-title"] > span:first-child {
         font-size: 2.5rem !important;
         line-height: 1.05 !important;
