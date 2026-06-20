@@ -376,16 +376,18 @@ code {
 
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   MOBILE PORTRAIT — Hero image keeps the masseuse on the left visible.
-   The hero uses a `background-image` on the section, so we steer
-   `background-position` toward the left edge whenever the viewport is in
-   portrait orientation on a phone. Also disable `background-attachment: fixed`
-   on touch devices because iOS Safari ignores it and it causes janky paints
+   MOBILE PORTRAIT — keep the masseuse (hero) and Buddha statue (showcase)
+   on screen by anchoring their background-image to the strict LEFT edge.
+   Both subjects sit on the left of the original landscape composition, so
+   `background-position: left center` reveals them naturally when the
+   viewport becomes narrow. Also disable `background-attachment: fixed` on
+   touch devices because iOS Safari ignores it and it causes janky paints
    on Android.
    ───────────────────────────────────────────────────────────────────────── */
 @media (orientation: portrait) and (max-width: 900px) {
-    [data-testid="hero-section"] {
-        background-position: 30% center !important;
+    [data-testid="hero-section"],
+    [data-testid="buddha-showcase"] {
+        background-position: left center !important;
         background-attachment: scroll !important;
     }
 }

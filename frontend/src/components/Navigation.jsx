@@ -137,6 +137,7 @@ export const Navigation = () => {
             onClick={() => setMobileOpen((v) => !v)}
             className="lg:hidden p-2 text-white"
             aria-label="Menu"
+            style={{ filter: "drop-shadow(0px 1px 2px rgba(0,0,0,0.55))" }}
           >
             {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
