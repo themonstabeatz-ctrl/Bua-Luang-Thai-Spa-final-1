@@ -1,22 +1,57 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ASSETS } from "@/constants/assets";
 import { useLang } from "@/i18n/LanguageContext";
 import { ChevronDown } from "lucide-react";
 
 export const Hero = () => {
   const { t } = useLang();
+  const sectionRef = useRef(null);
+  const [parallax, setParallax] = useState(0);
+
+  // Luxury parallax pattern: an isolated absolutely-positioned bg layer
+  // larger than the section, driven by transform: translate3d. Decoupled
+  // from `background-attachment: fixed` (which iOS ignores and Android
+  // re-anchors on address-bar collapse, causing the "jump"). Now the bg
+  // moves smoothly with scroll while the section keeps a stable 100dvh
+  // box — no jerks, no re-anchors.
+  useEffect(() => {
+    const onScroll = () => {
+      const el = sectionRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      // While the hero is in view, map its top offset (-vh..+vh) to a small
+      // translate. Factor 0.35 = subtle, premium parallax depth.
+      const progress = -rect.top;
+      setParallax(progress * 0.35);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
   return (
     <section
       id="home"
+      ref={sectionRef}
       data-testid="hero-section"
-      className="relative min-h-[100svh] w-full overflow-hidden flex items-center justify-center"
-      style={{
-        backgroundImage: `url(${ASSETS.heroBg})`,
-        backgroundAttachment: "fixed",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
+      className="relative min-h-[100dvh] w-full overflow-hidden flex items-center justify-center"
     >
+      {/* Parallax bg layer — fills section + extra 30% on each side so the
+          translate never reveals an empty edge. NOT background-attachment. */}
+      <div
+        aria-hidden="true"
+        data-testid="hero-bg"
+        className="absolute left-0 right-0 -top-[30%] -bottom-[30%] bg-cover bg-center pointer-events-none"
+        style={{
+          backgroundImage: `url(${ASSETS.heroBg})`,
+          transform: `translate3d(0, ${parallax}px, 0)`,
+          willChange: "transform",
+        }}
+      />
       <div className="relative z-10 w-full max-w-5xl mx-auto px-6 sm:px-10 lg:px-14 pt-32 pb-32 text-center">
         {/* Logo — transparent against dark spa scene via screen blend */}
         <img

@@ -6,7 +6,9 @@
    (navigation, hero copy, body, pricing labels, footer, widget, etc.) —
    single-line, zero per-component patches.
    ───────────────────────────────────────────────────────────────────────── */
-html[lang="th-TH"] {
+html[lang="th-TH"],
+html[lang="th"],
+html:lang(th) {
     font-size: 112.5%; /* ~+12.5% — restores Thai visual weight parity with SR/EN */
 }
 
@@ -398,10 +400,7 @@ code {
    (iOS Safari ignores `fixed` regardless, which is acceptable).
    ───────────────────────────────────────────────────────────────────────── */
 @media (orientation: portrait) and (max-width: 900px) {
-    [data-testid="hero-section"] {
-        background-position: left center !important;
-    }
-    [data-testid="buddha-showcase"] {
+    [data-testid="buddha-showcase-bg"] {
         background-position: 28% center !important;
     }
 }

@@ -39,3 +39,6 @@ Serbian (sr-RS). All agent responses must be in Serbian.
 - A11y on wheel picker (keyboard ArrowUp / ArrowDown step).
 - Unify date popup and time wheel into a single visual layer (currently Flatpickr + custom wheel; both on-brand but different renderers).
 - E2E Playwright smoke in CI.
+
+## 2026-06 (fork): Buddha parallax fix
+- Buddha sekcija: parallax klemovan na 0 (Math.min), sloj ankeriran top:0 / -bottom-50%, backgroundPosition "center top" -> glava Bude uvek cela vidljiva, parallax se zavrsava na gornjoj ivici slike.

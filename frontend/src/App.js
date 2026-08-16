@@ -20,6 +20,7 @@ import "@/App.css";
 const BuddhaShowcase = () => {
   const sectionRef = useRef(null);
   const [opacity, setOpacity] = useState(0);
+  const [parallax, setParallax] = useState(0);
 
   useEffect(() => {
     const handler = () => {
@@ -34,6 +35,10 @@ const BuddhaShowcase = () => {
       const t = Math.max(0, 1 - distance / maxDistance);
       const eased = t * t * (3 - 2 * t);
       setOpacity(eased);
+      // Luxury parallax clamped at 0: the image glides down while the section
+      // enters, and stops exactly when the image top edge meets the section
+      // top — so the Buddha head is always fully visible at rest.
+      setParallax(Math.min(0, -rect.top * 0.35));
     };
     handler();
     window.addEventListener("scroll", handler, { passive: true });
@@ -49,14 +54,19 @@ const BuddhaShowcase = () => {
       ref={sectionRef}
       data-testid="buddha-showcase"
       className="relative w-full overflow-hidden"
-      style={{
-        backgroundImage: `url(${ASSETS.buddhaBg})`,
-        backgroundAttachment: "fixed",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        minHeight: "95vh",
-      }}
+      style={{ minHeight: "95dvh" }}
     >
+      <div
+        aria-hidden="true"
+        data-testid="buddha-showcase-bg"
+        className="absolute left-0 right-0 top-0 -bottom-[50%] bg-cover pointer-events-none"
+        style={{
+          backgroundImage: `url(${ASSETS.buddhaBg})`,
+          backgroundPosition: "center top",
+          transform: `translate3d(0, ${parallax}px, 0)`,
+          willChange: "transform",
+        }}
+      />
       <img
         src={ASSETS.logo}
         alt="Bua Luang Thai Spa Beograd - Autentična Tajlandska masaža logo"
