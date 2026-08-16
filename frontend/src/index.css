@@ -254,6 +254,23 @@ span.flatpickr-weekday {
     caret-color: transparent;
 }
 
+/* Scrollable slot grid — thin gold scrollbar, max 4 visible rows */
+.buaa-slot-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(161, 122, 53, 0.45) rgba(161, 122, 53, 0.08);
+}
+.buaa-slot-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+.buaa-slot-scroll::-webkit-scrollbar-track {
+    background: rgba(161, 122, 53, 0.08);
+    border-radius: 999px;
+}
+.buaa-slot-scroll::-webkit-scrollbar-thumb {
+    background: rgba(161, 122, 53, 0.45);
+    border-radius: 999px;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    TimeWheelPicker — iOS-style drum/wheel scroll picker for the booking form.
    The scrollbar is hidden but native momentum scrolling and snap remain.

@@ -25,6 +25,7 @@ export const ContactSection = () => {
   const { selection } = useSelection();
   const [form, setForm] = useState(initial);
   const [submitting, setSubmitting] = useState(false);
+  const [slotRefresh, setSlotRefresh] = useState(0);
   const [messageSerbian, setMessageSerbian] = useState(null);
 
   const dateFpRef = useRef(null);
@@ -101,11 +102,13 @@ export const ContactSection = () => {
       setForm(initial);
       setMessageSerbian(null);
       dateFpRef.current?.flatpickr?.clear?.();
+      setSlotRefresh((k) => k + 1);
     } catch (err) {
       console.error(err);
       if (err?.response?.status === 409) {
         toast.error(t.contact.form.slotTaken);
         setForm((p) => ({ ...p, time: "" }));
+        setSlotRefresh((k) => k + 1);
       } else {
         toast.error(t.contact.form.error);
       }
@@ -299,6 +302,7 @@ export const ContactSection = () => {
               </div>
 
               <SlotGrid
+                refreshKey={slotRefresh}
                 date={form.date}
                 duration={selection?.duration || 60}
                 value={form.time}
