@@ -9,11 +9,13 @@ import { Hero } from "@/components/Hero";
 import { AboutSection } from "@/components/AboutSection";
 import { PricingSection } from "@/components/PricingSection";
 import { ContactSection } from "@/components/ContactSection";
+import { FaqSection } from "@/components/FaqSection";
 import { Footer } from "@/components/Footer";
 import { ChatFloater } from "@/components/ChatFloater";
 import { ASSETS } from "@/constants/assets";
 import { SEOHead } from "@/seo/SEOHead";
 import { HOME_PATH, SERVICE_PATH, LANGS, buildHreflangs, SERVICE_CONTENT, SERVICE_SLUGS } from "@/seo/services";
+import { HOME_KEYWORDS, buildFaqSchema } from "@/seo/localSeo";
 import { ServicePage } from "@/pages/ServicePage";
 import "@/App.css";
 
@@ -170,8 +172,9 @@ const Home = ({ lang }) => {
         ogDescription={seo.og}
         canonical={HOME_PATH[lang]}
         lang={lang}
+        keywords={HOME_KEYWORDS[lang] || HOME_KEYWORDS.sr}
         alternates={alternates}
-        jsonLd={[offerCatalog]}
+        jsonLd={[offerCatalog, buildFaqSchema(lang)]}
       />
       <ScrollToHash />
       <div className="relative">
@@ -181,6 +184,7 @@ const Home = ({ lang }) => {
         <BuddhaShowcase />
         <PricingSection />
         <ContactSection />
+        <FaqSection />
         <Footer />
         <ChatFloater />
       </div>

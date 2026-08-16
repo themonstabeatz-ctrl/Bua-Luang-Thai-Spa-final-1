@@ -8,23 +8,19 @@ import { Mandarin } from "flatpickr/dist/l10n/zh.js";
 // fallback for `sr` and `th` (still respects the d.m.Y format).
 import { useLang } from "@/i18n/LanguageContext";
 import { useSelection } from "@/contexts/SelectionContext";
-import { Phone, Send, Calendar as CalendarIcon, Clock as ClockIcon } from "lucide-react";
+import { Phone, Send, Calendar as CalendarIcon, Clock as ClockIcon, Instagram, Mail, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
-import { TimeWheelPicker } from "./TimeWheelPicker";
+import { SlotGrid } from "./SlotGrid";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const initial = { name: "", email: "", phone: "", date: "", time: "", message: "" };
 
-// Localized labels for the custom scroll-wheel time picker.
-const WHEEL_LABELS = {
-  sr: { hour: "Sat", minute: "Min", confirm: "Potvrdi", cancel: "Otkaži" },
-  en: { hour: "Hour", minute: "Min", confirm: "Confirm", cancel: "Cancel" },
-  ru: { hour: "Час", minute: "Мин", confirm: "Подтвердить", cancel: "Отмена" },
-  zh: { hour: "时", minute: "分", confirm: "确认", cancel: "取消" },
-  th: { hour: "ชม.", minute: "นาที", confirm: "ยืนยัน", cancel: "ยกเลิก" },
-};
+const PHONE_DISPLAY = "+381 62 625 500";
+const PHONE_TEL = "+38162625500";
+const INSTAGRAM_URL = "https://www.instagram.com/bua.luang.thai.spa/";
+const SALON_EMAIL = "bualuangthailandspa@gmail.com";
 
 // Map our app languages to Flatpickr locales (fallback to default English).
 const LOCALE_MAP = { ru: Russian, zh: Mandarin };
@@ -35,7 +31,6 @@ export const ContactSection = () => {
   const [form, setForm] = useState(initial);
   const [submitting, setSubmitting] = useState(false);
   const [messageSerbian, setMessageSerbian] = useState(null);
-  const [timeWheelOpen, setTimeWheelOpen] = useState(false);
 
   const dateFpRef = useRef(null);
   const calWasOpen = useRef(false);
@@ -53,10 +48,8 @@ export const ContactSection = () => {
     else fp.open();
   };
 
-  // NOTE: outside-click closing of the time wheel is INTENTIONALLY disabled.
-  // Per product spec, the wheel must only close when the user explicitly
-  // taps the in-modal "Potvrdi" (Confirm) button. Escape still closes it
-  // (see the keyboard handler inside <TimeWheelPicker>).
+  // NOTE: the availability grid below the date field replaces the old wheel
+  // picker; a slot can only be chosen from the free slots returned by the API.
 
   // Auto-populate message when a treatment is selected in the Pricing section,
   // and update the Serbian copy used in the owner notification email.
@@ -115,7 +108,12 @@ export const ContactSection = () => {
       dateFpRef.current?.flatpickr?.clear?.();
     } catch (err) {
       console.error(err);
-      toast.error(t.contact.form.error);
+      if (err?.response?.status === 409) {
+        toast.error(t.contact.form.slotTaken);
+        setForm((p) => ({ ...p, time: "" }));
+      } else {
+        toast.error(t.contact.form.error);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -129,16 +127,6 @@ export const ContactSection = () => {
     "buaa-picker-input w-full bg-transparent border-b-2 border-[rgba(161,122,53,0.45)] focus:border-[#a17a35] outline-none py-4 pr-12 text-lg sm:text-xl text-[#2b2620] placeholder:text-[#bba98a] tracking-wider font-light transition-colors cursor-pointer";
 
   const dateLocale = useMemo(() => LOCALE_MAP[lang] || undefined, [lang]);
-
-  // ISO yyyy-mm-dd today (browser/local time) — used as the earliest allowed
-  // booking date so a user cannot pick a past day.
-  const minDateIso = useMemo(() => {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  }, []);
 
   return (
     <section
@@ -225,7 +213,7 @@ export const ContactSection = () => {
                     options={{
                       dateFormat: "d.m.Y",
                       altInput: false,
-                      minDate: minDateIso,
+                      minDate: "today",
                       disableMobile: true,
                       monthSelectorType: "static",
                       // Opening is handled manually (toggle on input/icon tap).
@@ -305,36 +293,23 @@ export const ContactSection = () => {
                       readOnly
                       placeholder={t.contact.form.timePlaceholder}
                       value={form.time}
-                      onClick={() => setTimeWheelOpen((v) => !v)}
-                      className={pickerInputCls}
+                      className={`${pickerInputCls} cursor-default`}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setTimeWheelOpen((v) => !v)}
-                      aria-label={t.contact.form.timeLabel}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-[#a17a35] hover:text-[#7a5a22] transition-colors"
-                    >
-                      <ClockIcon className="h-6 w-6" strokeWidth={1.6} />
-                    </button>
+                    <ClockIcon
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 text-[#a17a35] pointer-events-none"
+                      strokeWidth={1.6}
+                    />
                   </div>
-                  <TimeWheelPicker
-                    open={timeWheelOpen}
-                    value={form.time}
-                    onChange={(hhmm) =>
-                      setForm((p) => ({ ...p, time: hhmm }))
-                    }
-                    onConfirm={(hhmm) => {
-                      setForm((p) => ({ ...p, time: hhmm }));
-                      setTimeWheelOpen(false);
-                    }}
-                    onCancel={() => {
-                      setForm((p) => ({ ...p, time: "" }));
-                      setTimeWheelOpen(false);
-                    }}
-                    labels={WHEEL_LABELS[lang] || WHEEL_LABELS.en}
-                  />
                 </div>
               </div>
+
+              <SlotGrid
+                date={form.date}
+                duration={selection?.duration || 60}
+                value={form.time}
+                onChange={(hhmm) => setForm((p) => ({ ...p, time: hhmm }))}
+                copy={t.contact.form}
+              />
               <div>
                 <label className="block text-[11px] tracking-[0.3em] uppercase text-[#a17a35] mb-2">
                   {t.contact.form.message}
@@ -368,6 +343,38 @@ export const ContactSection = () => {
                   {t.contact.form.callUs}
                   <Phone className="h-4 w-4 transition-transform group-hover:rotate-12" />
                 </a>
+              </div>
+
+              <div
+                data-testid="booking-contact-options"
+                className="mt-4 pt-5 border-t border-[rgba(161,122,53,0.22)]"
+              >
+                <p className="text-[12px] leading-relaxed text-[#7a6e5e] mb-4">
+                  {t.contact.form.noPayment}
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {[
+                    { key: "phone", href: `tel:${PHONE_TEL}`, Icon: Phone, label: "Telefon", sub: PHONE_DISPLAY },
+                    { key: "viber", href: `viber://chat?number=%2B${PHONE_TEL.replace("+", "")}`, Icon: MessageCircle, label: "Viber", sub: PHONE_DISPLAY },
+                    { key: "instagram", href: INSTAGRAM_URL, Icon: Instagram, label: "Instagram", sub: "@bua.luang.thai.spa" },
+                    { key: "email", href: `mailto:${SALON_EMAIL}`, Icon: Mail, label: "Email", sub: SALON_EMAIL },
+                  ].map(({ key, href, Icon, label, sub }) => (
+                    <a
+                      key={key}
+                      href={href}
+                      target={key === "instagram" ? "_blank" : undefined}
+                      rel={key === "instagram" ? "noopener noreferrer" : undefined}
+                      data-testid={`booking-option-${key}`}
+                      title={sub}
+                      className="group flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border border-[rgba(161,122,53,0.28)] bg-white/70 hover:border-[#a17a35] hover:bg-[rgba(161,122,53,0.08)] hover:-translate-y-0.5 transition-all duration-300"
+                    >
+                      <Icon className="h-5 w-5 text-[#a17a35]" strokeWidth={1.6} />
+                      <span className="text-[11px] tracking-[0.14em] uppercase text-[#5a4f44]">
+                        {label}
+                      </span>
+                    </a>
+                  ))}
+                </div>
               </div>
             </form>
           </div>

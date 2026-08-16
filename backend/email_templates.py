@@ -3,13 +3,13 @@
 from typing import Optional
 
 LOGO_URL = (
-    "https://customer-assets.emergentagent.com/job_bua-luang-spa/artifacts/"
-    "5esihdex_Bua%20luang%20logo%20crna%20senka.png"
+    "https://customer-assets-gfyr7b9c.emergentagent.net/job_bua-luang-spa/artifacts/"
+    "v1jkcsp3_email%20cover%20bua.jpg"
 )
 BRAND_PHONE = "+381 62 625 500"
 BRAND_PHONE_TEL = "+38162625500"
 BRAND_EMAIL = "bualuangthailandspa@gmail.com"
-INSTAGRAM_URL = "https://www.instagram.com/bualuang_thai_spa/"
+INSTAGRAM_URL = "https://www.instagram.com/bua.luang.thai.spa/"
 
 
 # Localised labels for the rich "selected treatment" block + CTAs in client email.
@@ -279,8 +279,8 @@ def _shell(inner_html: str) -> str:
 <body style="margin:0;padding:24px 12px;background:#fbf6ec;font-family:Georgia,'Cormorant Garamond',serif;color:#3a312a;-webkit-font-smoothing:antialiased;">
   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:620px;margin:0 auto;background:#ffffff;border:1px solid rgba(161,122,53,0.25);border-radius:18px;overflow:hidden;box-shadow:0 18px 60px rgba(60,40,18,0.10);">
     <tr>
-      <td style="background:#0a0705;padding:32px 24px;text-align:center;">
-        <img src="{LOGO_URL}" alt="Bua Luang Thai Spa" style="max-height:120px;max-width:80%;display:inline-block;" />
+      <td style="background:#fbf6ec;padding:0;text-align:center;line-height:0;">
+        <img src="{LOGO_URL}" alt="Bua Luang Thai Spa" width="620" style="width:100%;max-width:620px;height:auto;display:block;border:0;" />
       </td>
     </tr>
     <tr>

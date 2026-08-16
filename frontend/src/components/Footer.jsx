@@ -66,14 +66,14 @@ export const Footer = () => {
               +381 62 625 500
             </a>
             <a
-              href="https://instagram.com/bualuang_thai_spa"
+              href="https://www.instagram.com/bua.luang.thai.spa/"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 hover:text-[#a17a35] transition-colors"
               data-testid="footer-instagram"
             >
               <Instagram className="h-4 w-4 text-[#a17a35]" />
-              @bualuang_thai_spa
+              @bua.luang.thai.spa
             </a>
             <div
               className="flex items-center gap-3 text-[#3a312a]"

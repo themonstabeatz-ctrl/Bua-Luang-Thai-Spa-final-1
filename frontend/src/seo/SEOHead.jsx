@@ -34,7 +34,7 @@ const fetchSiteInfo = () => {
     .catch(() => ({
       name: "Bua Luang Thai Spa",
       phone: "+381626255500",
-      instagram: "https://www.instagram.com/bualuang_thai_spa/",
+      instagram: "https://www.instagram.com/bua.luang.thai.spa/",
       site_base_url: "https://bualuangthaispa.rs",
       address: { city: "Beograd", country: "RS" },
       hours: { opens: "10:00", closes: "22:00", days: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] },
@@ -74,6 +74,27 @@ const buildLocalBusinessSchema = (info, lang, currentUrl) => {
     address: postalAddress,
     geo,
     sameAs: info.instagram ? [info.instagram] : [],
+    alternateName: ["Bua Luang Thai Spa Beograd", "Bua Luang Tajlandska Masaža"],
+    currenciesAccepted: "RSD",
+    paymentAccepted: "Cash, Credit Card",
+    areaServed: [
+      { "@type": "City", name: "Beograd" },
+      { "@type": "AdministrativeArea", name: "Stari Grad" },
+      { "@type": "AdministrativeArea", name: "Vračar" },
+      { "@type": "AdministrativeArea", name: "Novi Beograd" },
+      { "@type": "AdministrativeArea", name: "Savski Venac" },
+      { "@type": "AdministrativeArea", name: "Dedinje" },
+      { "@type": "AdministrativeArea", name: "Zvezdara" },
+    ],
+    knowsAbout: [
+      "Tradicionalna tajlandska masaža",
+      "Aroma masaža uljem",
+      "Masaža toplim kamenjem",
+      "Tajlandska masaža stopala",
+      "Masaža za parove",
+      "Thai massage Belgrade",
+    ],
+    availableLanguage: ["sr", "en", "ru", "zh", "th"],
     openingHoursSpecification: [
       {
         "@type": "OpeningHoursSpecification",
@@ -94,6 +115,7 @@ export const SEOHead = ({
   description,
   ogDescription,
   canonical,         // path-only, e.g. "/sr/usluge/aroma"
+  keywords = [],     // local-SEO keyword set (string[])
   lang = "sr",
   alternates = [],   // [{lang, href: path-only}]
   jsonLd = [],       // additional schema blocks (Service, FAQPage…)
@@ -130,6 +152,11 @@ export const SEOHead = ({
       <html lang={htmlLangMap[lang] || lang} />
       <title>{title}</title>
       <meta name="description" content={description} />
+      {keywords.length > 0 && (
+        <meta name="keywords" content={keywords.join(", ")} />
+      )}
+      <meta name="geo.region" content="RS-00" />
+      <meta name="geo.placename" content="Beograd" />
       <link rel="canonical" href={canonicalUrl} />
 
       {/* Open Graph */}

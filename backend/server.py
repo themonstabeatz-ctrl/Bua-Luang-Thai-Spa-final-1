@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, BackgroundTasks
+from fastapi import FastAPI, APIRouter, BackgroundTasks, HTTPException, Query
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -15,7 +15,12 @@ from datetime import datetime, timezone
 import resend
 
 from email_templates import render_client_email, render_owner_email
-from ics_calendar import build_appointment_ics
+from slots import (
+    compute_slots,
+    is_slot_available,
+    DEFAULT_DURATION,
+    BUFFER_MIN,
+)
 
 
 ROOT_DIR = Path(__file__).parent
@@ -69,11 +74,11 @@ class ContactCreate(BaseModel):
     @field_validator("appointment_time")
     @classmethod
     def _validate_business_hours(cls, v):
-        """Booking slots are strictly 10:00 — 21:00 in 15-minute steps.
+        """Booking slots are strictly 10:00 — 21:00 in 30-minute steps.
 
         The salon closes at 22:00 but the last accepted appointment START is
-        21:00. Anything past 21:00 (21:15/30/45, 22:00) MUST be rejected so a
-        malicious or buggy client cannot bypass the wheel picker UI.
+        21:00. Anything past 21:00 MUST be rejected so a malicious or buggy
+        client cannot bypass the slot grid UI.
         """
         if not v:
             return v
@@ -84,10 +89,10 @@ class ContactCreate(BaseModel):
         h, m = int(hh), int(mm)
         if h < 10 or h > 21:
             raise ValueError("appointment_time hour must be between 10 and 21 (inclusive)")
-        if m not in (0, 15, 30, 45):
-            raise ValueError("appointment_time minute must be one of 00, 15, 30, 45")
+        if m not in (0, 30):
+            raise ValueError("appointment_time minute must be 00 or 30")
         if h == 21 and m != 0:
-            raise ValueError("last bookable slot is 21:00 — 21:15/30/45 are not allowed")
+            raise ValueError("last bookable slot is 21:00")
         return s
 
 
@@ -158,33 +163,8 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
         appointment_time=appt_time,
     )
 
-    # Build a one-tap .ics calendar attachment when we have a real booking
-    # slot. Visitor's iPhone/Android calendar will offer "Add to Calendar"
-    # automatically on a text/calendar attachment.
-    client_attachments = None
-    if appt_date and appt_time and treatment:
-        try:
-            import base64
-            ics_str = build_appointment_ics(
-                summary=f"Bua Luang Thai Spa — {treatment.get('name', '')}",
-                description=(treatment.get("description") or "").strip(),
-                date_iso=appt_date,
-                time_hhmm=appt_time,
-                duration_minutes=int(treatment.get("duration") or 60),
-                organizer_email=OWNER_EMAIL,
-            )
-            ics_b64 = base64.b64encode(ics_str.encode("utf-8")).decode("ascii")
-            client_attachments = [{
-                "filename": "appointment.ics",
-                "content": ics_b64,
-                "content_type": "text/calendar; charset=utf-8; method=PUBLISH",
-            }]
-        except Exception:
-            logger.exception("Failed to build .ics attachment — sending email without it")
-            client_attachments = None
-
     client_sent, client_err = await _resend_send(
-        to_client, c_subject, c_html, c_text, attachments=client_attachments,
+        to_client, c_subject, c_html, c_text,
     )
 
     # 2) Owner notification — ALWAYS Serbian, ALWAYS Serbian massage details
@@ -216,13 +196,61 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
 
 
 # ---- Routes ----
+async def _bookings_for_date(date_iso: str):
+    """Return [(start_hhmm, duration_minutes)] already booked for that date."""
+    docs = await db.contact_messages.find(
+        {"appointment_date": date_iso},
+        {"_id": 0, "appointment_time": 1, "selected_treatment": 1},
+    ).to_list(500)
+    out = []
+    for d in docs:
+        t = d.get("appointment_time")
+        if not t:
+            continue
+        dur = (d.get("selected_treatment") or {}).get("duration") or DEFAULT_DURATION
+        out.append((t, int(dur)))
+    return out
+
+
 @api_router.get("/")
 async def root():
     return {"message": "Bua Luang Thai Spa API"}
 
 
+@api_router.get("/availability")
+async def availability(
+    date: str = Query(..., min_length=10, max_length=10),
+    duration: int = Query(DEFAULT_DURATION, ge=15, le=600),
+):
+    """Slot availability for a given date and treatment duration."""
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", date):
+        raise HTTPException(status_code=422, detail="date must be YYYY-MM-DD")
+    bookings = await _bookings_for_date(date)
+    return {
+        "date": date,
+        "duration": duration,
+        "buffer_minutes": BUFFER_MIN,
+        "slots": compute_slots(date, duration, bookings),
+    }
+
+
 @api_router.post("/contact", response_model=ContactMessage)
 async def create_contact_message(payload: ContactCreate, background_tasks: BackgroundTasks):
+    appt_date = (payload.appointment_date or "").strip() or None
+    appt_time = (payload.appointment_time or "").strip() or None
+
+    # Guard the slot server-side: a booked slot (plus its 30-minute buffer)
+    # can never be taken twice, even if two visitors submit simultaneously.
+    if appt_date and appt_time:
+        duration = int(
+            (payload.selected_treatment.duration if payload.selected_treatment else None)
+            or DEFAULT_DURATION
+        )
+        bookings = await _bookings_for_date(appt_date)
+        ok, reason = is_slot_available(appt_date, appt_time, duration, bookings)
+        if not ok:
+            raise HTTPException(status_code=409, detail={"error": "slot_unavailable", "reason": reason})
+
     record = ContactMessage(
         name=payload.name.strip(),
         email=payload.email,
@@ -230,8 +258,8 @@ async def create_contact_message(payload: ContactCreate, background_tasks: Backg
         message=payload.message.strip(),
         message_serbian=(payload.message_serbian or "").strip() or None,
         language=payload.language,
-        appointment_date=(payload.appointment_date or "").strip() or None,
-        appointment_time=(payload.appointment_time or "").strip() or None,
+        appointment_date=appt_date,
+        appointment_time=appt_time,
         selected_treatment=payload.selected_treatment,
     )
 
@@ -282,6 +310,9 @@ async def site_info():
         "hours": {
             "opens": "10:00",
             "closes": "22:00",
+            "last_booking": "21:00",
+            "slot_step_minutes": 30,
+            "buffer_minutes": BUFFER_MIN,
             "days": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
         },
     }
