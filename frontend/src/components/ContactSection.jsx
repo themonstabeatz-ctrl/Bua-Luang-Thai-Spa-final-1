@@ -327,7 +327,10 @@ export const ContactSection = () => {
                       setForm((p) => ({ ...p, time: hhmm }));
                       setTimeWheelOpen(false);
                     }}
-                    onCancel={() => setTimeWheelOpen(false)}
+                    onCancel={() => {
+                      setForm((p) => ({ ...p, time: "" }));
+                      setTimeWheelOpen(false);
+                    }}
                     labels={WHEEL_LABELS[lang] || WHEEL_LABELS.en}
                   />
                 </div>

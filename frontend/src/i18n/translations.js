@@ -448,7 +448,7 @@ export const translations = {
     },
     footer: {
       tagline: "Autentična tajlandska tradicija u srcu Beograda.",
-      rights: "Sva prava zadržana.",
+      rights: "Website napravili Savatije Grujović i Miloš Stanojević. Sva prava zadržana.",
       quickLinks: "Brzi linkovi",
       followUs: "Pratite nas",
     },
@@ -519,7 +519,7 @@ export const translations = {
     },
     footer: {
       tagline: "Authentic Thai tradition in the heart of Belgrade.",
-      rights: "All rights reserved.",
+      rights: "Website by Savatije Grujović and Miloš Stanojević. All rights reserved.",
       quickLinks: "Quick links",
       followUs: "Follow us",
     },
@@ -590,7 +590,7 @@ export const translations = {
     },
     footer: {
       tagline: "Аутентичная тайская традиция в сердце Белграда.",
-      rights: "Все права защищены.",
+      rights: "Сайт создан Саватием Груйовичем и Милошем Станоевичем. Все права защищены.",
       quickLinks: "Навигация",
       followUs: "Подписывайтесь",
     },
@@ -659,7 +659,7 @@ export const translations = {
     },
     footer: {
       tagline: "贝尔格莱德中心的正宗泰式传统。",
-      rights: "版权所有。",
+      rights: "网站由 Savatije Grujović 与 Miloš Stanojević 制作。版权所有。",
       quickLinks: "快速链接",
       followUs: "关注我们",
     },
@@ -729,7 +729,7 @@ export const translations = {
     },
     footer: {
       tagline: "ประเพณีไทยแท้ในใจกลางกรุงเบลเกรด",
-      rights: "สงวนลิขสิทธิ์",
+      rights: "เว็บไซต์จัดทำโดย Savatije Grujović และ Miloš Stanojević สงวนลิขสิทธิ์",
       quickLinks: "ลิงก์ด่วน",
       followUs: "ติดตามเรา",
     },
