@@ -8,7 +8,7 @@ import { Mandarin } from "flatpickr/dist/l10n/zh.js";
 // fallback for `sr` and `th` (still respects the d.m.Y format).
 import { useLang } from "@/i18n/LanguageContext";
 import { useSelection } from "@/contexts/SelectionContext";
-import { Phone, Send, Calendar as CalendarIcon, Clock as ClockIcon, Instagram, Mail, MessageCircle } from "lucide-react";
+import { Phone, Send, Calendar as CalendarIcon, Clock as ClockIcon } from "lucide-react";
 import { toast } from "sonner";
 import { SlotGrid } from "./SlotGrid";
 
@@ -16,11 +16,6 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const initial = { name: "", email: "", phone: "", date: "", time: "", message: "" };
-
-const PHONE_DISPLAY = "+381 62 625 500";
-const PHONE_TEL = "+38162625500";
-const INSTAGRAM_URL = "https://www.instagram.com/bua.luang.thai.spa/";
-const SALON_EMAIL = "bualuangthailandspa@gmail.com";
 
 // Map our app languages to Flatpickr locales (fallback to default English).
 const LOCALE_MAP = { ru: Russian, zh: Mandarin };
@@ -343,38 +338,6 @@ export const ContactSection = () => {
                   {t.contact.form.callUs}
                   <Phone className="h-4 w-4 transition-transform group-hover:rotate-12" />
                 </a>
-              </div>
-
-              <div
-                data-testid="booking-contact-options"
-                className="mt-4 pt-5 border-t border-[rgba(161,122,53,0.22)]"
-              >
-                <p className="text-[12px] leading-relaxed text-[#7a6e5e] mb-4">
-                  {t.contact.form.noPayment}
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {[
-                    { key: "phone", href: `tel:${PHONE_TEL}`, Icon: Phone, label: "Telefon", sub: PHONE_DISPLAY },
-                    { key: "viber", href: `viber://chat?number=%2B${PHONE_TEL.replace("+", "")}`, Icon: MessageCircle, label: "Viber", sub: PHONE_DISPLAY },
-                    { key: "instagram", href: INSTAGRAM_URL, Icon: Instagram, label: "Instagram", sub: "@bua.luang.thai.spa" },
-                    { key: "email", href: `mailto:${SALON_EMAIL}`, Icon: Mail, label: "Email", sub: SALON_EMAIL },
-                  ].map(({ key, href, Icon, label, sub }) => (
-                    <a
-                      key={key}
-                      href={href}
-                      target={key === "instagram" ? "_blank" : undefined}
-                      rel={key === "instagram" ? "noopener noreferrer" : undefined}
-                      data-testid={`booking-option-${key}`}
-                      title={sub}
-                      className="group flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl border border-[rgba(161,122,53,0.28)] bg-white/70 hover:border-[#a17a35] hover:bg-[rgba(161,122,53,0.08)] hover:-translate-y-0.5 transition-all duration-300"
-                    >
-                      <Icon className="h-5 w-5 text-[#a17a35]" strokeWidth={1.6} />
-                      <span className="text-[11px] tracking-[0.14em] uppercase text-[#5a4f44]">
-                        {label}
-                      </span>
-                    </a>
-                  ))}
-                </div>
               </div>
             </form>
           </div>
