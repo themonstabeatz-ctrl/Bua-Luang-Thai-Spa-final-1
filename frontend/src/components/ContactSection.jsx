@@ -7,6 +7,7 @@ import { Mandarin } from "flatpickr/dist/l10n/zh.js";
 // react-flatpickr bundle, so the default English locale is used as a graceful
 // fallback for `sr` and `th` (still respects the d.m.Y format).
 import { useLang } from "@/i18n/LanguageContext";
+import { translations } from "@/i18n/translations";
 import { useSelection } from "@/contexts/SelectionContext";
 import { Phone, Send, Calendar as CalendarIcon, Clock as ClockIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +17,21 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 const initial = { name: "", email: "", phone: "", date: "", time: "", message: "" };
+
+// Rebuild the "Selected: …" line in the currently active site language, using
+// the treatment coordinates (rowIdx/optIdx) stored on the selection. Keeps the
+// auto-message in sync with the global header language switch.
+const buildLocalizedMessage = (language, rowIdx, optIdx) => {
+  const pricing = translations[language]?.pricing || translations.sr.pricing;
+  const row = pricing.rows?.[rowIdx];
+  const opt = row?.options?.[optIdx];
+  if (!row || !opt) return null;
+  const price = Number(opt.price).toLocaleString("sr-RS");
+  return pricing.selectedTemplate
+    .replace("{name}", row.name)
+    .replace("{duration}", opt.duration)
+    .replace("{price}", price);
+};
 
 // Map our app languages to Flatpickr locales (fallback to default English).
 const LOCALE_MAP = { ru: Russian, zh: Mandarin };
@@ -30,6 +46,9 @@ export const ContactSection = () => {
 
   const dateFpRef = useRef(null);
   const calWasOpen = useRef(false);
+  // Tracks the last auto-generated "Selected: …" line so we only re-translate
+  // it on a language switch when the user has NOT manually edited the message.
+  const autoMsgRef = useRef("");
 
   const openStateSnapshot = () => {
     calWasOpen.current = !!dateFpRef.current?.flatpickr?.isOpen;
@@ -51,9 +70,29 @@ export const ContactSection = () => {
   // and update the Serbian copy used in the owner notification email.
   useEffect(() => {
     if (!selection) return;
-    setForm((prev) => ({ ...prev, message: selection.message }));
+    const msg =
+      buildLocalizedMessage(lang, selection.rowIdx, selection.optIdx) ||
+      selection.message;
+    autoMsgRef.current = msg;
+    setForm((prev) => ({ ...prev, message: msg }));
     setMessageSerbian(selection.messageSerbian);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selection]);
+
+  // Re-translate the auto-generated "Selected: …" line whenever the global
+  // language switches — unless the user has manually edited the text.
+  useEffect(() => {
+    if (!selection) return;
+    const msg = buildLocalizedMessage(lang, selection.rowIdx, selection.optIdx);
+    if (!msg) return;
+    // Compare against the CURRENT field value (committed) — not inside the
+    // setForm updater, whose ref would already be mutated by then.
+    if (form.message === autoMsgRef.current) {
+      autoMsgRef.current = msg;
+      setForm((prev) => ({ ...prev, message: msg }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   const selectedTreatmentPayload = selection
     ? {
