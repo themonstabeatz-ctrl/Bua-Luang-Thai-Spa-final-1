@@ -270,6 +270,7 @@ async def create_contact_message(payload: ContactCreate, background_tasks: Backg
         phone=(payload.phone or "").strip() or None,
         message=payload.message.strip(),
         message_serbian=(payload.message_serbian or "").strip() or None,
+        message_thai=(payload.message_thai or "").strip() or None,
         language=payload.language,
         appointment_date=appt_date,
         appointment_time=appt_time,

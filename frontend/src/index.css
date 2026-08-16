@@ -25,19 +25,19 @@ html:lang(th) {
 @import "flatpickr/dist/flatpickr.min.css";
 
 /* Hero photo focal point. The masseuse (~25-35%) and client (~5-40%) sit on
-   the LEFT of the composition, the curtain/plant on the right. Center-crop
-   hides the therapist, so we shift the focus to ~30% (both fully visible,
-   matching the desired framing on desktop + landscape phones). */
+   the LEFT of the composition, the curtain/plant on the right. We anchor the
+   background to the LEFT edge so BOTH the therapist and the client are always
+   fully visible from the left side of the image, with the left edge of the
+   photo flush against the left edge of the viewport on desktop + landscape. */
 .hero-parallax-bg {
-    background-position: 30% center;
+    background-position: 0% center;
 }
 
-/* Portrait phones: the crop is a narrow vertical slice, so we centre it on
-   the therapist (~30% of the source) which also keeps the client in frame
-   below — instead of the curtain a higher value would reveal. */
+/* Portrait phones: push to LEFT edge of the image so BOTH the therapist and
+   the client are visible in the tall narrow crop. */
 @media (orientation: portrait) {
     .hero-parallax-bg {
-        background-position: 24% center !important;
+        background-position: 0% center !important;
     }
 }
 
