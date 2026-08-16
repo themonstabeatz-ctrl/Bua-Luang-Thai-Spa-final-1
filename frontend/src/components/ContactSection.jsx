@@ -38,6 +38,20 @@ export const ContactSection = () => {
   const [timeWheelOpen, setTimeWheelOpen] = useState(false);
 
   const dateFpRef = useRef(null);
+  const calWasOpen = useRef(false);
+
+  const openStateSnapshot = () => {
+    calWasOpen.current = !!dateFpRef.current?.flatpickr?.isOpen;
+  };
+  // Toggle driven by a mousedown/touchstart snapshot: flatpickr's own
+  // document listener may close the calendar before our click fires, so we
+  // decide based on whether it WAS open when the tap started.
+  const toggleCalendar = () => {
+    const fp = dateFpRef.current?.flatpickr;
+    if (!fp) return;
+    if (calWasOpen.current) fp.close();
+    else fp.open();
+  };
 
   // NOTE: outside-click closing of the time wheel is INTENTIONALLY disabled.
   // Per product spec, the wheel must only close when the user explicitly
@@ -207,13 +221,15 @@ export const ContactSection = () => {
                   </label>
                   <Flatpickr
                     ref={dateFpRef}
-                    value={form.date}
+                    value={form.date ? new Date(`${form.date}T00:00:00`) : ""}
                     options={{
                       dateFormat: "d.m.Y",
                       altInput: false,
                       minDate: minDateIso,
                       disableMobile: true,
                       monthSelectorType: "static",
+                      // Opening is handled manually (toggle on input/icon tap).
+                      clickOpens: false,
                       // `static: true` anchors the calendar inside the input
                       // wrapper instead of repositioning relative to the
                       // document, which makes Flatpickr skip its internal
@@ -256,12 +272,22 @@ export const ContactSection = () => {
                             readOnly
                             placeholder={t.contact.form.datePlaceholder}
                             defaultValue={defaultValue}
+                            onMouseDown={openStateSnapshot}
+                            onTouchStart={openStateSnapshot}
+                            onClick={toggleCalendar}
                             className={pickerInputCls}
                           />
-                          <CalendarIcon
-                            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-[#a17a35]"
-                            strokeWidth={1.6}
-                          />
+                          <button
+                            type="button"
+                            data-testid="contact-date-toggle"
+                            aria-label={t.contact.form.dateLabel}
+                            onMouseDown={openStateSnapshot}
+                            onTouchStart={openStateSnapshot}
+                            onClick={toggleCalendar}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 p-1 text-[#a17a35] hover:text-[#7a5a22] transition-colors"
+                          >
+                            <CalendarIcon className="h-6 w-6" strokeWidth={1.6} />
+                          </button>
                         </div>
                       );
                     }}
@@ -279,8 +305,7 @@ export const ContactSection = () => {
                       readOnly
                       placeholder={t.contact.form.timePlaceholder}
                       value={form.time}
-                      onClick={() => setTimeWheelOpen(true)}
-                      onFocus={() => setTimeWheelOpen(true)}
+                      onClick={() => setTimeWheelOpen((v) => !v)}
                       className={pickerInputCls}
                     />
                     <button

@@ -45,7 +45,7 @@ export const Hero = () => {
       <div
         aria-hidden="true"
         data-testid="hero-bg"
-        className="absolute left-0 right-0 -top-[30%] -bottom-[30%] bg-cover bg-center pointer-events-none"
+        className="hero-parallax-bg absolute left-0 right-0 -top-[30%] -bottom-[30%] bg-cover bg-center pointer-events-none"
         style={{
           backgroundImage: `url(${ASSETS.heroBg})`,
           transform: `translate3d(0, ${parallax}px, 0)`,

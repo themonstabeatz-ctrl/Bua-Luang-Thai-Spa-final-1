@@ -24,6 +24,14 @@ html:lang(th) {
    ───────────────────────────────────────────────────────────────────────── */
 @import "flatpickr/dist/flatpickr.min.css";
 
+/* Portrait phones: keep the therapist + client (left side of the hero photo)
+   in frame instead of the curtain that a plain `center` crop shows. */
+@media (orientation: portrait) {
+    .hero-parallax-bg {
+        background-position: 18% center !important;
+    }
+}
+
 /* The picker calendar/time popup */
 .flatpickr-calendar {
     background: linear-gradient(180deg, #fbf3dc 0%, #f8edd4 100%) !important;
@@ -162,6 +170,25 @@ span.flatpickr-weekday {
     background: transparent !important;
     border-color: transparent !important;
     cursor: not-allowed;
+}
+
+/* Small screens: keep the static calendar fully inside the viewport. */
+@media (max-width: 640px) {
+    .flatpickr-calendar.static {
+        width: min(320px, calc(100vw - 108px)) !important;
+        left: 0 !important;
+        right: auto !important;
+    }
+    .flatpickr-rContainer,
+    .flatpickr-days,
+    .dayContainer {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+    .flatpickr-day {
+        max-width: none;
+    }
 }
 
 /* Time picker */

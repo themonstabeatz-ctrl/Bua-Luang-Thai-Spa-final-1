@@ -42,3 +42,9 @@ Serbian (sr-RS). All agent responses must be in Serbian.
 
 ## 2026-06 (fork): Buddha parallax fix
 - Buddha sekcija: parallax klemovan na 0 (Math.min), sloj ankeriran top:0 / -bottom-50%, backgroundPosition "center top" -> glava Bude uvek cela vidljiva, parallax se zavrsava na gornjoj ivici slike.
+
+## 2026-06 (fork): Mobilne ispravke (sve verifikovano, iteration_9.json 100%)
+- Hero portrait: klasa .hero-parallax-bg + @media (orientation: portrait) background-position 18% center -> terapeut i klijent vidljivi umesto zavese
+- Flatpickr: value prosledjen kao Date objekat (fix za pogresan prikaz 20.06.2026), clickOpens:false + rucni toggle (calWasOpen mousedown snapshot) na input i novo dugme contact-date-toggle
+- Kalendar na mobilnom: @media max-width 640px width clamp min(320px, 100vw-108px), staje u ekran
+- TimeWheelPicker: ITEM_HEIGHT 58, selektovane cifre 36px, dvotacka 42px; time input sada toggle-uje (uklonjen onFocus)

@@ -24,7 +24,7 @@ const LAST_HOUR = 21;
 // Minutes available for a given hour. Last booking is strictly 21:00.
 const minutesFor = (hour) => (hour === LAST_HOUR ? MINUTES_LAST_HOUR : MINUTES_FULL);
 
-const ITEM_HEIGHT = 44; // px — must match CSS height of .tw-item
+const ITEM_HEIGHT = 58; // px — must match CSS height of .tw-item
 const VISIBLE_ITEMS = 5; // odd number so the middle slot is the selected one
 const WHEEL_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 const PAD_ROWS = Math.floor(VISIBLE_ITEMS / 2); // empty rows above/below
@@ -182,8 +182,8 @@ const Wheel = ({ items, value, onChange, label, formatter = pad2 }) => {
               onClick={() => onItemClick(it)}
               className={`tw-item w-full flex items-center justify-center font-serif tabular-nums transition-all ${
                 selected
-                  ? "text-[#2b2620] text-[26px] font-medium"
-                  : "text-[#a09686] text-[20px] font-light"
+                  ? "text-[#2b2620] text-[36px] font-medium"
+                  : "text-[#a09686] text-[26px] font-light"
               }`}
               style={{
                 height: ITEM_HEIGHT,
@@ -307,7 +307,7 @@ export const TimeWheelPicker = ({
             className="font-serif text-[#a17a35] select-none"
             style={{
               fontFamily: "'Cormorant Garamond', 'Playfair Display', serif",
-              fontSize: 32,
+              fontSize: 42,
               lineHeight: `${WHEEL_HEIGHT}px`,
               marginTop: 22,
             }}
