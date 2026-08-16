@@ -58,6 +58,9 @@ class SelectedTreatment(BaseModel):
     # block in Serbian regardless of which language the visitor used.
     name_serbian: Optional[str] = Field(default=None, max_length=200)
     description_serbian: Optional[str] = Field(default=None, max_length=2000)
+    # Thai copies, used to render the second (Thai) half of the OWNER email.
+    name_thai: Optional[str] = Field(default=None, max_length=200)
+    description_thai: Optional[str] = Field(default=None, max_length=2000)
 
 
 class ContactCreate(BaseModel):
@@ -74,11 +77,12 @@ class ContactCreate(BaseModel):
     @field_validator("appointment_time")
     @classmethod
     def _validate_business_hours(cls, v):
-        """Booking slots are strictly 10:00 — 21:00 in 30-minute steps.
+        """Booking slots run from 10:00 in 15-minute steps.
 
-        The salon closes at 22:00 but the last accepted appointment START is
-        21:00. Anything past 21:00 MUST be rejected so a malicious or buggy
-        client cannot bypass the slot grid UI.
+        The salon closes at 22:00; whether a given start actually fits depends
+        on the treatment duration (verified server-side by `is_slot_available`).
+        This validator only guards the coarse format so a malicious or buggy
+        client cannot submit garbage times.
         """
         if not v:
             return v
@@ -89,10 +93,8 @@ class ContactCreate(BaseModel):
         h, m = int(hh), int(mm)
         if h < 10 or h > 21:
             raise ValueError("appointment_time hour must be between 10 and 21 (inclusive)")
-        if m not in (0, 30):
-            raise ValueError("appointment_time minute must be 00 or 30")
-        if h == 21 and m != 0:
-            raise ValueError("last bookable slot is 21:00")
+        if m not in (0, 15, 30, 45):
+            raise ValueError("appointment_time minute must be 00, 15, 30 or 45")
         return s
 
 
@@ -167,8 +169,9 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
         to_client, c_subject, c_html, c_text,
     )
 
-    # 2) Owner notification — ALWAYS Serbian, ALWAYS Serbian massage details
+    # 2) Owner notification — ALWAYS bilingual (Serbian first, then Thai)
     treatment_serbian = None
+    treatment_thai = None
     if treatment:
         treatment_serbian = {
             "name": treatment.get("name_serbian") or treatment.get("name"),
@@ -176,11 +179,17 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
             "price": treatment.get("price"),
             "description": treatment.get("description_serbian") or treatment.get("description"),
         }
+        treatment_thai = {
+            "name": treatment.get("name_thai") or treatment.get("name_serbian") or treatment.get("name"),
+            "duration": treatment.get("duration"),
+            "price": treatment.get("price"),
+            "description": treatment.get("description_thai") or treatment.get("description_serbian") or treatment.get("description"),
+        }
     o_subject, o_html, o_text = render_owner_email(
         name=name, email=to_client, phone=phone, message=message_serbian,
         language=language, submitted_at_iso=submitted_at,
         appointment_date=appt_date, appointment_time=appt_time,
-        treatment=treatment_serbian,
+        treatment=treatment_serbian, treatment_thai=treatment_thai,
     )
     owner_sent, owner_err = await _resend_send(OWNER_EMAIL, o_subject, o_html, o_text)
 

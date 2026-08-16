@@ -386,7 +386,7 @@ def render_client_email(language: str, name: str, phone: str, message: str, trea
 
 # ------------------------- Owner notification (always Serbian) -------------------------
 
-OWNER_SUBJECT = "🚨 NOVA PORUKA SA SAJTA – Bua Luang Thai Spa"
+OWNER_SUBJECT = "🚨 NOVA REZERVACIJA / การจองใหม่ – Bua Luang Thai Spa"
 
 # Native Serbian display labels for the language the visitor used on the site.
 LANGUAGE_DISPLAY_SR = {
@@ -397,44 +397,81 @@ LANGUAGE_DISPLAY_SR = {
     "th": "Tajlandski",
 }
 
+LANGUAGE_DISPLAY_TH = {
+    "sr": "เซอร์เบีย",
+    "en": "อังกฤษ",
+    "ru": "รัสเซีย",
+    "zh": "จีน",
+    "th": "ไทย",
+}
 
-def render_owner_email(
-    name: str,
-    email: str,
-    phone: str,
-    message: str,
-    language: str,
-    submitted_at_iso: str,
-    appointment_date: Optional[str] = None,
-    appointment_time: Optional[str] = None,
-    treatment: Optional[dict] = None,
-) -> tuple[str, str, str]:
-    """Return (subject, html, plain_text) for the internal owner notification email.
+# Per-locale copy for the owner notification body (Serbian + Thai).
+OWNER_COPY = {
+    "sr": {
+        "heading": "Nova rezervacija sa sajta",
+        "subtitle": "Bua Luang Thai Spa &nbsp;·&nbsp; admin notifikacija",
+        "labels": {
+            "name": "Ime i prezime",
+            "email": "Email adresa",
+            "phone": "Broj telefona",
+            "appt": "Datum i vreme termina",
+            "message": "Poruka / Zahtev za termin",
+            "lang": "Izabrani jezik na sajtu",
+            "sent": "Datum i vreme slanja",
+        },
+        "at": "u",
+        "empty": "—",
+        "note": "Ova poruka je automatski generisana kada je posetilac sajta poslao kontakt formu.",
+        "lang_display": LANGUAGE_DISPLAY_SR,
+    },
+    "th": {
+        "heading": "การจองใหม่จากเว็บไซต์",
+        "subtitle": "Bua Luang Thai Spa &nbsp;·&nbsp; การแจ้งเตือนผู้ดูแล",
+        "labels": {
+            "name": "ชื่อ-นามสกุล",
+            "email": "อีเมล",
+            "phone": "เบอร์โทรศัพท์",
+            "appt": "วันและเวลานัดหมาย",
+            "message": "ข้อความ / คำขอนัดหมาย",
+            "lang": "ภาษาที่เลือกบนเว็บไซต์",
+            "sent": "วันและเวลาที่ส่ง",
+        },
+        "at": "เวลา",
+        "empty": "—",
+        "note": "ข้อความนี้ถูกสร้างขึ้นโดยอัตโนมัติเมื่อผู้เยี่ยมชมเว็บไซต์ส่งแบบฟอร์มติดต่อ",
+        "lang_display": LANGUAGE_DISPLAY_TH,
+    },
+}
 
-    The owner always sees the booking entirely in Serbian. When the visitor
-    selected a treatment in the Pricing section, the `treatment` dict must
-    already carry Serbian copies (name + description); the backend takes care
-    of swapping `name_serbian`/`description_serbian` in before calling this.
-    """
+
+def _owner_body_html(locale, treatment, name, email, phone, message, language,
+                     submitted_at_iso, appointment_date, appointment_time):
+    """Render the owner-notification inner body for a single locale (sr/th)."""
+    copy = OWNER_COPY[locale]
+    lbl = copy["labels"]
+
     safe_name = _html_escape(name)
     safe_email = _html_escape(email)
-    safe_phone = _html_escape(phone) if phone else "—"
+    safe_phone = _html_escape(phone) if phone else copy["empty"]
     safe_message = _html_escape(message).replace("\n", "<br/>")
-    lang_display = LANGUAGE_DISPLAY_SR.get((language or "sr").lower(), (language or "sr").upper())
+    lang_display = copy["lang_display"].get((language or "sr").lower(), (language or "sr").upper())
     safe_lang = _html_escape(lang_display)
     safe_time = _html_escape(submitted_at_iso.replace("T", " ").split(".")[0] + " UTC")
 
+    appt_value = _html_escape(
+        f"{_format_date_eu(appointment_date)} {copy['at']} {appointment_time}"
+        if (appointment_date and appointment_time)
+        else (_format_date_eu(appointment_date) or appointment_time or copy["empty"])
+    )
+
     rows = [
-        ("Ime i prezime", safe_name),
-        ("Email adresa", f'<a href="mailto:{safe_email}" style="color:#a17a35;text-decoration:none;">{safe_email}</a>'),
-        ("Broj telefona", safe_phone if not phone else f'<a href="tel:{_html_escape(phone)}" style="color:#a17a35;text-decoration:none;">{safe_phone}</a>'),
-        ("Datum i vreme termina", _html_escape(
-            f"{_format_date_eu(appointment_date)} u {appointment_time}" if (appointment_date and appointment_time)
-            else (_format_date_eu(appointment_date) or appointment_time or "—")
-        )),
-        ("Poruka / Zahtev za termin", safe_message),
-        ("Izabrani jezik na sajtu", safe_lang),
-        ("Datum i vreme slanja", safe_time),
+        (lbl["name"], safe_name),
+        (lbl["email"], f'<a href="mailto:{safe_email}" style="color:#a17a35;text-decoration:none;">{safe_email}</a>'),
+        (lbl["phone"], safe_phone if not phone else f'<a href="tel:{_html_escape(phone)}" style="color:#a17a35;text-decoration:none;">{safe_phone}</a>'),
+        (lbl["appt"], appt_value),
+        (lbl["message"], safe_message),
+        (lbl["lang"], safe_lang),
+        (lbl["sent"], safe_time),
     ]
 
     rows_html = "".join(
@@ -451,56 +488,104 @@ def render_owner_email(
         for label, value in rows
     )
 
-    # Beautiful Serbian treatment block (Name → Duration → Date/Time →
-    # Description → Price) so the owner sees the booking in full detail.
     treatment_block = (
-        _treatment_block_html("sr", treatment, appointment_date, appointment_time)
+        _treatment_block_html(locale, treatment, appointment_date, appointment_time)
         if treatment else ""
     )
 
-    inner = f"""
+    return f"""
       <h1 style="margin:0 0 6px 0;font-size:22px;line-height:1.2;color:#a17a35;font-weight:400;letter-spacing:0.04em;">
-        Nova poruka sa sajta
+        {copy['heading']}
       </h1>
       <p style="margin:0 0 22px 0;font-family:Arial,sans-serif;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#7a6e5e;">
-        Bua Luang Thai Spa &nbsp;·&nbsp; admin notifikacija
+        {copy['subtitle']}
       </p>
       <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">
         {rows_html}
       </table>
       {treatment_block}
       <p style="margin:24px 0 0 0;font-size:13px;color:#7a6e5e;font-style:italic;">
-        Ova poruka je automatski generisana kada je posetilac sajta poslao kontakt formu.
+        {copy['note']}
       </p>
     """
 
+
+def _owner_body_plain(locale, treatment, name, email, phone, message, language,
+                      submitted_at_iso, appointment_date, appointment_time):
+    copy = OWNER_COPY[locale]
+    lbl = copy["labels"]
+    lang_display = copy["lang_display"].get((language or "sr").lower(), (language or "sr").upper())
+    appt = (
+        f"{(_format_date_eu(appointment_date) or '')}"
+        f"{(' ' + copy['at'] + ' ' + appointment_time) if appointment_time else ''}"
+    ) or copy["empty"]
+
+    treat_copy = CLIENT_TREATMENT_COPY.get(locale, CLIENT_TREATMENT_COPY["sr"])
     plain_treatment = ""
     if treatment:
         plain_treatment = (
-            "\nIzabrani tretman:\n"
-            f"  Naziv masaže: {treatment.get('name','')}\n"
-            f"  Trajanje: {treatment.get('duration','')} MIN\n"
+            f"\n{treat_copy['block_heading']}:\n"
+            f"  {treat_copy['name_label']}: {treatment.get('name','')}\n"
+            f"  {treat_copy['duration_label']}: {treatment.get('duration','')} {treat_copy['duration_unit']}\n"
         )
-        if appointment_date or appointment_time:
-            plain_treatment += (
-                f"  Datum i vreme: "
-                f"{(_format_date_eu(appointment_date) or '')}{(' u ' + appointment_time) if appointment_time else ''}\n"
-            )
         if treatment.get("description"):
-            plain_treatment += f"  Opis: {treatment['description']}\n"
-        plain_treatment += f"  Cena: {_format_price(treatment.get('price',0))} RSD\n"
+            plain_treatment += f"  {treat_copy['description_label']}: {treatment['description']}\n"
+        plain_treatment += f"  {treat_copy['price_label']}: {_format_price(treatment.get('price',0))} {treat_copy['currency']}\n"
 
-    plain = (
-        "NOVA PORUKA SA SAJTA – Bua Luang Thai Spa\n\n"
-        f"Ime i prezime: {name}\n"
-        f"Email adresa: {email}\n"
-        f"Broj telefona: {phone or '—'}\n"
-        f"Datum i vreme termina: "
-        f"{(_format_date_eu(appointment_date) or '—')}{(' u ' + appointment_time) if appointment_time else ''}\n"
-        f"Poruka: {message}\n"
-        f"Izabrani jezik: {lang_display}\n"
-        f"Datum/vreme slanja: {submitted_at_iso}\n"
+    return (
+        f"{copy['heading']}\n\n"
+        f"{lbl['name']}: {name}\n"
+        f"{lbl['email']}: {email}\n"
+        f"{lbl['phone']}: {phone or copy['empty']}\n"
+        f"{lbl['appt']}: {appt}\n"
+        f"{lbl['message']}: {message}\n"
+        f"{lbl['lang']}: {lang_display}\n"
+        f"{lbl['sent']}: {submitted_at_iso}\n"
         f"{plain_treatment}"
     )
+
+
+def render_owner_email(
+    name: str,
+    email: str,
+    phone: str,
+    message: str,
+    language: str,
+    submitted_at_iso: str,
+    appointment_date: Optional[str] = None,
+    appointment_time: Optional[str] = None,
+    treatment: Optional[dict] = None,
+    treatment_thai: Optional[dict] = None,
+) -> tuple[str, str, str]:
+    """Return (subject, html, plain_text) for the internal owner notification.
+
+    The email is bilingual: the full booking is rendered first entirely in
+    Serbian, then — inside the same message — the identical content is
+    repeated in Thai. `treatment` carries the Serbian copies, `treatment_thai`
+    the Thai copies (falls back to Serbian when Thai is missing).
+    """
+    sr_html = _owner_body_html(
+        "sr", treatment, name, email, phone, message, language,
+        submitted_at_iso, appointment_date, appointment_time,
+    )
+    th_html = _owner_body_html(
+        "th", treatment_thai or treatment, name, email, phone, message, language,
+        submitted_at_iso, appointment_date, appointment_time,
+    )
+
+    divider = (
+        '<div style="margin:40px 0 36px 0;border-top:2px dashed rgba(161,122,53,0.40);"></div>'
+    )
+    inner = f"{sr_html}{divider}{th_html}"
+
+    sr_plain = _owner_body_plain(
+        "sr", treatment, name, email, phone, message, language,
+        submitted_at_iso, appointment_date, appointment_time,
+    )
+    th_plain = _owner_body_plain(
+        "th", treatment_thai or treatment, name, email, phone, message, language,
+        submitted_at_iso, appointment_date, appointment_time,
+    )
+    plain = f"{sr_plain}\n\n----------------------------------------\n\n{th_plain}"
 
     return OWNER_SUBJECT, _shell(inner), plain

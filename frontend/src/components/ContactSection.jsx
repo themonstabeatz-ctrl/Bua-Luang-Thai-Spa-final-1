@@ -63,6 +63,8 @@ export const ContactSection = () => {
         description: selection.description,
         name_serbian: selection.nameSerbian,
         description_serbian: selection.descriptionSerbian,
+        name_thai: selection.nameThai,
+        description_thai: selection.descriptionThai,
       }
     : null;
 

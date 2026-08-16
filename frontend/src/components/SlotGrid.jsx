@@ -4,10 +4,32 @@ import { Loader2 } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
+const OPEN_MIN = 10 * 60;
+const LAST_SLOT_MIN = 21 * 60 + 45;
+const CLOSE_MIN = 22 * 60;
+const STEP_MIN = 15;
+
+const toHHMM = (m) =>
+  `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+
+// Client-side slot list for the "no date chosen yet" state so the visitor can
+// tap a time first and pick the date afterwards (order is entirely up to them).
+const defaultSlots = (duration) => {
+  const dur = duration || 60;
+  const out = [];
+  for (let s = OPEN_MIN; s <= LAST_SLOT_MIN; s += STEP_MIN) {
+    if (s + dur <= CLOSE_MIN) out.push({ time: toHHMM(s), available: true, reason: null });
+  }
+  return out;
+};
+
 /**
- * Availability grid. Fetches `/api/availability` for the picked date and the
- * duration of the selected treatment, then renders every 10:00–21:00 slot.
- * Busy / past / too-late slots are rendered disabled.
+ * Availability grid. Slots are generated every 15 minutes from 10:00.
+ * • Past slots for the chosen date are hidden.
+ * • Future slots already booked (treatment + 30-min buffer) stay VISIBLE but
+ *   are shown struck-through and disabled.
+ * • Free slots are clickable.
+ * The grid also renders before a date is picked, so time can be chosen first.
  */
 export const SlotGrid = ({ date, duration, value, onChange, copy, refreshKey = 0 }) => {
   const [slots, setSlots] = useState([]);
@@ -44,15 +66,17 @@ export const SlotGrid = ({ date, duration, value, onChange, copy, refreshKey = 0
     };
   }, [date, duration, refreshKey]);
 
-  // Only slots that can fit the full treatment + 30-min buffer are shown.
-  const freeSlots = slots.filter((s) => s.available);
+  const source = date ? slots : defaultSlots(duration);
+  // Hide past & closing slots; keep free + booked (booked rendered disabled).
+  const displaySlots = source.filter((s) => s.reason == null || s.reason === "booked");
 
-  // Drop a previously chosen time the moment it stops being bookable.
+  // Drop a chosen time only once we have real availability that rejects it.
   useEffect(() => {
-    if (!value || !loaded) return;
-    if (!freeSlots.some((s) => s.time === value)) onChange("");
+    if (!value || !date || !loaded) return;
+    const ok = slots.some((s) => s.time === value && s.available);
+    if (!ok) onChange("");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slots, loaded]);
+  }, [slots, loaded, date]);
 
   return (
     <div data-testid="slot-grid" className="pt-1">
@@ -68,37 +92,37 @@ export const SlotGrid = ({ date, duration, value, onChange, copy, refreshKey = 0
         )}
       </div>
 
-      {!date && (
-        <p data-testid="slot-grid-pick-date" className="text-sm text-[#7a6e5e] italic">
-          {copy.slotsPickDate}
-        </p>
-      )}
-
-      {date && !loading && loaded && freeSlots.length === 0 && (
+      {date && !loading && loaded && displaySlots.length === 0 && (
         <p data-testid="slot-grid-empty" className="text-sm text-[#8a5a2a] italic">
           {copy.slotsEmpty}
         </p>
       )}
 
-      {date && freeSlots.length > 0 && (
+      {displaySlots.length > 0 && (
         <div
           data-testid="slot-grid-scroll"
           className="buaa-slot-scroll max-h-[212px] overflow-y-auto pr-1 scroll-smooth"
         >
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
-            {freeSlots.map((s) => {
-              const selected = s.time === value;
+            {displaySlots.map((s) => {
+              const booked = s.reason === "booked";
+              const selected = s.time === value && !booked;
               return (
                 <button
                   key={s.time}
                   type="button"
                   data-testid={`slot-${s.time}`}
-                  data-available="true"
-                  onClick={() => onChange(s.time)}
+                  data-available={booked ? "false" : "true"}
+                  data-booked={booked ? "true" : "false"}
+                  disabled={booked}
+                  aria-disabled={booked}
+                  onClick={() => !booked && onChange(s.time)}
                   title={s.time}
                   className={[
                     "relative py-2.5 rounded-xl text-sm tabular-nums tracking-wider transition-all duration-300 border",
-                    selected
+                    booked
+                      ? "line-through bg-[rgba(161,122,53,0.06)] text-[#b8ab96] border-[rgba(161,122,53,0.18)] cursor-not-allowed opacity-70"
+                      : selected
                       ? "bg-gradient-to-r from-[#c9a45a] via-[#a17a35] to-[#7a5a22] text-white border-transparent shadow-[0_8px_22px_rgba(161,122,53,0.40)] scale-[1.03]"
                       : "bg-white/80 text-[#3a312a] border-[rgba(161,122,53,0.35)] hover:border-[#a17a35] hover:bg-[rgba(161,122,53,0.10)] hover:-translate-y-0.5",
                   ].join(" ")}

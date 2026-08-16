@@ -9,6 +9,7 @@ import { ChevronDown, Check } from "lucide-react";
 const formatPrice = (n) => n.toLocaleString("sr-RS");
 
 const SR_PRICING = translations.sr.pricing;
+const TH_PRICING = translations.th.pricing;
 
 const fillTemplate = (tpl, { name, duration, price }) =>
   tpl
@@ -28,6 +29,7 @@ const PricingRow = ({ row, idx, t, lang }) => {
     });
     const srRow = SR_PRICING.rows[idx];
     const srOpt = srRow.options[optIdx] || opt;
+    const thRow = TH_PRICING.rows[idx] || srRow;
     const serbianMsg = fillTemplate(SR_PRICING.selectedTemplate, {
       name: srRow.name,
       duration: srOpt.duration,
@@ -41,10 +43,12 @@ const PricingRow = ({ row, idx, t, lang }) => {
       messageSerbian: serbianMsg,
       name: row.name,
       nameSerbian: srRow.name,
+      nameThai: thRow.name,
       duration: opt.duration,
       price: opt.price,
       description: row.description,
       descriptionSerbian: srRow.description,
+      descriptionThai: thRow.description,
     });
 
     // Smooth scroll to contact form

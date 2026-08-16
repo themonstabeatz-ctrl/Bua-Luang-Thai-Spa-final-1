@@ -1,9 +1,9 @@
 """Booking slot availability rules for Bua Luang Thai Spa.
 
 Business rules (confirmed by the owner):
-  • Slots every 30 minutes, from 10:00 up to and including 21:00.
+  • Slots every 15 minutes, from 10:00 onwards.
   • The salon closes at 22:00, so an appointment must FINISH by 22:00
-    (the 21:00 slot therefore only accepts a 60-minute treatment).
+    (which start times qualify depends on the chosen treatment duration).
   • A single therapist works alone, so a mandatory 30-minute break follows
     every booked appointment before the next one may start.
 """
@@ -14,10 +14,10 @@ from zoneinfo import ZoneInfo
 
 TZ = ZoneInfo("Europe/Belgrade")
 
-OPEN_MIN = 10 * 60        # 10:00 — first slot
-LAST_SLOT_MIN = 21 * 60   # 21:00 — last bookable start
-CLOSE_MIN = 22 * 60       # 22:00 — salon closes
-STEP_MIN = 30
+OPEN_MIN = 10 * 60            # 10:00 — first slot
+LAST_SLOT_MIN = 21 * 60 + 45  # 21:45 — latest generated start
+CLOSE_MIN = 22 * 60          # 22:00 — salon closes
+STEP_MIN = 15
 BUFFER_MIN = 30
 DEFAULT_DURATION = 60
 
