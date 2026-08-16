@@ -259,8 +259,8 @@ export const SERVICE_CONTENT = {
   // ─────────── AROMA ───────────
   aroma: {
     sr: {
-      name: "Aroma Masaža",
-      title: "Aroma Masaža Beograd · Bua Luang Thai Spa",
+      name: "Relax Masaža",
+      title: "Relax Masaža Beograd · Bua Luang Thai Spa",
       metaDescription:
         "Aroma masaža u Beogradu sa premium esencijalnim uljima koja smiruju nervni sistem. 60 ili 90 minuta sa sertifikovanim tajlandskim terapeutom.",
       ogDescription:
@@ -292,8 +292,8 @@ export const SERVICE_CONTENT = {
       ],
     },
     en: {
-      name: "Aroma Massage",
-      title: "Aroma Massage Belgrade · Bua Luang Thai Spa",
+      name: "Relax Massage",
+      title: "Relax Massage Belgrade · Bua Luang Thai Spa",
       metaDescription:
         "Aroma massage in Belgrade using premium essential oil blends imported from Thailand. 60 or 90 minutes with certified Thai therapists.",
       ogDescription:
@@ -325,8 +325,8 @@ export const SERVICE_CONTENT = {
       ],
     },
     ru: {
-      name: "Ароматический Массаж",
-      title: "Ароматический массаж Белград · Bua Luang Thai Spa",
+      name: "Расслабляющий Массаж",
+      title: "Расслабляющий массаж Белград · Bua Luang Thai Spa",
       metaDescription:
         "Ароматический массаж в Белграде с премиальными эфирными маслами из Таиланда. 60 или 90 минут с сертифицированными тайскими мастерами.",
       ogDescription:
@@ -358,8 +358,8 @@ export const SERVICE_CONTENT = {
       ],
     },
     zh: {
-      name: "芳香按摩",
-      title: "贝尔格莱德芳香按摩 · Bua Luang Thai Spa",
+      name: "放松按摩",
+      title: "贝尔格莱德放松按摩 · Bua Luang Thai Spa",
       metaDescription:
         "贝尔格莱德芳香按摩,使用来自泰国的高级精油配方。60 或 90 分钟,认证泰国按摩师专业服务。",
       ogDescription:

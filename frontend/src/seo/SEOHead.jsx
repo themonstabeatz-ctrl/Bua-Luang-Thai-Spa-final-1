@@ -88,7 +88,7 @@ const buildLocalBusinessSchema = (info, lang, currentUrl) => {
     ],
     knowsAbout: [
       "Tradicionalna tajlandska masaža",
-      "Aroma masaža uljem",
+      "Relax masaža uljem",
       "Masaža toplim kamenjem",
       "Tajlandska masaža stopala",
       "Masaža za parove",

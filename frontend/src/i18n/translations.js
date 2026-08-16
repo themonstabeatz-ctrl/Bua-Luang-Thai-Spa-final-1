@@ -32,8 +32,8 @@ const SR_PRICING = {
         "Autentični tretman bez ulja koji kombinuje akupresuru i pasivno istezanje za oslobađanje od stresa i povećanje fleksibilnosti celog tela.",
     },
     {
-      name: "Aroma Masaža",
-      subname: "Aroma Massage",
+      name: "Relax Masaža",
+      subname: "Relax Massage",
       options: [
         { duration: 60, price: 4300 },
         { duration: 90, price: 5300 },
@@ -109,8 +109,8 @@ const EN_PRICING = {
         "An authentic oil-free treatment that combines acupressure and passive stretching to release stress and boost full-body flexibility.",
     },
     {
-      name: "Aroma Massage",
-      subname: "Aroma Massage",
+      name: "Relax Massage",
+      subname: "Relax Massage",
       options: [
         { duration: 60, price: 4300 },
         { duration: 90, price: 5300 },
@@ -186,8 +186,8 @@ const RU_PRICING = {
         "Аутентичная процедура без масел, сочетающая акупрессуру и пассивную растяжку — снимает стресс и повышает гибкость всего тела.",
     },
     {
-      name: "Аромамасляный массаж",
-      subname: "Aroma Massage",
+      name: "Расслабляющий массаж",
+      subname: "Relax Massage",
       options: [
         { duration: 60, price: 4300 },
         { duration: 90, price: 5300 },
@@ -262,8 +262,8 @@ const ZH_PRICING = {
       description: "正宗无油疗程，结合穴位按压与被动伸展，舒缓压力并提升全身柔韧度。",
     },
     {
-      name: "芳香精油按摩",
-      subname: "Aroma Massage",
+      name: "放松按摩",
+      subname: "Relax Massage",
       options: [
         { duration: 60, price: 4300 },
         { duration: 90, price: 5300 },
@@ -334,8 +334,8 @@ const TH_PRICING = {
         "การรักษาแบบดั้งเดิมโดยไม่ใช้น้ำมัน ผสมผสานการกดจุดและการยืดเหยียดแบบพาสซีฟ เพื่อคลายความเครียดและเพิ่มความยืดหยุ่นของร่างกาย",
     },
     {
-      name: "นวดอโรมา",
-      subname: "Aroma Massage",
+      name: "นวดผ่อนคลาย",
+      subname: "Relax Massage",
       options: [
         { duration: 60, price: 4300 },
         { duration: 90, price: 5300 },
