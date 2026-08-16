@@ -100,8 +100,6 @@ export const SlotGrid = ({ date, duration, value, onChange, copy }) => {
           })}
         </div>
       )}
-
-      <p className="mt-3 text-[11px] leading-relaxed text-[#7a6e5e]">{copy.slotNote}</p>
     </div>
   );
 };
