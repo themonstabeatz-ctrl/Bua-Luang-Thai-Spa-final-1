@@ -70,6 +70,7 @@ class ContactCreate(BaseModel):
     message: str = Field(min_length=1, max_length=4000)
     language: str = Field(default="sr")
     message_serbian: Optional[str] = Field(default=None, max_length=4000)
+    message_thai: Optional[str] = Field(default=None, max_length=4000)
     selected_treatment: Optional[SelectedTreatment] = None
     appointment_date: Optional[str] = Field(default=None, max_length=40)
     appointment_time: Optional[str] = Field(default=None, max_length=20)
@@ -107,6 +108,7 @@ class ContactMessage(BaseModel):
     phone: Optional[str] = None
     message: str
     message_serbian: Optional[str] = None
+    message_thai: Optional[str] = None
     language: str = "sr"
     client_email_sent: bool = False
     owner_email_sent: bool = False
@@ -151,6 +153,7 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
     phone = payload["phone"] or ""
     message = payload["message"]
     message_serbian = payload.get("message_serbian") or message
+    message_thai = payload.get("message_thai") or message_serbian
     language = payload["language"]
     submitted_at = payload["created_at"]
 
@@ -187,6 +190,7 @@ async def _send_and_update(record_id: str, payload: dict) -> None:
         }
     o_subject, o_html, o_text = render_owner_email(
         name=name, email=to_client, phone=phone, message=message_serbian,
+        message_thai=message_thai,
         language=language, submitted_at_iso=submitted_at,
         appointment_date=appt_date, appointment_time=appt_time,
         treatment=treatment_serbian, treatment_thai=treatment_thai,

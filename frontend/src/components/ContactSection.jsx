@@ -43,6 +43,7 @@ export const ContactSection = () => {
   const [submitting, setSubmitting] = useState(false);
   const [slotRefresh, setSlotRefresh] = useState(0);
   const [messageSerbian, setMessageSerbian] = useState(null);
+  const [messageThai, setMessageThai] = useState(null);
 
   const dateFpRef = useRef(null);
   const calWasOpen = useRef(false);
@@ -76,6 +77,7 @@ export const ContactSection = () => {
     autoMsgRef.current = msg;
     setForm((prev) => ({ ...prev, message: msg }));
     setMessageSerbian(selection.messageSerbian);
+    setMessageThai(selection.messageThai);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selection]);
 
@@ -113,6 +115,7 @@ export const ContactSection = () => {
     const { name, value } = e.target;
     if (name === "message" && messageSerbian && value !== form.message) {
       setMessageSerbian(null);
+      setMessageThai(null);
     }
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -137,11 +140,13 @@ export const ContactSection = () => {
         appointment_time: time,
         language: lang,
         message_serbian: messageSerbian || undefined,
+        message_thai: messageThai || undefined,
         selected_treatment: selectedTreatmentPayload || undefined,
       });
       toast.success(t.contact.form.success);
       setForm(initial);
       setMessageSerbian(null);
+      setMessageThai(null);
       dateFpRef.current?.flatpickr?.clear?.();
       setSlotRefresh((k) => k + 1);
     } catch (err) {

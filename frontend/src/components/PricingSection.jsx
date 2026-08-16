@@ -35,12 +35,19 @@ const PricingRow = ({ row, idx, t, lang }) => {
       duration: srOpt.duration,
       price: srOpt.price,
     });
+    const thOpt = thRow.options?.[optIdx] || srOpt;
+    const thaiMsg = fillTemplate(TH_PRICING.selectedTemplate, {
+      name: thRow.name,
+      duration: thOpt.duration,
+      price: thOpt.price,
+    });
 
     selectTreatment({
       rowIdx: idx,
       optIdx,
       message: localMsg,
       messageSerbian: serbianMsg,
+      messageThai: thaiMsg,
       name: row.name,
       nameSerbian: srRow.name,
       nameThai: thRow.name,

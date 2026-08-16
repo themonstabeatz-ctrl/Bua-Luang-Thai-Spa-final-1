@@ -556,20 +556,23 @@ def render_owner_email(
     appointment_time: Optional[str] = None,
     treatment: Optional[dict] = None,
     treatment_thai: Optional[dict] = None,
+    message_thai: Optional[str] = None,
 ) -> tuple[str, str, str]:
     """Return (subject, html, plain_text) for the internal owner notification.
 
     The email is bilingual: the full booking is rendered first entirely in
     Serbian, then — inside the same message — the identical content is
-    repeated in Thai. `treatment` carries the Serbian copies, `treatment_thai`
-    the Thai copies (falls back to Serbian when Thai is missing).
+    repeated in Thai. `treatment`/`message` carry the Serbian copies,
+    `treatment_thai`/`message_thai` the Thai copies (fall back to Serbian
+    when Thai is missing).
     """
+    message_th = message_thai or message
     sr_html = _owner_body_html(
         "sr", treatment, name, email, phone, message, language,
         submitted_at_iso, appointment_date, appointment_time,
     )
     th_html = _owner_body_html(
-        "th", treatment_thai or treatment, name, email, phone, message, language,
+        "th", treatment_thai or treatment, name, email, phone, message_th, language,
         submitted_at_iso, appointment_date, appointment_time,
     )
 
@@ -583,7 +586,7 @@ def render_owner_email(
         submitted_at_iso, appointment_date, appointment_time,
     )
     th_plain = _owner_body_plain(
-        "th", treatment_thai or treatment, name, email, phone, message, language,
+        "th", treatment_thai or treatment, name, email, phone, message_th, language,
         submitted_at_iso, appointment_date, appointment_time,
     )
     plain = f"{sr_plain}\n\n----------------------------------------\n\n{th_plain}"
